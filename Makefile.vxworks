@@ -30,14 +30,16 @@ SUBPRJS=vsb prj bootloader vip
 TARGETS=$(addsuffix .install,$(SUBPRJS))
 
 define run_script
-  if [ -f $(SCRIPTS_DIR)/$(subst .,-,$1).sh ]; then \
-    echo "## RUN: $(SCRIPTS_DIR)/$(subst .,-,$1).sh"; \
-    $(SCRIPTS_DIR)/$(subst .,-,$1).sh; \
-    if [ $$? -ne 0 ]; then \
-      echo "## ERROR: $(SCRIPTS_DIR)/$(subst .,-,$1).sh"; \
-      exit 1; \
-    else \
-      echo "## SUCCESS: $(SCRIPTS_DIR)/$(subst .,-,$1).sh"; \
+  if [ ! -f $(STAMP_DIR)/$@ ]; then \
+    if [ -f $(SCRIPTS_DIR)/$(subst .,-,$1).sh ]; then \
+      echo "## RUN: $(SCRIPTS_DIR)/$(subst .,-,$1).sh"; \
+      $(SCRIPTS_DIR)/$(subst .,-,$1).sh; \
+      if [ $$? -ne 0 ]; then \
+        echo "## ERROR: $(SCRIPTS_DIR)/$(subst .,-,$1).sh"; \
+        exit 1; \
+      else \
+        echo "## SUCCESS: $(SCRIPTS_DIR)/$(subst .,-,$1).sh"; \
+      fi; \
     fi; \
   fi;
 endef
