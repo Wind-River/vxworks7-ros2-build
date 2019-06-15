@@ -50,7 +50,7 @@ clean:
 $(STAMP_DIR):
 	@mkdir -p $(STAMP_DIR)
 
-%.create:
+%.create: $(STAMP_DIR)
 	@$(call run_script,$@)
 	@$(MAKE_STAMP)
 
