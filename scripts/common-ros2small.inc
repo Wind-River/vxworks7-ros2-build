@@ -51,51 +51,33 @@ ros2small_download()
 
 ros2small_patch()
 {
-        PRJ_PKGS_DIRS=(src/ament/uncrustify_vendor \
+        PRJ_PKGS_DIRS=( \
                        src/eProsima/Fast-CDR \
                        src/eProsima/Fast-RTPS \
                        src/ros/class_loader \
-                       src/ros/pluginlib \
-                       src/ros2/demos \
                        src/ros2/examples \
-                       src/ros2/geometry2 \
-                       src/ros2/orocos_kinematics_dynamics \
                        src/ros2/rcl \
                        src/ros2/rclcpp \
-                       src/ros2/rclpy \
                        src/ros2/rcutils \
-                       src/ros2/realtime_support \
                        src/ros2/rmw_implementation \
-                       src/ros2/robot_state_publisher \
                        src/ros2/rosidl \
                        src/ros2/rosidl_defaults \
                        src/ros2/rosidl_typesupport \
-                       src/ros2/rviz \
-                       src/ros2/tinyxml_vendor \
-                       src/ros2/yaml_cpp_vendor)
+                       )
 
-	PRJ_PKGS=(uncrustify_vendor \
+	PRJ_PKGS=( \
                 fastcdr \
                 fastrtps \
                 class_loader \
-                pluginlib \
-                demos \
                 examples \
-                geometry2 \
-                orocos_kinematics_dynamics \
                 rcl \
                 rclcpp \
-                rclpy \
                 rcutils \
-                realtime_support \
                 rmw_implementation \
-                robot_state_publisher \
                 rosidl \
                 rosidl_defaults \
                 rosidl_typesupport \
-                rviz \
-                tinyxml_vendor \
-                yaml_cpp_vendor)
+                )
 
         # find pathches for pkgs in the list and apply them to project workspace
         for ((c=0; c<${#PRJ_PKGS[@]}; c++)); do
