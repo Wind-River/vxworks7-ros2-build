@@ -25,8 +25,8 @@ PRJ_GIT_REPO="https://github.com/Wind-River/vxworks7-layer-for-ros2.git"
 PRJ_GIT_BRANCH="master"
 PRJ_GIT_DIR="middleware" # a directory within ${WIND_PKGS_DIR_NAME}
 
-# crystal patch 1
-PRJ_COMMIT_ID=3ab389d56b3afb2322b424cc60b03c7bc8ea0f3d
+# ROS2 dashing release
+PRJ_COMMIT_ID=${PRJ_COMMIT_ID:-dashing-release}
 
 # define VSB layers and put them in a dependency order
 VSB_LAYERS="BZIP2 USER_MANAGEMENT EXPAT"
