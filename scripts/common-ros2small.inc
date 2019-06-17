@@ -63,6 +63,7 @@ ros2small_patch()
                        src/ros2/rosidl \
                        src/ros2/rosidl_defaults \
                        src/ros2/rosidl_typesupport \
+                       src/ros2/tinydir_vendor \
                        )
 
 	PRJ_PKGS=( \
@@ -77,6 +78,7 @@ ros2small_patch()
                 rosidl \
                 rosidl_defaults \
                 rosidl_typesupport \
+                tinydir_vendor \
                 )
 
         # find pathches for pkgs in the list and apply them to project workspace
