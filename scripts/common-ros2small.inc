@@ -21,8 +21,8 @@
 # 19apr19,akh  created
 
 
-PRJ_GIT_REPO="https://github.com/Wind-River/vxworks7-layer-for-ros2.git"
-PRJ_GIT_BRANCH="master"
+PRJ_GIT_REPO=${PRJ_GIT_REPO:-"https://github.com/Wind-River/vxworks7-layer-for-ros2.git"}
+PRJ_GIT_BRANCH=${PRJ_GIT_BRANCH:-"master"}
 PRJ_GIT_DIR="middleware" # a directory within ${WIND_PKGS_DIR_NAME}
 
 # ROS2 dashing release
