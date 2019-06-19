@@ -121,6 +121,7 @@ ros2small_configure()
 		src/ros2/rosidl_typesupport_opensplice \
 		src/ament/ament_lint \
 		src/ament/uncrustify_vendor \
+		src/ros2/rcl_logging/rcl_logging_log4cxx \
         "
 
         # Ignore Python-specific packages
