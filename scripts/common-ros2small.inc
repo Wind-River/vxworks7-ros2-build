@@ -55,10 +55,12 @@ ros2small_patch()
                        src/eProsima/Fast-CDR \
                        src/eProsima/Fast-RTPS \
                        src/ros/class_loader \
+		       src/ros2/demos \
                        src/ros2/examples \
                        src/ros2/rcl \
                        src/ros2/rclcpp \
                        src/ros2/rcutils \
+		       src/ros2/realtime_support \
                        src/ros2/rmw_implementation \
                        src/ros2/rosidl \
                        src/ros2/rosidl_defaults \
@@ -70,10 +72,12 @@ ros2small_patch()
                 fastcdr \
                 fastrtps \
                 class_loader \
+		demos
                 examples \
                 rcl \
                 rclcpp \
                 rcutils \
+		realtime_support \
                 rmw_implementation \
                 rosidl \
                 rosidl_defaults \
@@ -153,5 +157,5 @@ ros2small_build()
 			examples_rclcpp_minimal_service \
 			examples_rclcpp_minimal_timer"
 
-	. ./vxworks_env.sh && colcon build --symlink-install --cmake-force-configure --packages-up-to $ROS2EXAMPLES --cmake-args -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=$VSB_DIR/buildspecs/cmake/rtp.cmake -DCMAKE_PREFIX_PATH=$PRJ_WS/install\;$VSB_DIR/usr/root -DBUILD_TESTING=OFF
+	. ./vxworks_env.sh && colcon build --symlink-install --cmake-force-configure --packages-up-to $ROS2EXAMPLES pendulum_control --cmake-args -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=$VSB_DIR/buildspecs/cmake/rtp.cmake -DCMAKE_PREFIX_PATH=$PRJ_WS/install\;$VSB_DIR/usr/root -DBUILD_TESTING=OFF
 }
