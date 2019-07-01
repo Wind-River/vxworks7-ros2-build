@@ -127,7 +127,7 @@ ros2small_configure()
         # Ignore Python-specific packages
         IGNORED_PKGS=" ${IGNORED_PKGS} \
 		src/ament/ament_cmake/ament_cmake_pytest \
-		src/ament/osrf_pycommon \
+		src/osrf/osrf_pycommon \
                 src/ros2/demos/demo_nodes_py \
                 src/ros2/geometry2/tf2_py \
                 src/ros2/kdl_parser/kdl_parser_py \
