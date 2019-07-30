@@ -103,7 +103,7 @@ ros2small_configure()
 {
         # create vxworks_env.sh and autoconf
         ADDED_LIBS="-L${VSB_DIR}/usr/lib/common -lnet -lunix -lregex" \
-        PRE_INCLUDE=-isystem${VSB_DIR}/usr/h/published/UTILS \
+        PRE_INCLUDE=-isystem${VSB_DIR}/usr/h/published/UTILS_UNIX \
         EXTRA_DEFINE=-Wno-narrowing \
         CPU=${CPU} TOOL_VERSION=llvm_2016_04 TOOL=llvm make -f $WIND_USR_MK/autoconf.mk vxworks_env.sh
 
