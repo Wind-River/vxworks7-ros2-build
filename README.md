@@ -5,7 +5,7 @@ VxWorks® 7 ROS2 Build Scripts
 # Overview
 
 The VxWorks 7 ROS2 Build Scripts provide build scripts to automate building
-ROS2 for VxWorks 7 SR0610.
+ROS2 for VxWorks 7 SR0620.
 
 The Robot Operating System 2 is a set of software libraries and tools that 
 aid in building robot applications. ROS2 is a re-architecture of the 
@@ -46,7 +46,7 @@ license notice that designates the licensing terms for the respective file.
 
 # Prerequisite(s)
 
-* Install the Wind River® VxWorks® 7 operating system version SR0610.
+* Install the Wind River® VxWorks® 7 operating system version SR0620.
 
 * The build system will need to download source code from github.com and bitbucket.org.  A
   working Internet connection with access to both sites is required.
@@ -59,13 +59,13 @@ For the standard build you must also have:
 * Supported Linux host for both ROS2 and VxWorks 7
    * ROS 2.0 Target Platforms
       * http://www.ros.org/reps/rep-2000.html
-   * VxWorks 7 SR0610
-      * https://docs.windriver.com/bundle/Release_Notes_SR0610_1/page/jgn1464040947636.html
-   * For ROS2 Crystal Clemmys, Ubuntu Bionic (18.04) LTS is the Tier 1 host
+   * VxWorks 7 SR0620
+      * https://docs.windriver.com/bundle/vxworks_7_release_notes_sr0620/page/bym1551818657142.html
+   * For ROS2 Dashing Diademata, Ubuntu Bionic (18.04) LTS is the Tier 1 host
 * Install the development tools and ROS tools from “Building ROS 2 on Linux”
    * https://index.ros.org/doc/ros2/Installation/Linux-Development-Setup/
-* Install the “Required Linux Host OS Packages”  for VxWorks 7
-   * https://docs.windriver.com/bundle/Workbench_4_Release_Notes_SR0610_1/page/age1446069416293.html
+* Install the “Required Linux Host OS Packages” for VxWorks 7
+   * https://docs.windriver.com/bundle/Workbench_4_Release_Notes_SR0620_1/page/age1436590316395.html
 * Mercurial (hg) package for Eigen
 
 # Standard Build
@@ -115,7 +115,7 @@ cd ..
 4. Repeat steps 1 to 3 for vxbuild and vxros2build by replacing vxprodinstaller in the commands.
 
 
-## Installing VxWorks 7 SR0610
+## Installing VxWorks 7 SR0620
 
 Download the VxWorks 7 on-line installer for Linux from your WindShare account.
 Go to the directory where the installer zip file is located and follow the steps below.
