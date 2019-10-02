@@ -51,6 +51,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     libxrandr-dev \
     python3-sip-dev \
     python3-pyqt5 \
+    python3-lark-parser \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python packages
