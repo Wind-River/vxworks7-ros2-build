@@ -1,7 +1,7 @@
 FROM vxbuild:1.0
 
 # Environment variables
-ENV ROS_DISTRO crystal
+ENV ROS_DISTRO dashing
 ENV ROS2_WS /opt/ros2_ws
 ## Let the script create the workspace
 ## ENV PRJ_WS_NAME ${BSP}_${BOARD}_${PRJ}_ws
