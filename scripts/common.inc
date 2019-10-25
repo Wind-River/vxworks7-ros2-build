@@ -28,7 +28,7 @@ export WIND_WRTOOL_WORKSPACE="${WORKSPACE}"
 
 # default project specific settings, can be overwritten in the corresponding cfg files
 PRJ=${PRJ:-ros2small}
-BOARD=${BOARD:-up}
+BOARD=${BOARD:-up2}
 TOOL=${TOOL:-llvm}
 BUILD_TYPE=${BUILD_TYPE:-Release} # set to 'Debug' to build with -g
 
