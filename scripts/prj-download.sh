@@ -35,12 +35,13 @@ setup_env
 
 echo "Downloading ${PRJ} repos"
 
-# download project dependencies vxWorks layers
-
-GIT_REPO="${PRJ_GIT_REPO}"
-GIT_BRANCH="${PRJ_GIT_BRANCH}"
-GIT_DIR="${WIND_PKGS_DIR_NAME}/${PRJ_GIT_DIR}"
-clone_repo ${WIND_BASE}/${GIT_DIR}
+if [ "x$GIT_REPO" != "x" ]; then
+	# download project dependencies vxWorks layers
+	GIT_REPO="${PRJ_GIT_REPO}"
+	GIT_BRANCH="${PRJ_GIT_BRANCH}"
+	GIT_DIR="${WIND_PKGS_DIR_NAME}/${PRJ_GIT_DIR}"
+	clone_repo ${WIND_BASE}/${GIT_DIR}
+fi
 
 # download prj sources
 cd ${PRJ_WS}
