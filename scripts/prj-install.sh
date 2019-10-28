@@ -49,7 +49,7 @@ if [ -d ${WORKSPACE}/${VSB_NAME}/usr/root/lib/ ]; then
 fi
 
 # copy PRJ libs and binaries to VSB
-if [ -d ${PRJ_WS/install} ]; then
+if [ -d ${PRJ_WS}/install ]; then
         find ${PRJ_WS}/install -name *.so* -exec cp {} romfs/lib/. \;
         find ${PRJ_WS}/install -name *.vxe -exec cp {} romfs/bin/. \;
         find ${PRJ_WS}/install -name *.urdf -exec cp {} romfs/bin/. \;
