@@ -137,8 +137,8 @@ ros2_EXAMPLES=examples_rclcpp_minimal_action_client \
 # ros2_MAKE_OPT = srcdir=../$(unixextra_SRC_DIR)
 
 define ros2_patch
-        if ls $(BUILD_DIR)/ros2/$(ros2_SRC_DIR)/$(1)/usr_src/0001-* 1> /dev/null 2>&1; then \
-                PATCHES="$(BUILD_DIR)/ros2/$(ros2_SRC_DIR)/$(1)/usr_src/*.patch"; \
+        if ls $(BUILD_DIR)/ros2/$(ros2_SRC_DIR)/$($(1)_PATCH_DIR)/usr_src/0001-* 1> /dev/null 2>&1; then \
+                PATCHES="$(BUILD_DIR)/ros2/$(ros2_SRC_DIR)/$($(1)_PATCH_DIR)/usr_src/*.patch"; \
                 for PATCH in $$PATCHES; do \
                         $(PATCH) -p1 -N -d $(BUILD_DIR)/ros2/$(ros2_BUILD_DIR)/$($(1)_SRC_DIR) -p1 < $$PATCH ; \
                 done; \
