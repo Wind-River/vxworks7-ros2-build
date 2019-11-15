@@ -210,7 +210,9 @@ ros2.configure: ros2.patch
 	@$(MAKE_STAMP)
 
 ros2.build: ros2.configure
-
+	@$(call echo_action,Building,$*)
+	cd $(BUILD_DIR)/ros2/$(ros2_BUILD_DIR); \
+	export WIND_ROOT_DIR=$(ROOT_DIR); \
         colcon build --symlink-install --cmake-force-configure --packages-up-to $(ros2_EXAMPLES) \
 		pendulum_control \
 		--cmake-args \
@@ -219,6 +221,8 @@ ros2.build: ros2.configure
                 -DCMAKE_MODULE_PATH:PATH=$(CMAKE_MODULE_DIR) \
                 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=$(CMAKE_MODULE_DIR)/rtp.cmake \
                 -DBUILD_TESTING:BOOL=OFF
+	@$(MAKE_STAMP)
+
 
 ros2.install : ros2.build
 	@$(call echo_action,Installing,$*)
