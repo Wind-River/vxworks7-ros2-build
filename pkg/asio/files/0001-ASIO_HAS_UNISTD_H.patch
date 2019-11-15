@@ -1,0 +1,11 @@
+diff -ruN asio-asio-1-12-0.orig/asio/include/asio/detail/config.hpp asio-asio-1-12-0/asio/include/asio/detail/config.hpp
+--- asio/include/asio/detail/config.hpp	2018-03-04 09:21:01.000000000 +0100
++++ asio/include/asio/detail/config.hpp	2018-03-17 14:49:19.095823877 +0100
+@@ -939,6 +939,7 @@
+    || defined(__FreeBSD__) \
+    || defined(__NetBSD__) \
+    || defined(__OpenBSD__) \
++   || defined(__VXWORKS__) \
+    || defined(__linux__)
+ #   define ASIO_HAS_UNISTD_H 1
+ #  endif

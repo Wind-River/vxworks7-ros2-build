@@ -1,0 +1,11 @@
+--- asio.orig/configure.ac
++++ asio/configure.ac
+@@ -67,7 +67,7 @@ AC_CHECK_HEADER([openssl/ssl.h],,
+ ],[])
+ 
+ if test x$OPENSSL_FOUND != xno; then
+-  LIBS="$LIBS -lssl -lcrypto"
++  LIBS="$LIBS -lHASH -lOPENSSL"
+ fi
+ 
+ AM_CONDITIONAL(HAVE_OPENSSL,test x$OPENSSL_FOUND != xno)

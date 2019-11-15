@@ -1,0 +1,232 @@
+diff -ruN asio-asio-1-12-0.orig/asio/include/asio/detail/impl/reactive_serial_port_service.ipp asio-asio-1-12-0/asio/include/asio/detail/impl/reactive_serial_port_service.ipp
+--- asio/include/asio/detail/impl/reactive_serial_port_service.ipp	2018-03-04 09:21:01.000000000 +0100
++++ asio/include/asio/detail/impl/reactive_serial_port_service.ipp	2019-03-31 11:38:48.766269630 +0200
+@@ -21,6 +21,11 @@
+ #if defined(ASIO_HAS_SERIAL_PORT)
+ #if !defined(ASIO_WINDOWS) && !defined(__CYGWIN__)
+ 
++#ifdef __VXWORKS__
++#include <vxWorks.h>
++#include <ioLib.h>
++#endif
++
+ #include <cstring>
+ #include "asio/detail/reactive_serial_port_service.hpp"
+ 
+@@ -66,7 +71,10 @@
+     descriptor_ops::close(fd, state, ignored_ec);
+     return ec;
+   }
+-
++#ifdef __VXWORKS__
++  s = descriptor_ops::error_wrapper(::ioctl(
++         fd, FIOSETOPTIONS, OPT_RAW), ec);
++#else
+   // Set up default serial port options.
+   termios ios;
+   errno = 0;
+@@ -88,6 +96,7 @@
+     errno = 0;
+     s = descriptor_ops::error_wrapper(::tcsetattr(fd, TCSANOW, &ios), ec);
+   }
++#endif
+   if (s < 0)
+   {
+     asio::error_code ignored_ec;
+@@ -112,8 +121,17 @@
+ {
+   termios ios;
+   errno = 0;
++#if  defined (__VXWORKS__)
++  descriptor_ops::error_wrapper(::ioctl(descriptor_service_.native_handle(impl), 
++					FIOGETOPTIONS, &ios.tty_iflag),ec);
++  descriptor_ops::error_wrapper(::ioctl(descriptor_service_.native_handle(impl), 
++					SIO_HW_OPTS_GET, &ios.c_cflag), ec);
++  descriptor_ops::error_wrapper(::ioctl(descriptor_service_.native_handle(impl), 
++					SIO_BAUD_GET, &ios.BaudRate), ec);
++#else
+   descriptor_ops::error_wrapper(::tcgetattr(
+         descriptor_service_.native_handle(impl), &ios), ec);
++#endif
+   if (ec)
+     return ec;
+ 
+@@ -121,8 +139,17 @@
+     return ec;
+ 
+   errno = 0;
++#if  defined (__VXWORKS__)
++  descriptor_ops::error_wrapper(::ioctl(descriptor_service_.native_handle(impl),
++					FIOSETOPTIONS, &ios.tty_iflag), ec);
++  descriptor_ops::error_wrapper(::ioctl(descriptor_service_.native_handle(impl),
++					SIO_HW_OPTS_SET, &ios.c_cflag), ec);
++  descriptor_ops::error_wrapper(::ioctl(descriptor_service_.native_handle(impl),
++					SIO_BAUD_SET, &ios.BaudRate), ec);
++#else
+   descriptor_ops::error_wrapper(::tcsetattr(
+         descriptor_service_.native_handle(impl), TCSANOW, &ios), ec);
++#endif
+   return ec;
+ }
+ 
+@@ -133,8 +160,17 @@
+ {
+   termios ios;
+   errno = 0;
++#if  defined (__VXWORKS__)
++  descriptor_ops::error_wrapper(::ioctl(descriptor_service_.native_handle(impl),
++					FIOGETOPTIONS, &ios.tty_iflag),ec);
++  descriptor_ops::error_wrapper(::ioctl(descriptor_service_.native_handle(impl),
++					SIO_HW_OPTS_GET, &ios.c_cflag), ec);
++  descriptor_ops::error_wrapper(::ioctl(descriptor_service_.native_handle(impl),
++					SIO_BAUD_GET, &ios.BaudRate), ec);
++#else
+   descriptor_ops::error_wrapper(::tcgetattr(
+         descriptor_service_.native_handle(impl), &ios), ec);
++#endif
+   if (ec)
+     return ec;
+ 
+diff -ruN asio-asio-1-12-0.orig/asio/include/asio/detail/reactive_serial_port_service.hpp asio-asio-1-12-0/asio/include/asio/detail/reactive_serial_port_service.hpp
+--- asio/include/asio/detail/reactive_serial_port_service.hpp	2018-03-04 09:21:01.000000000 +0100
++++ asio/include/asio/detail/reactive_serial_port_service.hpp	2019-03-31 11:27:10.359383867 +0200
+@@ -141,8 +141,10 @@
+       asio::error_code& ec)
+   {
+     errno = 0;
++#ifndef __VXWORKS__
+     descriptor_ops::error_wrapper(::tcsendbreak(
+           descriptor_service_.native_handle(impl), 0), ec);
++#endif
+     return ec;
+   }
+ 
+diff -ruN asio-asio-1-12-0.orig/asio/include/asio/impl/serial_port_base.ipp asio-asio-1-12-0/asio/include/asio/impl/serial_port_base.ipp
+--- asio/include/asio/impl/serial_port_base.ipp	2018-03-04 09:21:01.000000000 +0100
++++ asio/include/asio/impl/serial_port_base.ipp	2019-03-31 11:25:25.005580125 +0200
+@@ -33,6 +33,12 @@
+ # define ASIO_OPTION_STORAGE termios
+ #endif
+ 
++#ifdef __VXWORKS__
++#include <vxWorks.h>
++#include <sioLib.h>
++#define CSTOPB  STOPB
++#endif
++
+ #include "asio/detail/push_options.hpp"
+ 
+ namespace asio {
+@@ -40,7 +46,7 @@
+ ASIO_SYNC_OP_VOID serial_port_base::baud_rate::store(
+     ASIO_OPTION_STORAGE& storage, asio::error_code& ec) const
+ {
+-#if defined(ASIO_WINDOWS) || defined(__CYGWIN__)
++#if defined(ASIO_WINDOWS) || defined(__CYGWIN__) || defined (__VXWORKS__)
+   storage.BaudRate = value_;
+ #else
+   speed_t baud;
+@@ -127,7 +133,7 @@
+ ASIO_SYNC_OP_VOID serial_port_base::baud_rate::load(
+     const ASIO_OPTION_STORAGE& storage, asio::error_code& ec)
+ {
+-#if defined(ASIO_WINDOWS) || defined(__CYGWIN__)
++#if defined(ASIO_WINDOWS) || defined(__CYGWIN__) || defined (__VXWORKS__)
+   value_ = storage.BaudRate;
+ #else
+   speed_t baud = ::cfgetospeed(&storage);
+@@ -244,6 +250,24 @@
+   default:
+     break;
+   }
++#elif defined(__VXWORKS__)
++  switch (value_)
++  {
++  case none:
++      storage.c_cflag &= ~(CLOCAL);
++      storage.tty_iflag &= ~(OPT_TANDEM);
++    break;
++  case software:
++    storage.c_cflag &= ~(CLOCAL);
++    storage.tty_iflag |= OPT_TANDEM;
++    break;
++  case hardware:
++    storage.c_cflag &= CLOCAL;
++    storage.tty_iflag &= ~(OPT_TANDEM);
++    break;
++  default:
++    break;
++  }
+ #else
+   switch (value_)
+   {
+@@ -300,6 +324,19 @@
+   {
+     value_ = none;
+   }
++#elif  defined(__VXWORKS__)
++  if (storage.tty_iflag & OPT_TANDEM)
++  {
++    value_ = software;
++  }
++  else if (storage.c_cflag & CLOCAL)
++  {
++    value_ = hardware;
++  }
++  else
++  {
++    value_ = none;
++  }
+ #else
+   if (storage.c_iflag & (IXOFF | IXON))
+   {
+@@ -355,6 +392,22 @@
+     break;
+   default:
+     break;
++  }
++#elif  defined(__VXWORKS__)
++  switch (value_)
++  {
++  case none:
++    storage.c_cflag &= ~(PARENB | PARODD);
++    break;
++  case even:
++    storage.c_cflag |= PARENB;
++    storage.c_cflag &= ~PARODD;
++    break;
++  case odd:
++    storage.c_cflag |= (PARENB | PARODD);
++    break;
++  default:
++    break;
+   }
+ #else
+   switch (value_)
+diff -ruN asio-asio-1-12-0.orig/asio/include/asio/serial_port_base.hpp asio-asio-1-12-0/asio/include/asio/serial_port_base.hpp
+--- asio/include/asio/serial_port_base.hpp	2018-03-04 09:21:01.000000000 +0100
++++ asio/include/asio/serial_port_base.hpp	2019-03-31 11:10:29.426064655 +0200
+@@ -21,7 +21,7 @@
+ #if defined(ASIO_HAS_SERIAL_PORT) \
+   || defined(GENERATING_DOCUMENTATION)
+ 
+-#if !defined(ASIO_WINDOWS) && !defined(__CYGWIN__)
++#if !defined(ASIO_WINDOWS) && !defined(__CYGWIN__) && !defined(__VXWORKS__)
+ # include <termios.h>
+ #endif // !defined(ASIO_WINDOWS) && !defined(__CYGWIN__)
+ 
+@@ -34,6 +34,14 @@
+ # define ASIO_OPTION_STORAGE DCB
+ #else
+ # define ASIO_OPTION_STORAGE termios
++#ifdef __VXWORKS__
++struct termios
++      {
++       unsigned int c_cflag;
++       unsigned int tty_iflag;
++       unsigned int BaudRate;
++      };
++#endif
+ #endif
+ 
+ #include "asio/detail/push_options.hpp"

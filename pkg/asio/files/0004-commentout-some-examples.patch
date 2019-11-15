@@ -1,0 +1,169 @@
+--- /home/akholodn/github/chriskohlhoff/asio/asio/configure.ac	2017-12-27 23:31:24.836238200 +0100
++++ asio/configure.ac	2018-02-23 22:56:29.809138913 +0100
+@@ -73,6 +73,7 @@
+ AM_CONDITIONAL(HAVE_OPENSSL,test x$OPENSSL_FOUND != xno)
+ 
+ WINDOWS=no
++VXWORKS=no
+ case $host in
+   *-*-linux*)
+     CXXFLAGS="$CXXFLAGS -pthread"
+@@ -117,6 +118,9 @@
+     CXXFLAGS="$CXXFLAGS -pthread"
+     LDFLAGS="$LDFLAGS -pthread"
+     ;;
++   *-*-vxworks*)
++    VXWORKS=yes
++    ;;
+ esac
+ 
+ if test "$GXX" = yes; then
+@@ -141,6 +145,7 @@
+ AM_CONDITIONAL(HAVE_BOOST_COROUTINE,test x$HAVE_BOOST_COROUTINE = xyes)
+ 
+ AM_CONDITIONAL(WINDOWS_TARGET,test x$WINDOWS != xno)
++AM_CONDITIONAL(VXWORKS_TARGET,test x$VXWORKS != xno)
+ 
+ AC_OUTPUT([
+   Makefile
+--- asio.orig/src/examples/cpp03/Makefile.am
++++ asio/src/examples/cpp03/Makefile.am
+@@ -17,7 +17,6 @@ noinst_PROGRAMS = \
+ 	echo/async_tcp_echo_server \
+ 	echo/async_udp_echo_server \
+ 	echo/blocking_tcp_echo_client \
+-	echo/blocking_tcp_echo_server \
+ 	echo/blocking_udp_echo_client \
+ 	echo/blocking_udp_echo_server \
+ 	http/client/async_client \
+@@ -56,10 +55,21 @@ noinst_PROGRAMS = \
+ 	tutorial/daytime6/server \
+ 	tutorial/daytime7/server
+ 
++if !VXWORKS_TARGET
++noinst_PROGRAMS += \
++	echo/blocking_tcp_echo_server
++endif
++
++if !WINDOWS_TARGET
++if !VXWORKS_TARGET
++noinst_PROGRAMS += \
++	fork/daemon \
++	fork/process_per_connection
++endif
++endif
++
+ if !WINDOWS_TARGET
+ noinst_PROGRAMS += \
+ 	chat/posix_chat_client \
+-	fork/daemon \
+-	fork/process_per_connection \
+ 	local/connect_pair \
+ 	local/iostream_client \
+@@ -99,7 +105,9 @@ chat_chat_server_SOURCES = chat/chat_ser
+ echo_async_tcp_echo_server_SOURCES = echo/async_tcp_echo_server.cpp
+ echo_async_udp_echo_server_SOURCES = echo/async_udp_echo_server.cpp
+ echo_blocking_tcp_echo_client_SOURCES = echo/blocking_tcp_echo_client.cpp
++if !VXWORKS_TARGET
+ echo_blocking_tcp_echo_server_SOURCES = echo/blocking_tcp_echo_server.cpp
++endif
+ echo_blocking_udp_echo_client_SOURCES = echo/blocking_udp_echo_client.cpp
+ echo_blocking_udp_echo_server_SOURCES = echo/blocking_udp_echo_server.cpp
+ http_client_async_client_SOURCES = http/client/async_client.cpp
+@@ -171,8 +179,10 @@ tutorial_daytime7_server_SOURCES = tutor
+ 
+ if !WINDOWS_TARGET
+ chat_posix_chat_client_SOURCES = chat/posix_chat_client.cpp
++if !VXWORKS_TARGET
+ fork_daemon_SOURCES = fork/daemon.cpp
+ fork_process_per_connection_SOURCES = fork/process_per_connection.cpp
++endif
+ local_connect_pair_SOURCES = local/connect_pair.cpp
+ local_iostream_client_SOURCES = local/iostream_client.cpp
+ local_stream_server_SOURCES = local/stream_server.cpp
+--- /home/akholodn/github/chriskohlhoff/asio/asio/src/examples/cpp11/Makefile.am	2017-12-27 23:31:24.916237633 +0100
++++ asio/src/examples/cpp11/Makefile.am	2018-02-23 23:21:35.631953390 +0100
+@@ -17,7 +17,6 @@
+ 	echo/async_tcp_echo_server \
+ 	echo/async_udp_echo_server \
+ 	echo/blocking_tcp_echo_client \
+-	echo/blocking_tcp_echo_server \
+ 	echo/blocking_udp_echo_client \
+ 	echo/blocking_udp_echo_server \
+ 	executors/actor \
+@@ -34,10 +33,21 @@
+ 	multicast/sender \
+ 	nonblocking/third_party_lib
+ 
++if !VXWORKS_TARGET
++noinst_PROGRAMS += \
++	echo/blocking_tcp_echo_server
++endif
++
+ if !WINDOWS_TARGET
++if !VXWORKS_TARGET
+ noinst_PROGRAMS += \
+ 	fork/daemon \
+-	fork/process_per_connection \
++	fork/process_per_connection
++endif
++endif
++
++if !WINDOWS_TARGET
++noinst_PROGRAMS += \
+ 	local/connect_pair \
+ 	local/iostream_client \
+ 	local/stream_server \
+@@ -59,10 +69,9 @@
+ buffers_reference_counted_SOURCES = buffers/reference_counted.cpp
+ chat_chat_client_SOURCES = chat/chat_client.cpp
+ chat_chat_server_SOURCES = chat/chat_server.cpp
+-echo_async_tcp_echo_server_SOURCES = echo/async_tcp_echo_server.cpp
+ echo_async_udp_echo_server_SOURCES = echo/async_udp_echo_server.cpp
++echo_async_tcp_echo_server_SOURCES = echo/async_tcp_echo_server.cpp
+ echo_blocking_tcp_echo_client_SOURCES = echo/blocking_tcp_echo_client.cpp
+-echo_blocking_tcp_echo_server_SOURCES = echo/blocking_tcp_echo_server.cpp
+ echo_blocking_udp_echo_client_SOURCES = echo/blocking_udp_echo_client.cpp
+ echo_blocking_udp_echo_server_SOURCES = echo/blocking_udp_echo_server.cpp
+ executors_actor_SOURCES = executors/actor.cpp
+@@ -87,9 +96,18 @@
+ multicast_sender_SOURCES = multicast/sender.cpp
+ nonblocking_third_party_lib_SOURCES = nonblocking/third_party_lib.cpp
+ 
++if !VXWORKS_TARGET
++echo_blocking_tcp_echo_server_SOURCES = echo/blocking_tcp_echo_server.cpp
++endif
++
+ if !WINDOWS_TARGET
++if !VXWORKS_TARGET
+ fork_daemon_SOURCES = fork/daemon.cpp
+ fork_process_per_connection_SOURCES = fork/process_per_connection.cpp
++endif
++endif
++
++if !WINDOWS_TARGET
+ local_connect_pair_SOURCES = local/connect_pair.cpp
+ local_iostream_client_SOURCES = local/iostream_client.cpp
+ local_stream_server_SOURCES = local/stream_server.cpp
+--- asio.orig/src/examples/cpp14/Makefile.am
++++ asio/src/examples/cpp14/Makefile.am
+@@ -13,7 +13,9 @@ noinst_PROGRAMS = \
+ 	echo/async_tcp_echo_server \
+ 	echo/async_udp_echo_server \
+ 	echo/blocking_tcp_echo_client \
++if !VXWORKS_TARGET
+ 	echo/blocking_tcp_echo_server \
++endif
+ 	echo/blocking_udp_echo_client \
+ 	echo/blocking_udp_echo_server \
+ 	executors/actor \
+@@ -31,7 +33,9 @@ AM_CXXFLAGS = -I$(srcdir)/../../../inclu
+ echo_async_tcp_echo_server_SOURCES = echo/async_tcp_echo_server.cpp
+ echo_async_udp_echo_server_SOURCES = echo/async_udp_echo_server.cpp
+ echo_blocking_tcp_echo_client_SOURCES = echo/blocking_tcp_echo_client.cpp
++if !VXWORKS_TARGET
+ echo_blocking_tcp_echo_server_SOURCES = echo/blocking_tcp_echo_server.cpp
++endif
+ echo_blocking_udp_echo_client_SOURCES = echo/blocking_udp_echo_client.cpp
+ echo_blocking_udp_echo_server_SOURCES = echo/blocking_udp_echo_server.cpp
+ executors_actor_SOURCES = executors/actor.cpp

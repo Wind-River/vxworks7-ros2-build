@@ -1,75 +1,51 @@
-# Makefile - build pipeline for VxWorks 7 and ROS 2
-#
-# Copyright (c) 2019 Wind River Systems, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+TOP_BUILDDIR=$(CURDIR)
+WIND_USR_MK=$(TOP_BUILDDIR)/mk/usr
 
-# Modification history
-# --------------------
-# 16apr19,rcw  created
+include $(WIND_USR_MK)/defs.common.mk
+include $(WIND_USR_MK)/defs.packages.mk
+include $(WIND_USR_MK)/defs.crossbuild.mk
 
-LOCAL_DIR=$(dirname $(readlink -f $0))
-STAMP_DIR=$(CURDIR)/.stamp
-SCRIPTS_DIR=$(CURDIR)/scripts
 
-VPATH=$(STAMP_DIR)
-MAKE_STAMP=touch $(STAMP_DIR)/$@
+DEFAULT_BUILD = asio.install tinyxml2.install unixextra.install
 
-SUBPRJS=vsb prj bootloader vip
-TARGETS=$(addsuffix .install,$(SUBPRJS))
+## Add missing variablse from SDK
+export TOOL=llvm
+export TGT_ARCH=x86_64
+export CMAKE_MODULE_PATH=$(CMAKE_MODULE_DIR)
+## XX
 
-define run_script
-  if [ -f $(SCRIPTS_DIR)/$(subst .,-,$1).sh ]; then \
-    echo "## RUN: $(SCRIPTS_DIR)/$(subst .,-,$1).sh"; \
-    $(SCRIPTS_DIR)/$(subst .,-,$1).sh; \
-    if [ $$? -ne 0 ]; then \
-      echo "## ERROR: $(SCRIPTS_DIR)/$(subst .,-,$1).sh"; \
-      exit 1; \
-    else \
-      echo "## SUCCESS: $(SCRIPTS_DIR)/$(subst .,-,$1).sh"; \
-    fi; \
-  fi;
-endef
+.PHONY: clean_buildstamps
 
-all: $(STAMP_DIR) $(TARGETS)
+all: $(DOWNLOADS_DIR) $(STAMP_DIR) $(EXPORT_DIR) $(DEFAULT_BUILD)
 
-clean:
-	@rm -rf $(STAMP_DIR)
+$(EXPORT_DIR):
+	@mkdir -p $(EXPORT_DIR)
+
+$(DOWNLOADS_DIR):
+	@mkdir -p $(DOWNLOADS_DIR)
 
 $(STAMP_DIR):
 	@mkdir -p $(STAMP_DIR)
 
-%.create:
-	@$(call run_script,$@)
-	@$(MAKE_STAMP)
+clean_buildstamps:
+	@rm -f $(TOP_BUILDDIR)/build/.stamp/*
 
-%.download: %.create
-	@$(call run_script,$@)
-	@$(MAKE_STAMP)
+distclean:
+	@rm -rf $(DOWNLOADS_DIR)
+	@rm -rf $(TOP_BUILDDIR)/build
 
-%.patch: %.download
-	@$(call run_script,$@)
-	@$(MAKE_STAMP)
+clean: clean_buildstamps
 
-%.configure: %.patch
-	@$(call run_script,$@)
-	@$(MAKE_STAMP)
+info:
+	@$(ECHO) "PACKAGES: $(PACKAGES)"
+	@$(ECHO) "CURDIR: $(CURDIR)"
+	@$(ECHO) "DOWNLOADS_DIR: $(DOWNLOADS_DIR)"
+	@$(ECHO) "PACKAGE_DIR: $(PACKAGE_DIR)"
+	@$(ECHO) "BUILD_DIR: $(BUILD_DIR)"
+	@$(ECHO) "EXPORT_DIR: $(EXPORT_DIR)"
+	@$(ECHO) "ROOT_DIR: $(ROOT_DIR)"
+	@$(ECHO) "CMAKE_MODULE_DIR: $(CMAKE_MODULE_DIR)"
 
-%.build: %.configure
-	@$(call run_script,$@)
-	@$(MAKE_STAMP)
+include $(PACKAGE_DIR)/*/Makefile
 
-%.install: %.build
-	@$(call run_script,$@)
-	@$(MAKE_STAMP)
+include $(WIND_USR_MK)/rules.packages.mk

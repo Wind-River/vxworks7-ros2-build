@@ -1,0 +1,24 @@
+diff -ruN asio-asio-1-12-0.orig/asio/include/asio/detail/impl/socket_ops.ipp asio-asio-1-12-0/asio/include/asio/detail/impl/socket_ops.ipp
+--- asio/include/asio/detail/impl/socket_ops.ipp	2018-03-04 09:21:01.000000000 +0100
++++ asio/include/asio/detail/impl/socket_ops.ipp	2018-03-17 23:01:17.387263119 +0100
+@@ -33,6 +33,11 @@
+ # include <string>
+ #endif // defined(ASIO_WINDOWS_RUNTIME)
+ 
++#if defined(__VXWORKS__)
++#include "ioLib.h" // ioctl
++#include "sys/poll.h" // freeaddrinfo
++#endif // defined(__VXWORKS__)
++
+ #if defined(ASIO_WINDOWS) || defined(__CYGWIN__) \
+   || defined(__MACH__) && defined(__APPLE__)
+ # if defined(ASIO_HAS_PTHREADS)
+@@ -609,7 +614,7 @@
+ int socketpair(int af, int type, int protocol,
+     socket_type sv[2], asio::error_code& ec)
+ {
+-#if defined(ASIO_WINDOWS) || defined(__CYGWIN__)
++#if defined(ASIO_WINDOWS) || defined(__CYGWIN__) || defined(__VXWORKS__)
+   (void)(af);
+   (void)(type);
+   (void)(protocol);

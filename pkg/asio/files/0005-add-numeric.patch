@@ -1,0 +1,10 @@
+--- /home/akholodn/github/chriskohlhoff/asio/asio/src/examples/cpp11/executors/fork_join.cpp	2017-12-27 23:31:24.916237633 +0100
++++ asio/src/examples/cpp11/executors/fork_join.cpp	2017-07-22 21:31:26.809564937 +0200
+@@ -4,6 +4,7 @@
+ #include <condition_variable>
+ #include <memory>
+ #include <mutex>
++#include <numeric>
+ #include <queue>
+ #include <thread>
+ 

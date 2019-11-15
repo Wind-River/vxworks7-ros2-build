@@ -1,0 +1,8 @@
+0001-ASIO_HAS_UNISTD_H.patch
+0002-socket_ops_ipp.patch
+0003-enable-serial-port.patch
+0004-commentout-some-examples.patch
+0005-add-numeric.patch
+# 0006-automake-fix.patch
+0007-openssl-fix.patch
+# acinclude.patch
