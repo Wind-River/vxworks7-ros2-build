@@ -142,8 +142,11 @@ ros2.build: ros2.configure
 
 ros2.install : ros2.build
 	@$(call echo_action,Installing,$*)
-	cd $(BUILD_DIR)/ros2/$(unixextra_BUILD_DIR) && \
-	echo "MAKE_OPT: $(ros2_MAKE_OPT)" && \
-	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \
-	$(ros2_MAKE_INSTALL_VAR) $(MAKE) -C $(BUILD_DIR)/unixextra/$(unixextra_BUILD_DIR) -f $(BUILD_DIR)/unixextra/$(unixextra_SRC_DIR)/Makefile $(unixextra_MAKE_INSTALL_OPT) $(unixextra_MAKE_OPT)
+	@# copy PRJ libs and binaries to VSB
+	cd $(BUILD_DIR)/ros2/$(ros2_BUILD_DIR) && \
+	if [ -d install ]; then \
+		find install -name *.so* -exec install -m 644 {} $(ROOT_DIR)/lib/ \;; \
+		find install -name *.vxe -exec install -m 644 {} $(ROOT_DIR)/$(TOOL)/bin/ \;; \
+		find install -name *.urdf -exec install -m 755 {} $(ROOT_DIR)/$(TOOL)/bin/ \;; \
+	fi
 	@$(MAKE_STAMP)
