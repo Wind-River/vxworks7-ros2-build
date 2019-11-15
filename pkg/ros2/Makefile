@@ -52,10 +52,6 @@ ros2_EXAMPLES=examples_rclcpp_minimal_action_client \
               examples_rclcpp_minimal_service \
               examples_rclcpp_minimal_timer
 
-# ros2_CONFIGURE_OPT = $(TGT_CONFIGURE_OPT) LIBS="$(unixextra_LIBS)"
-# ros2_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT)
-# ros2_MAKE_OPT = srcdir=../$(unixextra_SRC_DIR)
-
 define ros2_patch
         if ls $(BUILD_DIR)/ros2/$(ros2_SRC_DIR)/$($(1)_PATCH_DIR)/usr_src/0001-* 1> /dev/null 2>&1; then \
                 PATCHES="$(BUILD_DIR)/ros2/$(ros2_SRC_DIR)/$($(1)_PATCH_DIR)/usr_src/*.patch"; \
