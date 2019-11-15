@@ -43,7 +43,9 @@ define pkg_distclean
 		echo "Deleting $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR)"; \
 		rm -rf $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR); \
         fi; \
-	rmdir $(BUILD_DIR)/$(1)
+	if [ -d $(BUILD_DIR)/$(1) ]; then \
+		rmdir $(BUILD_DIR)/$(1); \
+	fi
 endef
 
 define pkg_clean
