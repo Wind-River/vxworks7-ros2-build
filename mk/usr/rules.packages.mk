@@ -114,17 +114,11 @@ define fetch_svn
 	exit 1
 endef
 
-define stringify_url
-	$1="$2" ; \
-	$1=$${$1//:/.} ; \
-	$1=$${$1//\//.} ; \
-	$1=$${$1//\*/.} ; \
-	$1="$${$1#.}"
-endef
+stringify_url=$(subst *,.,$(subst /,.,$(subst :,.,$1)))
 
 define clone_git
 	$(ECHO) "clone_git $1" ; \
-	$(call stringify_url,GIT_DIR_NAME,$($(1)_URL)) ; \
+	GIT_DIR_NAME=$(call stringify_url,$($(1)_URL)) ; \
 	mkdir -p $(BUILD_DIR)/$(1); \
 	if [ ! -d $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) ] ; then \
 		cd $(BUILD_DIR)/$(1) && \
@@ -141,7 +135,8 @@ endef
 
 define fetch_git
 	$(ECHO) "fetch_git $1" ; \
-	$(call stringify_url,GIT_DIR_NAME,$($(1)_URL)) ; \
+	GIT_DIR_NAME=$(call stringify_url,$($(1)_URL)) ; \
+	mkdir -p $(BUILD_DIR)/$(1); \
 	mkdir -p $(BUILD_DIR)/$(1); \
 	if [ ! -d $(DOWNLOADS_DIR)/$$GIT_DIR_NAME ] ; then \
 		cd $(DOWNLOADS_DIR) &&  \
@@ -155,7 +150,7 @@ endef
 
 define fetch_hg
         $(ECHO) "fetch_hg $1" ; \
-        $(call stringify_url,HG_DIR_NAME,$($(1)_URL)) ; \
+	HG_DIR_NAME=$(call stringify_url,$($(1)_URL)) ; \
 	mkdir -p $(BUILD_DIR)/$(1); \
         if [ ! -d $(DOWNLOADS_DIR)/$$HG_DIR_NAME ] ; then \
                 cd $(DOWNLOADS_DIR) &&  \
@@ -169,7 +164,7 @@ endef
 
 define clone_hg
         $(ECHO) "clone_hg " ; \
-        $(call stringify_url,HG_DIR_NAME,$($(1)_URL)) ; \
+	HG_DIR_NAME=$(call stringify_url,$($(1)_URL)) ; \
 	mkdir -p $(BUILD_DIR)/$(1); \
         if [ ! -d $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) ] ; then \
                 cd $(BUILD_DIR)/$(1) && \
