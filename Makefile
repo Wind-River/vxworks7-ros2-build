@@ -6,7 +6,7 @@ include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.crossbuild.mk
 
 
-DEFAULT_BUILD = asio.install tinyxml2.install unixextra.install
+DEFAULT_BUILD = asio.install tinyxml2.install unixextra.install ros2.install
 
 ## Add missing variablse from SDK
 export TOOL=llvm
