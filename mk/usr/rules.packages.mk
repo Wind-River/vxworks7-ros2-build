@@ -74,7 +74,7 @@ define pkg_configure
 		cmake $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) \
 		    $(TGT_CMAKE_TOOLCHAIN_FILE) \
 		    -DCMAKE_INSTALL_PREFIX=$(CMAKE_INSTALL_PREFIX) \
-		    -DCMAKE_PREFIX_PATH=$(WIND_ROOT_DIR) \
+		    -DCMAKE_PREFIX_PATH=$(ROOT_DIR) \
 		    -DCMAKE_MODULE_PATH=$(CMAKE_MODULE_DIR) \
 		    $(CMAKE_OPT) ; \
 	else \
