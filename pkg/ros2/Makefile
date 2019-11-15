@@ -86,11 +86,11 @@ poco_vendor_SRC_DIR = src/ros2/poco_vendor
 osrf_testing_tools_cpp_PATCH_DIR = osrf_testing_tools_cpp
 osrf_testing_tools_cpp_SRC_DIR = src/osrf/osrf_testing_tools_cpp
 orocos_kinematics_dynamics_PATCH_DIR = orocos_kinematics_dynamics
-orocos_kinematics_dynamics_SRC_DIR = src/osrf/osrf_testing_tools_cpp
+orocos_kinematics_dynamics_SRC_DIR = src/ros2/orocos_kinematics_dynamics
 ros_planning_PATCH_DIR =  ros-planning
-ros_planning_SRC_DIR = ros-planning
+ros_planning_SRC_DIR = src/ros-planning
 rmw_connext_PATCH_DIR = rmw_connext
-rmw_connext_SRC_DIR = src/ros2/rw_connext
+rmw_connext_SRC_DIR = src/ros2/rmw_connext
 rosidl_typesupport_connext_PATCH_DIR = rosidl_typesupport_connext
 rosidl_typesupport_connext_SRC_DIR = src/ros2/rosidl_typesupport_connext
 rmw_opensplice_PATCH_DIR = rmw_opensplice
@@ -182,21 +182,23 @@ ros2.patch: ros2.unpack
 
 ros2.configure: ros2.patch
 	@$(call echo_action,Configuring,$*)
-	# Ignore copyleft packages
-	@$(call ros2_ignorepkg,ros-visualization)
+
+	@# Ignore copyleft packages
+	@$(call ros2_ignorepkg,ros_visualization)
 	@$(call ros2_ignorepkg,rviz)
 	@$(call ros2_ignorepkg,poco_vendor)
 	@$(call ros2_ignorepkg,osrf_testing_tools_cpp)
 	@$(call ros2_ignorepkg,orocos_kinematics_dynamics)
-	@$(call ros2_ignorepkg,ros-planning)
+	@$(call ros2_ignorepkg,ros_planning)
 	@$(call ros2_ignorepkg,rmw_connext)
 	@$(call ros2_ignorepkg,rosidl_typesupport_connext)
 	@$(call ros2_ignorepkg,rmw_opensplice)
 	@$(call ros2_ignorepkg,rosidl_typesupport_opensplice)
-	@$(call ros2_ignorepkg,ament_lient)
+	@$(call ros2_ignorepkg,ament_lint)
 	@$(call ros2_ignorepkg,uncrustify_vendor)
 	@$(call ros2_ignorepkg,rcl_logging_log4cxx)
-	# Ignore Python-specific packages
+
+	@# Ignore Python-specific packages
 	@$(call ros2_ignorepkg,ament_cmake_pytest)
 	@$(call ros2_ignorepkg,osrf_pycommon)
 	@$(call ros2_ignorepkg,demo_nodes_py)
