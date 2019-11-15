@@ -123,14 +123,14 @@ rqt_gui_py_PATCH_DIR = rqt_gui_py
 rqt_gui_py_SRC_DIR = src/ros-visualization/rqt/rqt_gui_py
 
 
-ros2_EXAMPLES="examples_rclcpp_minimal_action_client \
-               examples_rclcpp_minimal_client \
-               examples_rclcpp_minimal_publisher \
-               examples_rclcpp_minimal_subscriber \
-               examples_rclcpp_minimal_action_server \
-               examples_rclcpp_minimal_composition \
-               examples_rclcpp_minimal_service \
-               examples_rclcpp_minimal_timer"
+ros2_EXAMPLES=examples_rclcpp_minimal_action_client \
+              examples_rclcpp_minimal_client \
+              examples_rclcpp_minimal_publisher \
+              examples_rclcpp_minimal_subscriber \
+              examples_rclcpp_minimal_action_server \
+              examples_rclcpp_minimal_composition \
+              examples_rclcpp_minimal_service \
+              examples_rclcpp_minimal_timer
 
 # ros2_CONFIGURE_OPT = $(TGT_CONFIGURE_OPT) LIBS="$(unixextra_LIBS)"
 # ros2_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT)
