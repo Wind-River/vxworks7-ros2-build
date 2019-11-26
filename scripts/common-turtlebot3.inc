@@ -19,29 +19,30 @@
 # --------------------
 # 12apr19,akh  created
 
-source common-ros2.inc
+source common-ros2small.inc
 
 # add turtlebot3 repos
 turtlebot3_download()
 {
         # retrieve ROS2 repos
-	ros2_download
+	ros2small_download
 
-        wget --no-check-certificate https://raw.githubusercontent.com/razr/turtlebot3/master/turtlebot3.repos
+        wget --no-check-certificate https://raw.githubusercontent.com/ROBOTIS-GIT/turtlebot3/ros2-devel/turtlebot3.repos
         vcs import src < turtlebot3.repos
 }
 
 turtlebot3_patch()
 {
-        ros2_patch
+        ros2small_patch
 }
 
 turtlebot3_configure()
 {
-        ros2_configure
+        ros2small_configure
 }
 
 turtlebot3_build()
 {
-	ros2_build
+
+        . ./vxworks_env.sh && colcon build --symlink-install --cmake-force-configure --packages-up-to hls_lfcd_lds_driver --cmake-args -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=$VSB_DIR/buildspecs/cmake/rtp.cmake -DCMAKE_PREFIX_PATH=$PRJ_WS/install\;$VSB_DIR/usr/root -DBUILD_TESTING=OFF
 }
