@@ -44,7 +44,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE BOTH)
 
 set(CMAKE_INCLUDE_PATH
         /include
-        /include/usr/h/published/UTILS
+	/include/usr/h/published/UTILS_UNIX
         /include/usr/h/public)
 
 set(CMAKE_LIBRARY_PATH
