@@ -26,11 +26,11 @@ PACKAGES += ros2
 ros2_NAME = ros2
 ros2_VER =  dashing
 
-ros2_URL = https://github.com/Wind-River/vxworks7-layer-for-ros2.git
+ros2_URL := https://github.com/Wind-River/vxworks7-layer-for-ros2.git
 ros2_TYPE = git
-ros2_COMMIT_ID = dashing-release-SR0620
+ros2_COMMIT_ID := dashing-release-SR0620
 
-ros2_REPO_COMMIT_ID = dashing-release
+ros2_REPO_COMMIT_ID := dashing-release
 ros2_REPO_URL = https://raw.githubusercontent.com/ros2/ros2/${ros2_REPO_COMMIT_ID}/ros2.repos
 
 ros2_LICENSE = BSD
