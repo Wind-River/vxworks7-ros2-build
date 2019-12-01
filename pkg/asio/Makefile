@@ -19,38 +19,31 @@
 # 26jun18,rcw updated
 # 12mar18,akh  created
 #
+include $(WIND_USR_MK)/defs.common.mk
+include $(WIND_USR_MK)/defs.packages.mk
+include $(WIND_USR_MK)/defs.crossbuild.mk
 
 PACKAGES += asio
 
-asio_NAME = asio
-asio_VER = 1.12.0
-asio_TYPE = unpack
+PKG_NAME = asio
+PKG_VER = 1.12.0
+PKG_TYPE = unpack
 
-ifeq  "$(WIND_SDK_HOST_TYPE)" "x86-win32"
-asio_URL = https://github.com/chriskohlhoff/asio/archive/asio-1-12-0.zip
-asio_FILE_NAME = asio-1-12-0.zip
-asio_TYPE = unpack
-asio_MD5_CHECKSUM = e7b27761818ba597886620c87f48a768
-else
-asio_URL = https://github.com/chriskohlhoff/asio/archive/asio-1-12-0.tar.gz
-asio_FILE_NAME = asio-1-12-0.tar.gz
-asio_TYPE = unpack
-asio_MD5_CHECKSUM = 9bacab7c7c9a0e81410571f14e36cbe4
-endif
+PKG_URL = https://github.com/chriskohlhoff/asio/archive/asio-1-12-0.tar.gz
+PKG_FILE_NAME = asio-1-12-0.tar.gz
+PKG_MD5_CHECKSUM = 9bacab7c7c9a0e81410571f14e36cbe4
 
-asio_LICENSE = Boost
+PKG_LICENSE = Boost
 
-asio_BUILD_DIR = build
-asio_SRC_DIR = asio-asio-1-12-0/asio
-asio_PATCH_DIR = files
+PKG_BUILD_DIR = build
+PKG_SRC_DIR = asio-asio-1-12-0/asio
+PKG_PATCH_DIR = files
 
-asio_LIBS := -lunix -lnet
+PKG_LIBS := -lunix -lnet
 
-asio_CONFIGURE_OPT = $(TGT_CONFIGURE_OPT) LIBS="$(asio_LIBS)"
-asio_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT)
+PKG_CONFIGURE_OPT = $(TGT_CONFIGURE_OPT) LIBS="$(PKG_LIBS)"
+PKG_CONFIGURE_OPT += --without-boost
+PKG_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT)
 
-_WRS_CONFIG_CFG_ASIO_WITHOUT_BOOST = 1
-ifdef _WRS_CONFIG_CFG_ASIO_WITHOUT_BOOST
-asio_CONFIGURE_OPT += --without-boost
-endif
-# PKG_EXTRA_SRC = acinclude.m4
+include $(WIND_USR_MK)/rules.packages.mk
+

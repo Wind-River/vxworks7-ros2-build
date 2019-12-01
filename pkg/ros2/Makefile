@@ -21,29 +21,33 @@
 #
 
 # SYNOPSIS        automate the build of ROS2
+include $(WIND_USR_MK)/defs.common.mk
+include $(WIND_USR_MK)/defs.packages.mk
+include $(WIND_USR_MK)/defs.crossbuild.mk
+
 PACKAGES += ros2
 
-ros2_NAME = ros2
-ros2_VER =  dashing
+PKG_NAME = ros2
+PKG_VER =  dashing
 
-ros2_URL := https://github.com/Wind-River/vxworks7-layer-for-ros2.git
-ros2_TYPE = git
-ros2_COMMIT_ID := dashing-release-SR0620
+#PKG_URL = https://github.com/Wind-River/vxworks7-layer-for-ros2.git
+PKG_URL = https://github.com/Wind-River/vxworks7-layer-for-ros2.git
+PKG_TYPE = git
+PKG_COMMIT_ID = dashing-release-SR0620
 
-ros2_REPO_COMMIT_ID := dashing-release
-ros2_REPO_URL = https://raw.githubusercontent.com/ros2/ros2/${ros2_REPO_COMMIT_ID}/ros2.repos
+PKG_REPO_COMMIT_ID = dashing-release
+PKG_REPO_URL = https://raw.githubusercontent.com/ros2/ros2/${PKG_REPO_COMMIT_ID}/${PKG_NAME}.repos
 
-ros2_LICENSE = BSD
+PKG_LICENSE = BSD
 
-ros2_BUILD_DIR = ros2_ws
-ros2_SRC_DIR = src
-ros2_PATCH_DIR = patches
+PKG_BUILD_DIR = ros2_ws
+PKG_SRC_DIR = patches
 
-ros2_BUILD_TYPE = Debug
+PKG_BUILD_TYPE := Debug
 
 include $(PACKAGE_DIR)/ros2/rospackages.mk
 
-ros2_EXAMPLES=examples_rclcpp_minimal_action_client \
+ROS2_EXAMPLES=examples_rclcpp_minimal_action_client \
               examples_rclcpp_minimal_client \
               examples_rclcpp_minimal_publisher \
               examples_rclcpp_minimal_subscriber \
@@ -53,86 +57,48 @@ ros2_EXAMPLES=examples_rclcpp_minimal_action_client \
               examples_rclcpp_minimal_timer
 
 define ros2_patch
-        if ls $(BUILD_DIR)/ros2/$(ros2_SRC_DIR)/$($(1)_PATCH_DIR)/usr_src/0001-* 1> /dev/null 2>&1; then \
-                PATCHES="$(BUILD_DIR)/ros2/$(ros2_SRC_DIR)/$($(1)_PATCH_DIR)/usr_src/*.patch"; \
-                for PATCH in $$PATCHES; do \
-                        $(PATCH) -p1 -N -d $(BUILD_DIR)/ros2/$(ros2_BUILD_DIR)/$($(1)_SRC_DIR) -p1 < $$PATCH ; \
-                done; \
-        fi
+        for pn in $(1); do \
+	        N=$$(basename $$pn); \
+                if ls $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/$$N/usr_src/0001-* 1> /dev/null 2>&1; then \
+                        PATCHES="$(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/$$N/usr_src/*.patch"; \
+                        for PATCH in $$PATCHES; do \
+                                $(PATCH) -p1 -N -d $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/$$pn -p1 < $$PATCH ; \
+                        done; \
+                fi \
+	done;
 endef
 
-define ros2_ignorepkg
-	touch $(BUILD_DIR)/ros2/$(ros2_BUILD_DIR)/$($(1)_SRC_DIR)/COLCON_IGNORE
-endef
 
 ros2.unpack: ros2.download
 	@$(call echo_action,Unpacking,$*)
-	$(call pkg_unpack,ros2)
-	mkdir -p $(BUILD_DIR)/ros2/$(ros2_BUILD_DIR); \
-	cd $(BUILD_DIR)/ros2/$(ros2_BUILD_DIR); \
-	curl -o ros2.repos $(ros2_REPO_URL); \
+	$(call pkg_unpack,$(PKG_NAME))
+	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
+	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
+	curl -o $(PKG_NAME).repos $(PKG_REPO_URL); \
 	mkdir src; \
-	vcs import src < ros2.repos
+	vcs import src < $(PKG_NAME).repos
 	@$(MAKE_STAMP)
 
 ros2.patch: ros2.unpack
 	@$(call echo_action,Patching,$*)
-	$(call ros2_patch,fastcdr)
-	$(call ros2_patch,fastrtps)
-	$(call ros2_patch,class_loader)
-	$(call ros2_patch,ros2_demos)
-	$(call ros2_patch,ros2_examples)
-	$(call ros2_patch,rcl)
-	$(call ros2_patch,rclcpp)
-	$(call ros2_patch,rcutils)
-	$(call ros2_patch,realtime_support)
-	$(call ros2_patch,rmw_implementation)
-	$(call ros2_patch,rosidl)
-	$(call ros2_patch,rosidl_defaults)
-	$(call ros2_patch,rosidl_typesupport)
-	$(call ros2_patch,tinydir_vendor)
-	$(call ros2_patch,console_bridge_vendor)
-	$(call ros2_patch,rmw_fastrtps_shared_cpp)
-	$(call ros2_patch,tlsf_cpp)
+	$(call ros2_patch,$(ROS2_PATCH_DIRS))
 	@$(MAKE_STAMP)
 
 ros2.configure: ros2.patch
 	@$(call echo_action,Configuring,$*)
-
-	@# Ignore copyleft packages
-	@$(call ros2_ignorepkg,ros_visualization)
-	@$(call ros2_ignorepkg,rviz)
-	@$(call ros2_ignorepkg,poco_vendor)
-	@$(call ros2_ignorepkg,osrf_testing_tools_cpp)
-	@$(call ros2_ignorepkg,orocos_kinematics_dynamics)
-	@$(call ros2_ignorepkg,ros_planning)
-	@$(call ros2_ignorepkg,rmw_connext)
-	@$(call ros2_ignorepkg,rosidl_typesupport_connext)
-	@$(call ros2_ignorepkg,rmw_opensplice)
-	@$(call ros2_ignorepkg,rosidl_typesupport_opensplice)
-	@$(call ros2_ignorepkg,ament_lint)
-	@$(call ros2_ignorepkg,uncrustify_vendor)
-	@$(call ros2_ignorepkg,rcl_logging_log4cxx)
-
-	@# Ignore Python-specific packages
-	@$(call ros2_ignorepkg,ament_cmake_pytest)
-	@$(call ros2_ignorepkg,osrf_pycommon)
-	@$(call ros2_ignorepkg,demo_nodes_py)
-	@$(call ros2_ignorepkg,tf2_py)
-	@$(call ros2_ignorepkg,kdl_parser_py)
-	@$(call ros2_ignorepkg,rclpy)
-	@$(call ros2_ignorepkg,rosidl_generator_py)
-	@$(call ros2_ignorepkg,rqt_gui_py)
+	for i in $(ROS_IGNORE_DIRS); do \
+		touch $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/$$i/COLCON_IGNORE; \
+	done;
 	@$(MAKE_STAMP)
 
 ros2.build: ros2.configure
 	@$(call echo_action,Building,$*)
-	cd $(BUILD_DIR)/ros2/$(ros2_BUILD_DIR); \
+	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
 	export WIND_ROOT_DIR=$(ROOT_DIR); \
-        colcon build --symlink-install --cmake-force-configure --packages-up-to $(ros2_EXAMPLES) \
+        colcon build --symlink-install --cmake-force-configure --packages-up-to $(ROS2_EXAMPLES) \
 		pendulum_control \
 		--cmake-args \
-                -DCMAKE_BUILD_TYPE:STRING=$(ros2_BUILD_TYPE) \
+                -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
                 -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
                 -DCMAKE_MODULE_PATH:PATH=$(CMAKE_MODULE_DIR) \
                 -DCMAKE_TOOLCHAIN_FILE:FILEPATH=$(CMAKE_MODULE_DIR)/rtp.cmake \
@@ -143,10 +109,13 @@ ros2.build: ros2.configure
 ros2.install : ros2.build
 	@$(call echo_action,Installing,$*)
 	@# copy PRJ libs and binaries to VSB
-	cd $(BUILD_DIR)/ros2/$(ros2_BUILD_DIR) && \
+	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) && \
 	if [ -d install ]; then \
 		find install -name *.so* -exec install -m 644 {} $(ROOT_DIR)/lib/ \;; \
 		find install -name *.vxe -exec install -m 644 {} $(ROOT_DIR)/$(TOOL)/bin/ \;; \
 		find install -name *.urdf -exec install -m 755 {} $(ROOT_DIR)/$(TOOL)/bin/ \;; \
 	fi
 	@$(MAKE_STAMP)
+
+include $(WIND_USR_MK)/rules.packages.mk
+

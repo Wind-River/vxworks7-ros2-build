@@ -21,42 +21,53 @@
 #
 
 # SYNOPSIS        extra UNIX functions not included into -lunix
+include $(WIND_USR_MK)/defs.common.mk
+include $(WIND_USR_MK)/defs.packages.mk
+include $(WIND_USR_MK)/defs.crossbuild.mk
+
 PACKAGES += unixextra
 
-unixextra_NAME = unixextra
-unixextra_VER = 1.0
-unixextra_TYPE = src
+PKG_NAME = unixextra
+PKG_VER = 1.0
+#PKG_TYPE = src
 
-unixextra_LICENSE = BSD
+PKG_LICENSE = BSD
 
-unixextra_BUILD_DIR = build
-unixextra_SRC_DIR = src
-unixextra_PATCH_DIR = files
+PKG_BUILD_DIR = build
+PKG_SRC_DIR = src
+PKG_PATCH_DIR = files
 
-# unixextra_LIBS := -lunix -lnet
+PKG_CONFIGURE_OPT = $(TGT_CONFIGURE_OPT)
+PKG_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT)
+PKG_MAKE_OPT = srcdir=../$(PKG_SRC_DIR)
 
-unixextra_CONFIGURE_OPT = $(TGT_CONFIGURE_OPT) LIBS="$(unixextra_LIBS)"
-unixextra_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT)
-unixextra_MAKE_OPT = srcdir=../$(unixextra_SRC_DIR)
+unixextra.download :
+	@$(MAKE_STAMP)
 
-unixextra.unpack : 
+unixextra.check : unixextra.download 
+	@$(MAKE_STAMP)
+
+unixextra.unpack : unixextra.check
 	@$(call echo_action,Unpacking,unixextra)
-	mkdir -p $(BUILD_DIR)/unixextra/$(unixextra_SRC_DIR)
-	cp $(PACKAGE_DIR)/unixextra/files/* $(BUILD_DIR)/unixextra/$(unixextra_SRC_DIR)
+	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)
+	cp $(PACKAGE_DIR)/$(PKG_NAME)/files/* $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)
 	@$(MAKE_STAMP)
 
 unixextra.build : unixextra.configure
 	@$(call echo_action,Building,$*)
-	cd $(BUILD_DIR)/unixextra/$(unixextra_BUILD_DIR) && \
+	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) && \
 	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \
-	echo "MAKE_OPT: $(unixextra_MAKE_OPT)" && \
-	$(MAKE) -C $(BUILD_DIR)/unixextra/$(unixextra_BUILD_DIR) -f $(BUILD_DIR)/unixextra/$(unixextra_SRC_DIR)/Makefile $(unixextra_MAKE_OPT)
+	echo "MAKE_OPT: $(PKG_MAKE_OPT)" && \
+	$(MAKE) -C $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) -f $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/Makefile $(PKG_MAKE_OPT)
 	@$(MAKE_STAMP)
 
 unixextra.install : unixextra.build
 	@$(call echo_action,Installing,$*)
-	cd $(BUILD_DIR)/unixextra/$(unixextra_BUILD_DIR) && \
-	echo "MAKE_OPT: $(unixextra_MAKE_OPT)" && \
+	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) && \
+	echo "MAKE_OPT: $(PKG_MAKE_OPT)" && \
 	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \
-	$(unixextra_MAKE_INSTALL_VAR) $(MAKE) -C $(BUILD_DIR)/unixextra/$(unixextra_BUILD_DIR) -f $(BUILD_DIR)/unixextra/$(unixextra_SRC_DIR)/Makefile $(unixextra_MAKE_INSTALL_OPT) $(unixextra_MAKE_OPT)
+	$(PKG_MAKE_INSTALL_VAR) $(MAKE) -C $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) -f $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/Makefile $(PKG_MAKE_INSTALL_OPT) $(PKG_MAKE_OPT)
 	@$(MAKE_STAMP)
+
+include $(WIND_USR_MK)/rules.packages.mk
+

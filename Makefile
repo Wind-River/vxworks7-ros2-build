@@ -1,12 +1,11 @@
-TOP_BUILDDIR=$(CURDIR)
-WIND_USR_MK=$(TOP_BUILDDIR)/mk/usr
+export TOP_BUILDDIR=$(CURDIR)
+export WIND_USR_MK=$(TOP_BUILDDIR)/mk/usr
 
 include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.crossbuild.mk
 
-
-DEFAULT_BUILD = asio.install tinyxml2.install unixextra.install ros2.install
+DEFAULT_BUILD = asio tinyxml2 unixextra ros2
 
 ## Add missing variablse from SDK
 export TOOL=llvm
@@ -16,7 +15,8 @@ export CMAKE_MODULE_PATH=$(CMAKE_MODULE_DIR)
 
 .PHONY: clean_buildstamps
 
-all: $(DOWNLOADS_DIR) $(STAMP_DIR) $(EXPORT_DIR) $(DEFAULT_BUILD)
+all: $(DOWNLOADS_DIR) $(STAMP_DIR) $(EXPORT_DIR)
+	for p in $(DEFAULT_BUILD); do $(MAKE) -C pkg/$$p $$p.install; done;
 
 $(EXPORT_DIR):
 	@mkdir -p $(EXPORT_DIR)
@@ -46,6 +46,4 @@ info:
 	@$(ECHO) "ROOT_DIR: $(ROOT_DIR)"
 	@$(ECHO) "CMAKE_MODULE_DIR: $(CMAKE_MODULE_DIR)"
 
-include $(PACKAGE_DIR)/*/Makefile
 
-include $(WIND_USR_MK)/rules.packages.mk

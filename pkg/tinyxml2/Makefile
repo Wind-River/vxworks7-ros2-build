@@ -20,33 +20,32 @@
 # 08nov17,cai  add git clone option for getting the code.
 # 02oct17,cai  created
 #
+include $(WIND_USR_MK)/defs.common.mk
+include $(WIND_USR_MK)/defs.packages.mk
+include $(WIND_USR_MK)/defs.crossbuild.mk
 
 PACKAGES += tinyxml2
 
-tinyxml2_NAME = tinyxml2
-tinyxml2_VER = 6.2.0
+PKG_NAME = tinyxml2
+PKG_VER = 6.2.0
 
-tinyxml2_URL = https://github.com/leethomason/tinyxml2.git
-tinyxml2_TYPE = git
-tinyxml2_COMMIT_ID = 8c8293ba8969a46947606a93ff0cb5a083aab47a
+PKG_URL = https://github.com/leethomason/tinyxml2.git
+PKG_TYPE = git
+PKG_COMMIT_ID = 8c8293ba8969a46947606a93ff0cb5a083aab47a
 
-tinyxml2_LICENSE = ZLib
+PKG_LICENSE = ZLib
 
-tinyxml2_BUILD_DIR = build
-tinyxml2_SRC_DIR = src
+PKG_BUILD_DIR = build
+PKG_SRC_DIR = src
 
-tinyxml2_MAKE_INSTALL_OPT=install DESTDIR=$(ROOT_DIR)
+PKG_MAKE_INSTALL_OPT=install DESTDIR=$(ROOT_DIR)
 
 tinyxml2.install : tinyxml2.build
 	@$(call echo_action,Installing,tinyxml2)
 	$(call pkg_install,tinyxml2)
 	install -d $(ROOT_DIR)/$(TOOL)/bin
-	install -m 755 $(BUILD_DIR)/tinyxml2/$(tinyxml2_BUILD_DIR)/xmltest* $(ROOT_DIR)/$(TOOL)/bin
+	install -m 755 $(BUILD_DIR)/tinyxml2/$(PKG_BUILD_DIR)/xmltest* $(ROOT_DIR)/$(TOOL)/bin
 	@$(MAKE_STAMP)
 
-# PKG_BUILD_TARGETS = tinyxml2_default
-# LIB_BASE_NAME = tinyxml2
-# PKG_BUILD_TARGETS = tinyxml2
-# cd $(PKG_BUILD_DIR) && git checkout -b vxworks $(COMMIT_ID)
-# PRE_NOBUILD_RTPH_FILES :=
-# USER_PUBLIC_H_FILES = tinyxml2.h
+include $(WIND_USR_MK)/rules.packages.mk
+

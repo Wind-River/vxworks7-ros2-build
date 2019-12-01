@@ -27,21 +27,21 @@ define echo_action
 endef
 
 define pkg_install
-	cd $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR) && \
+	cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) && \
 	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \
-	$($(1)_MAKE_INSTALL_VAR) $(MAKE) -C $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR) -f Makefile $($(1)_MAKE_INSTALL_OPT)
+	$(PKG_MAKE_INSTALL_VAR) $(MAKE) -C $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) -f Makefile $(PKG_MAKE_INSTALL_OPT)
 endef
 
 define pkg_distclean
-	if [ -n "$(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR)" ] && \
-	   [ -d $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR) ]; then \
-		echo "Deleting $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR)"; \
-		rm -rf $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR); \
+	if [ -n "$(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR)" ] && \
+	   [ -d $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ]; then \
+		echo "Deleting $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR)"; \
+		rm -rf $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR); \
         fi; \
-	if [ -n "$(BUILD_DIR)/$(1)/$($(1)_SRC_DIR)" ] && \
-	   [ -d $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) ]; then \
-		echo "Deleting $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR)"; \
-		rm -rf $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR); \
+	if [ -n "$(BUILD_DIR)/$(1)/$(PKG_SRC_DIR)" ] && \
+	   [ -d $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) ]; then \
+		echo "Deleting $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR)"; \
+		rm -rf $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR); \
         fi; \
 	if [ -d $(BUILD_DIR)/$(1) ]; then \
 		rmdir $(BUILD_DIR)/$(1); \
@@ -49,29 +49,29 @@ define pkg_distclean
 endef
 
 define pkg_clean
-	if [ -n "$(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR)" ] && \
-	   [ -d $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR) ]; then \
-		$(MAKE) -C $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR) -f Makefile clean; \
+	if [ -n "$(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR)" ] && \
+	   [ -d $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ]; then \
+		$(MAKE) -C $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) -f Makefile clean; \
 	fi
 endef
 
 define pkg_build
-	cd $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR) && \
+	cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) && \
 	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \
-	echo "MAKE_OPT: $($(1)_MAKE_OPT)" && \
-	$(MAKE) -C $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR) -f Makefile $($(1)_MAKE_OPT)
+	echo "MAKE_OPT: $(PKG_MAKE_OPT)" && \
+	$(MAKE) -j$(nproc) -C $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) -f Makefile $(PKG_MAKE_OPT)
 endef
 
 define pkg_configure
-	mkdir -p $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR) ; \
+	mkdir -p $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
 	if [ -n "$(VXWORKS_ENV_SH)" ] && \
 	   [ -f $(VXWORKS_ENV_SH) ]; then \
 		. ./$(VXWORKS_ENV_SH); \
 	fi ; \
-	cd $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) && \
-	if [ -f $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR)/CMakeLists.txt ]; then \
-		cd $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR) ; \
-		cmake $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) \
+	cd $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) && \
+	if [ -f $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR)/CMakeLists.txt ]; then \
+		cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
+		cmake $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) \
 		    $(TGT_CMAKE_TOOLCHAIN_FILE) \
 		    -DCMAKE_INSTALL_PREFIX=$(CMAKE_INSTALL_PREFIX) \
 		    -DCMAKE_PREFIX_PATH=$(ROOT_DIR) \
@@ -82,29 +82,29 @@ define pkg_configure
 			autoreconf --verbose --install --force || exit 1 ; \
 		fi ; \
 		if [ -f ./configure ]; then \
-			cd $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR) ; \
-			$(CONFIGURE_VAR) $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR)/configure \
-				$($(1)_CONFIGURE_OPT) ; \
+			cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
+			$(PKG_CONFIGURE_VAR) $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR)/configure \
+				$(PKG_CONFIGURE_OPT) ; \
 		fi ; \
 	fi
 endef
 
 define pkg_patch
-	if [ -f $(PACKAGE_DIR)/$(1)/$($(1)_PATCH_DIR)/series ]; then \
-		PATCHES=$$(cat $(PACKAGE_DIR)/$(1)/$($(1)_PATCH_DIR)/series | grep -v '^ *#'); \
+	if [ -f $(PACKAGE_DIR)/$(1)/$(PKG_PATCH_DIR)/series ]; then \
+		PATCHES=$$(cat $(PACKAGE_DIR)/$(1)/$(PKG_PATCH_DIR)/series | grep -v '^ *#'); \
 		for PATCH in $$PATCHES; do \
-			if [ -f "$(PACKAGE_DIR)/$(1)/$($(1)_PATCH_DIR)/$$PATCH" ]; then \
-			$(PATCH) -p1 -N -d $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) -p1 < $(PACKAGE_DIR)/$(1)/$($(1)_PATCH_DIR)/$$PATCH ; \
+			if [ -f "$(PACKAGE_DIR)/$(1)/$(PKG_PATCH_DIR)/$$PATCH" ]; then \
+			$(PATCH) -p1 -N -d $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) -p1 < $(PACKAGE_DIR)/$(1)/$(PKG_PATCH_DIR)/$$PATCH ; \
 			fi; \
 		done; \
 	fi
 endef
 
 define pkg_buildsys
-	mkdir -p $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR) && \
-	for FILE in $(BUILD_SYS_FILES) $($(1)_EXTRA_SRC); do \
+	mkdir -p $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) && \
+	for FILE in $(BUILD_SYS_FILES) $(PKG_EXTRA_SRC); do \
 		if [ -f $$FILE ] ; then \
-			cp $$FILE $(BUILD_DIR)/$(1)/$($(1)_BUILD_DIR) ; \
+			cp $$FILE $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
 		fi  ; \
 	done
 endef
@@ -118,47 +118,46 @@ stringify_url=$(subst *,.,$(subst /,.,$(subst :,.,$1)))
 
 define clone_git
 	$(ECHO) "clone_git $1" ; \
-	GIT_DIR_NAME=$(call stringify_url,$($(1)_URL)) ; \
+	GIT_DIR_NAME=$(call stringify_url,$(PKG_URL)) ; \
 	mkdir -p $(BUILD_DIR)/$(1); \
-	if [ ! -d $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) ] ; then \
+	if [ ! -d $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) ] ; then \
 		cd $(BUILD_DIR)/$(1) && \
-		LANG=C git clone $(DOWNLOADS_DIR)/$$GIT_DIR_NAME $($(1)_SRC_DIR) --progress ; \
-		if [ -n "$($(1)_COMMIT_ID)" ]; then \
-			cd $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) && \
-			LANG=C git checkout $($(1)_COMMIT_ID); \
+		LANG=C git clone $(DOWNLOADS_DIR)/$$GIT_DIR_NAME $(PKG_SRC_DIR) --progress ; \
+		if [ -n "$(PKG_COMMIT_ID)" ]; then \
+			cd $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) && \
+			LANG=C git checkout $(PKG_COMMIT_ID); \
 		fi ; \
 	else \
-		$(ECHO) "$(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) already exists." ; \
+		$(ECHO) "$(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) already exists." ; \
 		exit 1 ; \
 	fi
 endef
 
 define fetch_git
 	$(ECHO) "fetch_git $1" ; \
-	GIT_DIR_NAME=$(call stringify_url,$($(1)_URL)) ; \
-	mkdir -p $(BUILD_DIR)/$(1); \
+	GIT_DIR_NAME=$(call stringify_url,$(PKG_URL)) ; \
 	mkdir -p $(BUILD_DIR)/$(1); \
 	if [ ! -d $(DOWNLOADS_DIR)/$$GIT_DIR_NAME ] ; then \
 		cd $(DOWNLOADS_DIR) &&  \
-		echo LANG=C git clone --bare --mirror $($(1)_URL) $(DOWNLOADS_DIR)/$$GIT_DIR_NAME --progress ; \
-		LANG=C git clone --bare --mirror $($(1)_URL) $(DOWNLOADS_DIR)/$$GIT_DIR_NAME --progress ; \
+		echo LANG=C git clone --bare --mirror $(PKG_URL) $(DOWNLOADS_DIR)/$$GIT_DIR_NAME --progress ; \
+		LANG=C git clone --bare --mirror $(PKG_URL) $(DOWNLOADS_DIR)/$$GIT_DIR_NAME --progress ; \
 	else \
 		cd $(DOWNLOADS_DIR)/$$GIT_DIR_NAME &&  \
-	        LANG=C git fetch -f --prune --progress $($(1)_URL) refs/*:refs/* ; \
+	        LANG=C git fetch -f --prune --progress $(PKG_URL) refs/*:refs/* ; \
 	fi
 endef
 
 define fetch_hg
         $(ECHO) "fetch_hg $1" ; \
-	HG_DIR_NAME=$(call stringify_url,$($(1)_URL)) ; \
+	HG_DIR_NAME=$(call stringify_url,$(PKG_URL)) ; \
 	mkdir -p $(BUILD_DIR)/$(1); \
         if [ ! -d $(DOWNLOADS_DIR)/$$HG_DIR_NAME ] ; then \
                 cd $(DOWNLOADS_DIR) &&  \
-                echo LANG=C hg clone $($(1)_URL) $(DOWNLOADS_DIR)/$$HG_DIR_NAME ; \
-                LANG=C hg clone $($(1)_URL) $(DOWNLOADS_DIR)/$$HG_DIR_NAME ; \
+                echo LANG=C hg clone $(PKG_URL) $(DOWNLOADS_DIR)/$$HG_DIR_NAME ; \
+                LANG=C hg clone $(PKG_URL) $(DOWNLOADS_DIR)/$$HG_DIR_NAME ; \
         else \
                 cd $(DOWNLOADS_DIR)/$$HG_DIR_NAME &&  \
-                LANG=C hg fetch $($(1)_URL) ; \
+                LANG=C hg fetch $(PKG_URL) ; \
         fi
 endef
 
@@ -166,15 +165,15 @@ define clone_hg
         $(ECHO) "clone_hg " ; \
 	HG_DIR_NAME=$(call stringify_url,$($(1)_URL)) ; \
 	mkdir -p $(BUILD_DIR)/$(1); \
-        if [ ! -d $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) ] ; then \
+        if [ ! -d $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) ] ; then \
                 cd $(BUILD_DIR)/$(1) && \
-                LANG=C hg clone $(DOWNLOADS_DIR)/$$HG_DIR_NAME $($(1)_SRC_DIR) ; \
+                LANG=C hg clone $(DOWNLOADS_DIR)/$$HG_DIR_NAME $(PKG_SRC_DIR) ; \
                 if [ -n "$($(1)_COMMIT_ID)" ]; then \
-                        cd $(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) && \
-                        LANG=C hg update $($(1)_COMMIT_ID); \
+                        cd $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) && \
+                        LANG=C hg update $(PKG_COMMIT_ID); \
                 fi ; \
         else \
-                $(ECHO) "$(BUILD_DIR)/$(1)/$($(1)_SRC_DIR) already exists." ; \
+                $(ECHO) "$(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) already exists." ; \
                 exit 1 ; \
         fi
 endef
@@ -188,18 +187,18 @@ endef
 define fetch_web
 	$(ECHO) "fetch_web $1 $2 $3 $4"; \
 	if [ -f $$(which $(CURL)) ]; then  \
-		$(CURL) $(CURL_OPT) $($(1)_FILE_NAME) $($(1)_URL) ; \
+		$(CURL) $(CURL_OPT) $(PKG_FILE_NAME) $(PKG_URL) ; \
 	elif [ -f $$(which $(WGET)) ]; then \
-		$(WGET) $(WGET_OPT) $($(1)_FILE_NAME) $($(1)_URL) ; \
+		$(WGET) $(WGET_OPT) $(PKG_FILE_NAME) $(PKG_URL) ; \
 	fi
 endef
 
 define fetch_ftp
 	$(ECHO) "fetch_ftp $1 $2 $3 $4"; \
 	if [ -f $$(which $(CURL)) ]; then  \
-		$(CURL) $(CURL_OPT) $($(1)_FILE_NAME) $($(1)_URL) ; \
+		$(CURL) $(CURL_OPT) $(PKG_FILE_NAME) $(PKG_URL) ; \
 	elif [ -f $$(which $(WGET)) ]; then \
-		$(WGET) $(WGET_OPT) $($(1)_FILE_NAME) $($(1)_URL) ; \
+		$(WGET) $(WGET_OPT) $(PKG_FILE_NAME) $(PKG_URL) ; \
 	fi
 endef
 
@@ -207,24 +206,24 @@ endef
 define unpack_archive
 	$(ECHO) "Unpacking archive $1" ; \
 	mkdir -p $(BUILD_DIR)/$(1); \
-	case "$($(1)_FILE_NAME)" in \
+	case "$(PKG_FILE_NAME)" in \
 	  *.tar.bz2) \
-	    $(BZIP2) -dc $(DOWNLOADS_DIR)/$($(1)_FILE_NAME) \
+	    $(BZIP2) -dc $(DOWNLOADS_DIR)/$(PKG_FILE_NAME) \
 	    | $(TAR) -xf - -C $(BUILD_DIR)/$1 ;; \
 	  *.tgz|*.tar.gz) \
-	    $(GZIP) -dc $(DOWNLOADS_DIR)/$($(1)_FILE_NAME) \
+	    $(GZIP) -dc $(DOWNLOADS_DIR)/$(PKG_FILE_NAME) \
 	    | $(TAR) -xf - -C $(BUILD_DIR)/$1 ;; \
 	  *.tar) \
-	    $(TAR) -xf $(DOWNLOADS_DIR)/$($(1)_FILE_NAME) \
+	    $(TAR) -xf $(DOWNLOADS_DIR)/$(PKG_FILE_NAME) \
 	    -C $(BUILD_DIR)/$1 ;; \
 	  *.zip) \
-	    $(UNZIP) $(DOWNLOADS_DIR)/$($(1)_FILE_NAME) \
+	    $(UNZIP) $(DOWNLOADS_DIR)/$(PKG_FILE_NAME) \
 	    -d $(BUILD_DIR)/$1 ;; \
 	esac
 endef
 
 define pkg_unpack
-	case "$($(1)_TYPE)" in \
+	case "$(PKG_TYPE)" in \
 		git) $(call clone_git,$(1)) ;; \
 		hg) $(call clone_hg,$(1)) ;; \
 		cvs) $(call copy_cvs,$(1)) ;; \
@@ -236,15 +235,15 @@ endef
 
 # XXX
 define fetch_archive
-	$(ECHO) "Fetching archive $($(1)_FILE_NAME)" ; \
-	if [ -n "$($(1)_FILE_NAME)" ] && [ ! -f $(DOWNLOADS_DIR)/$($(1)_FILE_NAME) ] ; then \
-		case "$($(1)_URL)" in \
-			http://*) $(call fetch_web,$($(1)_NAME),$($(1)_URL), \
-			            $($(1)_FILE_NAME)) ;; \
-			https://*) $(call fetch_web,$($(1)_NAME),$($(1)_URL), \
-			            $($(1)_FILE_NAME)) ;; \
-			ftp://*) $(call fetch_ftp,$($(1)_NAME),$($(1)_URL), \
-			            $($(1)_FILE_NAME)) ;; \
+	$(ECHO) "Fetching archive $(PKG_FILE_NAME)" ; \
+	if [ -n "$(PKG_FILE_NAME)" ] && [ ! -f $(DOWNLOADS_DIR)/$(PKG_FILE_NAME) ] ; then \
+		case "$(PKG_URL)" in \
+			http://*) $(call fetch_web,$(PKG_NAME),$(PKG_URL), \
+			            $(PKG_FILE_NAME)) ;; \
+			https://*) $(call fetch_web,$(PKG_NAME),$(PKG_URL), \
+			            $(PKG_FILE_NAME)) ;; \
+			ftp://*) $(call fetch_ftp,$(PKG_NAME),$(PKG_URL), \
+			            $(PKG_FILE_NAME)) ;; \
 			*) $(OTHER_CHECKOUT) ;; \
 		esac ; \
 	fi ; \
@@ -259,12 +258,12 @@ endef
 
 define pkg_checksum
 	if [ "$($(1)_FILE_TYPE)" == "unpack" ] ; then \
-		if [ ! -f "$(DOWNLOADS_DIR)/$($(1)_FILE_NAME)" ] ; then \
-			echo "Could not find $($(1)_FILE_NAME) in downloads" ; \
+		if [ ! -f "$(DOWNLOADS_DIR)/$(PKG_FILE_NAME)" ] ; then \
+			echo "Could not find $(PKG_FILE_NAME) in downloads" ; \
 			exit 1 ; \
 		fi ; \
-		if [ -n "$($(1)_MD5_CHECKSUM)" ]; then \
-			echo "$($(1)_MD5_CHECKSUM)  $(DOWNLOADS_DIR)/$($(1)_FILE_NAME)" | md5sum --check || \
+		if [ -n "$(PKG_MD5_CHECKSUM)" ]; then \
+			echo "$(PKG_MD5_CHECKSUM)  $(DOWNLOADS_DIR)/$(PKG_FILE_NAME)" | md5sum --check || \
 			exit 1 ; \
 		fi ; \
 	fi
@@ -272,7 +271,7 @@ endef
 
 define pkg_download
 	cd $(DOWNLOADS_DIR); \
-	case "$($(1)_TYPE)" in \
+	case "$(PKG_TYPE)" in \
 		svn) $(call fetch_svn,$(1)) ;; \
 		git) $(call fetch_git,$(1)) ;; \
 		hg) $(call fetch_hg,$(1)) ;; \
