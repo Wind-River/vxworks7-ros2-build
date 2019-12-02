@@ -45,7 +45,7 @@ PKG_SRC_DIR = patches
 
 PKG_BUILD_TYPE := Debug
 
-include $(PACKAGE_DIR)/ros2/rospackages.mk
+include $(PACKAGE_DIR)/ros2/packages.mk
 
 ROS2_EXAMPLES=examples_rclcpp_minimal_action_client \
               examples_rclcpp_minimal_client \
