@@ -55,6 +55,7 @@ ros2small_patch()
                        src/eProsima/Fast-CDR \
                        src/eProsima/Fast-RTPS \
                        src/ros/class_loader \
+		       src/ros2/console_bridge_vendor \
 		       src/ros2/demos \
                        src/ros2/examples \
                        src/ros2/rcl \
@@ -69,9 +70,10 @@ ros2small_patch()
                        )
 
 	PRJ_PKGS=( \
-                fastcdr \
-                fastrtps \
+                Fast-CDR \
+                Fast-RTPS \
                 class_loader \
+		console_bridge_vendor \
 		demos
                 examples \
                 rcl \
