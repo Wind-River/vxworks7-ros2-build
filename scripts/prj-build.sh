@@ -43,7 +43,7 @@ make all JOBS=${JOBS}
 build_layers ${PRJ_VSB_LAYERS}
 
 # build libnet.so
-LIB_FORMAT=shared vxprj vsb build IPNET_USRSPACE
+# LIB_FORMAT=shared vxprj vsb build IPNET_USRSPACE
 
 echo "Building the ${PRJ} project"
 cd ${PRJ_WS}
