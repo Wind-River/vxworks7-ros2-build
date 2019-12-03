@@ -47,8 +47,8 @@ set(CMAKE_SHARED_LIBRARY_C_FLAGS "-fPIC")
 set(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared")
 
 # workaround SDK defects, these libs shall be included there
-set(CMAKE_EXE_LINKER_FLAGS_INIT "-lunix -lregex -lnet")
-set(CMAKE_SHARED_LINKER_FLAGS_INIT "-lunix -lregex -lnet")
+#set(CMAKE_EXE_LINKER_FLAGS_INIT "-lunix -lregex -lnet")
+#set(CMAKE_SHARED_LINKER_FLAGS_INIT "-lunix -lregex -lnet")
 
 set(CMAKE_SYSROOT $ENV{WIND_SDK_TOOLKIT})
 
