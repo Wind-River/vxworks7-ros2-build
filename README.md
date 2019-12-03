@@ -72,25 +72,45 @@ For the standard build you must also have:
 
 ## Build VxWorks 7 and ROS2
 
-Extract the VxWorks SDK tarball
-```
-tar –jxvf wrsdl-vxworks7-qemu-1.3.tar.bz2
-```
-
-Source the development environment
-```
-source wrsdk-vxworks7-qemu/toolkit/wind_sdk_env.linux
-```
-
 Clone this repository using the wrsdk branch
 ```
 git clone https://github.com/Wind-River/vxworks7-ros2-build.git
+cd vxworks7-ros2-build
 ```
 
-Run make to build ROS2 using the SDK
+Build Docker image
+```
+cd Docker/vxbuild
+docker build -t vxbuild:1.0 .
+cd Docker/vxros2build
+docker build -t vxros2build:1.0 .
+```
+
+Extract the VxWorks SDK tarball
+```
+tar –jxvf wrsdk-vxworks7-qemu-1.3.tar.bz2
+```
+
+Run Docker image
 ```
 cd vxworks7-ros2-build
-make
+docker run -ti -v <path-to-the-wrsdk>:/wrsdk -v $PWD:/work vxros2build:1.0
+```
+
+Inside Docker container: Source the development environment
+```
+wruser@d19165730517:/work source /wrsdk/toolkit/wind_sdk_env.linux
+```
+
+Inside Docker container: Run make to build ROS2 using the SDK
+```
+wruser@d19165730517:/work make
+```
+
+Buid artifacts are in export directory
+```
+wruser@d19165730517:/work ls export/root/
+include  lib  llvm
 ```
 
 # Legal Notices
