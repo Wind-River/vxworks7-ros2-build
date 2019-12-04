@@ -113,6 +113,12 @@ wruser@d19165730517:/work ls export/root/
 include  lib  llvm
 ```
 
+Rebuild from scratch
+```
+wruser@d19165730517:/work make distclean
+wruser@d19165730517:/work make
+```
+
 # Legal Notices
 
 All product names, logos, and brands are property of their respective owners. All company,
