@@ -33,6 +33,7 @@ clean_buildstamps:
 distclean:
 	@rm -rf $(DOWNLOADS_DIR)
 	@rm -rf $(TOP_BUILDDIR)/build
+	@rm -rf $(EXPORT_DIR)
 
 clean: clean_buildstamps
 
