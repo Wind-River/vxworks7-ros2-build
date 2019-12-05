@@ -30,7 +30,7 @@ $(STAMP_DIR):
 clean_buildstamps:
 	@rm -f $(TOP_BUILDDIR)/build/.stamp/*
 
-distclean:
+distclean: clean
 	@rm -rf $(DOWNLOADS_DIR)
 	@rm -rf $(TOP_BUILDDIR)/build
 	@rm -rf $(EXPORT_DIR)
