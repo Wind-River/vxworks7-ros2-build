@@ -119,6 +119,34 @@ wruser@d19165730517:/work make distclean
 wruser@d19165730517:/work make
 ```
 
+## Run ROS2 examples
+
+Copy VxWorks libraries to the export directory
+```
+cd vxworks7-ros2-build
+cp <path-to-the-wrsdk>/toolkit/include/usr/lib/common/lib* export/root/lib/.
+```
+
+Run QEMU
+```
+cd vxworks7-ros2-build
+qemu-system-x86_64 -m 512M  -kernel <path-to-the-wrsdk>/bsps/itl_generic_2_0_0_2/boot/vxWorks -display none -serial stdio -monitor none -append "bootline:fs(0,0)host:vxWorks h=10.0.2.2 e=10.0.2.15 u=target pw=boot o=gei0"  -usb -device usb-ehci,id=ehci  -device usb-storage,drive=fat32 -drive file=fat:ro:<path-to-the-build>/vxworks7-ros2-build/export/root,id=fat32,format=raw,if=none
+```
+
+Run ROS2 example
+```
+-> cmd
+[vxWorks *]# set env LD_LIBRARY_PATH="/bd0a/lib"
+[vxWorks *]# cd  /bd0a/llvm/bin/
+[vxWorks *]# rtp exec -u 0x20000 timer_lambda.vxe
+Launching process 'timer_lambda.vxe' ...
+Process 'timer_lambda.vxe' (process Id = 0xffff80000046f070) launched.
+[INFO] [minimal_timer]: Hello, world!
+[INFO] [minimal_timer]: Hello, world!
+[INFO] [minimal_timer]: Hello, world!
+[INFO] [minimal_timer]: Hello, world!
+```
+
 # Legal Notices
 
 All product names, logos, and brands are property of their respective owners. All company,
