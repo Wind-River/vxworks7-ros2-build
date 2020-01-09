@@ -21,6 +21,18 @@
 
 source common-ros2small.inc
 
+PRJ_PKGS_DIRS+=( \
+	src/utils/DynamixelSDK \
+	src/utils/hls_lfcd_lds_driver \
+	src/turtlebot3/turtlebot3
+)
+PRJ_PKGS+=( \
+	DynamixelSDK \
+	hls_lfcd_lds_driver \
+	turtlebot3
+)
+PKG_PKGS_UP_TO="hls_lfcd_lds_driver dynamixel_sdk turtlebot3_node"
+
 # add turtlebot3 repos
 turtlebot3_download()
 {
@@ -33,7 +45,7 @@ turtlebot3_download()
 
 turtlebot3_patch()
 {
-        ros2small_patch
+	ros2small_patch
 }
 
 turtlebot3_configure()
@@ -44,5 +56,5 @@ turtlebot3_configure()
 turtlebot3_build()
 {
 
-        . ./vxworks_env.sh && colcon build --symlink-install --cmake-force-configure --packages-up-to hls_lfcd_lds_driver --cmake-args -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=$VSB_DIR/buildspecs/cmake/rtp.cmake -DCMAKE_PREFIX_PATH=$PRJ_WS/install\;$VSB_DIR/usr/root -DBUILD_TESTING=OFF
+        . ./vxworks_env.sh && colcon build --symlink-install --cmake-force-configure --packages-up-to $PKG_PKGS_UP_TO --cmake-args -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=$VSB_DIR/buildspecs/cmake/rtp.cmake -DCMAKE_PREFIX_PATH=$PRJ_WS/install\;$VSB_DIR/usr/root -DBUILD_TESTING=OFF
 }
