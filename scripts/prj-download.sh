@@ -35,7 +35,7 @@ setup_env
 
 echo "Downloading ${PRJ} repos"
 
-if [ "x$GIT_REPO" != "x" ]; then
+if [ "x$PRJ_GIT_REPO" != "x" ]; then
 	# download project dependencies vxWorks layers
 	GIT_REPO="${PRJ_GIT_REPO}"
 	GIT_BRANCH="${PRJ_GIT_BRANCH}"
