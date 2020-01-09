@@ -21,7 +21,7 @@
 # 19apr19,akh  created
 
 
-PRJ_GIT_REPO=${PRJ_GIT_REPO:-"https://github.com/Wind-River/vxworks7-layer-for-ros2.git"}
+PRJ_GIT_REPO=${PRJ_GIT_REPO:-"http://stash.wrs.com/scm/to/vxworks7-layer-for-ros2.git"}
 PRJ_GIT_BRANCH=${PRJ_GIT_BRANCH:-"dashing-release-SR0620"}
 PRJ_GIT_DIR="middleware" # a directory within ${WIND_PKGS_DIR_NAME}
 
@@ -40,6 +40,73 @@ PRJ_VIP_COMPONENTS="INCLUDE_POSIX_PIPES INCLUDE_POSIX_PTHREAD_SCHEDULER INCLUDE_
 VIP_ATA_COMPONENTS="DRV_STORAGE_ATA_HOST PCI_DRV_STORAGE_AHCI"
 VIP_COMPONENTS_ADD="${VIP_COMPONENTS_ADD} ${PRJ_VIP_COMPONENTS}"
 
+PRJ_PKGS_DIRS=( \
+	src/eProsima/Fast-CDR \
+	src/eProsima/Fast-RTPS \
+	src/ros/class_loader \
+	src/ros2/console_bridge_vendor \
+	src/ros2/demos \
+	src/ros2/examples \
+	src/ros2/geometry2 \
+	src/ros2/rcl \
+	src/ros2/rclcpp \
+	src/ros2/rcutils \
+	src/ros2/realtime_support \
+	src/ros2/rmw_implementation \
+	src/ros2/rosidl \
+	src/ros2/rosidl_defaults \
+	src/ros2/rosidl_typesupport \
+	src/ros2/tinydir_vendor \
+)
+
+PRJ_PKGS=( \
+	Fast-CDR \
+	Fast-RTPS \
+	class_loader \
+	console_bridge_vendor \
+	demos \
+	examples \
+	geometry2 \
+	rcl \
+	rclcpp \
+	rcutils \
+	realtime_support \
+	rmw_implementation \
+	rosidl \
+	rosidl_defaults \
+	rosidl_typesupport \
+	tinydir_vendor \
+)
+
+IGNORED_PKGS=" \
+	src/ros-visualization \
+	src/ros2/rviz \
+	src/ros2/poco_vendor \
+	src/osrf/osrf_testing_tools_cpp \
+	src/ros2/orocos_kinematics_dynamics \
+	src/ros-planning \
+	src/ros2/rmw_connext \
+	src/ros2/rosidl_typesupport_connext \
+	src/ros2/rmw_opensplice \
+	src/ros2/rosidl_typesupport_opensplice \
+	src/ament/ament_lint \
+	src/ament/uncrustify_vendor \
+	src/ros2/rcl_logging/rcl_logging_log4cxx \
+	src/eclipse-cyclonedds \
+"
+
+# Ignore Python-specific packages
+IGNORED_PKGS=" ${IGNORED_PKGS} \
+	src/ament/ament_cmake/ament_cmake_pytest \
+	src/osrf/osrf_pycommon \
+	src/ros2/demos/demo_nodes_py \
+	src/ros2/geometry2/tf2_py \
+	src/ros2/kdl_parser/kdl_parser_py \
+	src/ros2/rclpy \
+	src/ros2/rosidl_python/rosidl_generator_py \
+	src/ros-visualization/rqt/rqt_gui_py \
+"
+
 ros2small_download()
 {
 	# retrieve ROS2 repos
@@ -51,53 +118,7 @@ ros2small_download()
 
 ros2small_patch()
 {
-        PRJ_PKGS_DIRS=( \
-                       src/eProsima/Fast-CDR \
-                       src/eProsima/Fast-RTPS \
-                       src/ros/class_loader \
-		       src/ros2/console_bridge_vendor \
-		       src/ros2/demos \
-                       src/ros2/examples \
-                       src/ros2/rcl \
-                       src/ros2/rclcpp \
-                       src/ros2/rcutils \
-		       src/ros2/realtime_support \
-                       src/ros2/rmw_implementation \
-                       src/ros2/rosidl \
-                       src/ros2/rosidl_defaults \
-                       src/ros2/rosidl_typesupport \
-                       src/ros2/tinydir_vendor \
-                       )
-
-	PRJ_PKGS=( \
-                Fast-CDR \
-                Fast-RTPS \
-                class_loader \
-		console_bridge_vendor \
-		demos
-                examples \
-                rcl \
-                rclcpp \
-                rcutils \
-		realtime_support \
-                rmw_implementation \
-                rosidl \
-                rosidl_defaults \
-                rosidl_typesupport \
-                tinydir_vendor \
-                )
-
-        # find pathches for pkgs in the list and apply them to project workspace
-        for ((c=0; c<${#PRJ_PKGS[@]}; c++)); do
-                # patches exist?
-                if ls ${WIND_PKGS}/${PRJ_GIT_DIR}/${PRJ_PKGS[$c]}/usr_src/0001-* 1> /dev/null 2>&1; then
-                        # patch project workspace
-                        PATCHES="${WIND_PKGS}/${PRJ_GIT_DIR}/${PRJ_PKGS[$c]}/usr_src"/*.patch
-                        for PATCH in ${PATCHES}; do
-                                patch -p1 -d ${PRJ_PKGS_DIRS[$c]} < ${PATCH}
-                        done
-                fi
-        done
+	prj_patch
 }
 
 
@@ -114,37 +135,7 @@ ros2small_configure()
         # figure out why we need to patch for the libyaml.so
         # -L${PRJ_WS}/install/libyaml_vendor/lib -lyaml" \
 
-        IGNORED_PKGS=" \
-                src/ros-visualization \
-                src/ros2/rviz \
-                src/ros2/poco_vendor \
-                src/osrf/osrf_testing_tools_cpp \
-		src/ros2/orocos_kinematics_dynamics \
-		src/ros-planning \
-		src/ros2/rmw_connext \
-		src/ros2/rosidl_typesupport_connext \
-		src/ros2/rmw_opensplice \
-		src/ros2/rosidl_typesupport_opensplice \
-		src/ament/ament_lint \
-		src/ament/uncrustify_vendor \
-		src/ros2/rcl_logging/rcl_logging_log4cxx \
-        "
-
-        # Ignore Python-specific packages
-        IGNORED_PKGS=" ${IGNORED_PKGS} \
-		src/ament/ament_cmake/ament_cmake_pytest \
-		src/osrf/osrf_pycommon \
-                src/ros2/demos/demo_nodes_py \
-                src/ros2/geometry2/tf2_py \
-                src/ros2/kdl_parser/kdl_parser_py \
-                src/ros2/rclpy \
-                src/ros2/rosidl_python/rosidl_generator_py \
-                src/ros-visualization/rqt/rqt_gui_py \
-        "
-
-        for IGNORED_PKG in ${IGNORED_PKGS}; do
-                touch ${IGNORED_PKG}/COLCON_IGNORE
-        done
+	prj_configure
 }
 
 
