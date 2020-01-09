@@ -224,3 +224,26 @@ parameter()
 		vxprj parameter set ${param} ${PARAMETERS[${param}]}
 	done
 }
+
+prj_patch()
+{
+	# find pathches for pkgs in the list and apply them to project workspace
+	for ((c=0; c<${#PRJ_PKGS[@]}; c++)); do
+		# patches exist?
+		if ls ${WIND_PKGS}/${PRJ_GIT_DIR}/${PRJ_PKGS[$c]}/usr_src/0001-* 1> /dev/null 2>&1; then
+			# patch project workspace
+			PATCHES="${WIND_PKGS}/${PRJ_GIT_DIR}/${PRJ_PKGS[$c]}/usr_src"/*.patch
+			for PATCH in ${PATCHES}; do
+				patch -p1 -d ${PRJ_PKGS_DIRS[$c]} < ${PATCH}
+			done
+		fi
+	done
+}
+
+prj_configure()
+{
+	for IGNORED_PKG in ${IGNORED_PKGS}; do
+		touch ${IGNORED_PKG}/COLCON_IGNORE
+	done
+}
+
