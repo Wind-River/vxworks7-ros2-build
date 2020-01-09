@@ -53,7 +53,9 @@ ROS_IGNORE_DIRS=ros-visualization \
                 ros2/rosidl_typesupport_opensplice \
                 ament/ament_lint \
                 ament/uncrustify_vendor \
-		ros2/rcl_logging/rcl_logging_log4cxx
+		ros2/rcl_logging/rcl_logging_log4cxx \
+		eclipse-cyclonedds
+
 
 # Ignore Python-specific packages
 ROS_IGNORE_DIRS+= \
