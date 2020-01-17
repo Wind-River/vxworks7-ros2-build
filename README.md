@@ -70,6 +70,21 @@ For the standard build you must also have:
    * https://docs.windriver.com/bundle/Workbench_4_Release_Notes_SR0610_1/page/age1446069416293.html
 * Mercurial (hg) package for Eigen (optional)
 
+## Build a simple CMake based OSS project
+
+```
+git clone https://github.com/Wind-River/vxworks7-ros2-build.git
+cd vxworks7-ros2-build
+export WIND_USR_MK=$PWD/mk/usr
+export TOP_BUILDDIR=$PWD
+export PACKAGE_DIR=$PWD/pkg
+
+git clone https://github.com/leethomason/tinyxml2.git
+cd tinyxml2; mkdir vxworks-build; cd vxworks-build
+cmake .. -DCMAKE_MODULE_PATH=$TOP_BUILDDIR/buildspecs/cmake -DCMAKE_TOOLCHAIN_FILE=$TOP_BUILDDIR/buildspecs/cmake/rtp.cmake
+make VERBOSE=1
+```
+
 ## Build VxWorks 7 and ROS2
 
 Clone this repository using the wrsdk branch
@@ -124,13 +139,17 @@ wruser@d19165730517:/work make
 Copy VxWorks libraries to the export directory
 ```
 cd vxworks7-ros2-build
-cp <path-to-the-wrsdk>/toolkit/include/usr/lib/common/lib* export/root/lib/.
+cp $WIND_SDK_TOOLKIT/include/usr/lib/common/lib* export/root/lib/.
 ```
 
 Run QEMU
 ```
+sudo apt-get install uml-utilities
+sudo tunctl -u $USER -t tap0
+sudo ifconfig tap0 192.168.200.254 up
+
 cd vxworks7-ros2-build
-qemu-system-x86_64 -m 512M  -kernel <path-to-the-wrsdk>/bsps/itl_generic_2_0_0_2/boot/vxWorks -display none -serial stdio -monitor none -append "bootline:fs(0,0)host:vxWorks h=10.0.2.2 e=10.0.2.15 u=target pw=boot o=gei0"  -usb -device usb-ehci,id=ehci  -device usb-storage,drive=fat32 -drive file=fat:ro:<path-to-the-build>/vxworks7-ros2-build/export/root,id=fat32,format=raw,if=none
+qemu-system-x86_64 -m 512M  -kernel $WIND_SDK_TOOLKIT/../bsps/itl_generic_2_0_0_2/boot/vxWorks -net nic  -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -monitor none -append "bootline:fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1 u=target pw=boot o=gei0" -usb -device usb-ehci,id=ehci  -device usb-storage,drive=fat32 -drive file=fat:ro:./export/root,id=fat32,format=raw,if=none
 ```
 
 Run ROS2 example
