@@ -38,4 +38,4 @@ cd_dir ${WORKSPACE}/${ROOTFS_NAME}
 
 echo "Installing the UEFI boot"
 mkdir -p EFI/BOOT
-cp ${WIND_BASE}/workspace/uefi_x86_64/BOOTX64.EFI EFI/BOOT/.
+cp ${WORKSPACE}/workspace/uefi_x86_64/BOOTX64.EFI EFI/BOOT/.

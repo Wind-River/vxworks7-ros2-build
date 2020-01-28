@@ -34,8 +34,7 @@ source common.inc
 setup_env
 
 check_vars WORKSPACE
-cd_dir $(ls -d ${WIND_PKGS}/boot/uefi* | head -n 1)
+cd_dir ${WORKSPACE}
 
 echo "Building the UEFI boot"
-make
-
+WIND_BASE=${WORKSPACE} make -C $(ls -d ${WIND_PKGS}/boot/uefi-* | head -n 1)
