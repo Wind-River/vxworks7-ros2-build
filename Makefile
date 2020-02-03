@@ -5,11 +5,11 @@ include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.crossbuild.mk
 
-DEFAULT_BUILD = asio tinyxml2 unixextra ros2 turtlebot3
+DEFAULT_BUILD = asio tinyxml2 ros2 turtlebot3
 
 ## Add missing variablse from SDK
 export TOOL=llvm
-export TGT_ARCH=x86_64
+export TGT_ARCH=$(shell echo $$CC | cut -d "-" -f 1)
 export CMAKE_MODULE_PATH=$(CMAKE_MODULE_DIR)
 ## XX
 
@@ -19,7 +19,8 @@ all: $(DOWNLOADS_DIR) $(STAMP_DIR) $(EXPORT_DIR)
 	for p in $(DEFAULT_BUILD); do $(MAKE) -C pkg/$$p $$p.install; done;
 
 $(EXPORT_DIR):
-	@mkdir -p $(EXPORT_DIR)
+	@mkdir -p $(ROOT_DIR)/lib
+	@cp $(WIND_SDK_TOOLKIT)/include/usr/lib/common/lib*.so* $(ROOT_DIR)/lib/.
 
 $(DOWNLOADS_DIR):
 	@mkdir -p $(DOWNLOADS_DIR)
