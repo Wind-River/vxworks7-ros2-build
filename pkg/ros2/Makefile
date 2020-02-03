@@ -48,15 +48,6 @@ PKG_BUILD_TYPE := Debug
 
 include $(PACKAGE_DIR)/ros2/packages.mk
 
-ROS2_EXAMPLES=examples_rclcpp_minimal_action_client \
-              examples_rclcpp_minimal_client \
-              examples_rclcpp_minimal_publisher \
-              examples_rclcpp_minimal_subscriber \
-              examples_rclcpp_minimal_action_server \
-              examples_rclcpp_minimal_composition \
-              examples_rclcpp_minimal_service \
-              examples_rclcpp_minimal_timer
-
 define ros2_patch
         for pn in $(1); do \
 	        N=$$(basename $$pn); \
@@ -96,8 +87,7 @@ ros2.build: ros2.configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
 	export WIND_ROOT_DIR=$(ROOT_DIR); \
-        colcon build --symlink-install --cmake-force-configure --packages-up-to $(ROS2_EXAMPLES) \
-		pendulum_control \
+	colcon build --symlink-install --cmake-force-configure --packages-up-to $(PKG_PKGS_UP_TO) \
 		--cmake-args \
                 -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
                 -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \

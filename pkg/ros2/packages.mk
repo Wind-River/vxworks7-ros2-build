@@ -33,6 +33,7 @@ ROS2_PATCH_DIRS=eProsima/Fast-CDR \
                 ros2/rcutils \
                 ros2/realtime_support \
                 ros2/rmw_implementation \
+                ros2/robot_state_publisher \
                 ros2/rosidl \
                 ros2/rosidl_defaults \
                 ros2/rosidl_typesupport \
@@ -45,7 +46,6 @@ ROS_IGNORE_DIRS=ros-visualization \
 		ros2/rviz \
                 ros2/poco_vendor \
                 osrf/osrf_testing_tools_cpp \
-                ros2/orocos_kinematics_dynamics \
                 ros-planning \
                 ros2/rmw_connext \
                 ros2/rosidl_typesupport_connext \
@@ -67,4 +67,20 @@ ROS_IGNORE_DIRS+= \
                 ros2/rclpy \
                 ros2/rosidl_python/rosidl_generator_py \
                 ros-visualization/rqt/rqt_gui_py
+
+ROS2_EXAMPLES=examples_rclcpp_minimal_action_client \
+	examples_rclcpp_minimal_client \
+	examples_rclcpp_minimal_publisher \
+	examples_rclcpp_minimal_subscriber \
+	examples_rclcpp_minimal_action_server \
+	examples_rclcpp_minimal_composition \
+	examples_rclcpp_minimal_service \
+	examples_rclcpp_minimal_timer
+
+PKG_PKGS_UP_TO=$(ROS2_EXAMPLES) \
+	pendulum_control
+
+#	dummy_map_server \
+#	dummy_sensors \
+#	robot_state_publisher
 
