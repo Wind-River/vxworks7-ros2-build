@@ -34,6 +34,8 @@ BUILD_TYPE=${BUILD_TYPE:-Release} # set to 'Debug' to build with -g
 
 # default VIP settings
 declare -A VIP_PARAMETERS_SET=()
+declare -A VIP_FILES_ADD=()
+VIP_FILES_DIR=${VIP_FILES_DIR:-${WORKSPACE}/files}
 VIP_BUNDLES_ADD="BUNDLE_STANDALONE_SHELL BUNDLE_RTP_DEPLOY"
 if [ "${BUILD_TYPE}" == "Debug" ]; then
 	VIP_BUNDLES_ADD="${VIP_BUNDLES_ADD} BUNDLE_EDR"
