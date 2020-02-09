@@ -37,14 +37,16 @@ SET(CMAKE_EXECUTABLE_SUFFIX ".vxe")
 SET(CMAKE_SKIP_RPATH  TRUE)
 
 set(CMAKE_DL_LIBS "dl")
-set(CMAKE_SHARED_LIBRARY_RPATH_LINK_C_FLAG "-Wl,-rpath-link,")
-set(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-Wl,-soname,")
-set(CMAKE_EXE_EXPORTS_C_FLAG "-Wl,--export-dynamic")
-set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
-set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")
+foreach(lang C CXX)
+  set(CMAKE_SHARED_LIBRARY_RPATH_LINK_${lang}_FLAG "-Wl,-rpath-link,")
+  set(CMAKE_SHARED_LIBRARY_SONAME_${lang}_FLAG "-Wl,-soname,")
+  set(CMAKE_EXE_EXPORTS_${lang}_FLAG "-Wl,--export-dynamic")
+  set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG "-Wl,-rpath,")
+  set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG_SEP ":")
 
-set(CMAKE_SHARED_LIBRARY_C_FLAGS "-fPIC")
-set(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared")
+  set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-fPIC")
+  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
+endforeach()
 
 # workaround SDK defects, these libs shall be included there
 #set(CMAKE_EXE_LINKER_FLAGS_INIT "-lunix -lregex -lnet")
