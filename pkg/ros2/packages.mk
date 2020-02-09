@@ -28,6 +28,7 @@ ROS2_PATCH_DIRS=eProsima/Fast-CDR \
                 ros2/demos \
                 ros2/examples \
                 ros2/geometry2 \
+                ros2/libyaml_vendor \
                 ros2/rcl \
                 ros2/rclcpp \
                 ros2/rcutils \
