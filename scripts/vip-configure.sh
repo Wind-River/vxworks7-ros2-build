@@ -38,7 +38,7 @@ check_vars WORKSPACE VIP_NAME
 cd_dir ${WORKSPACE}/${VIP_NAME}
 
 echo "Configuring the VIP ${VIP_NAME}"
-BSP_DIR=`vxprj vip info | grep BSP | sed 's/.* //g'`
+BSP_DIR=`vxprj vip info | grep BSP | xargs | cut -d " " -f 2`
 for file in "${!VIP_FILES_ADD[@]}"; do
         eval "wrtool prj file add ${VIP_FILES_DIR}/${file} -destination ${VIP_FILES_ADD[${file}]}"
 done
