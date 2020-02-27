@@ -23,16 +23,17 @@
 # UNIX library
 #
 #
+include $(WIND_USR_MK)/defs.common.mk
 
 SOURCES := $(wildcard $(srcdir)/*.c)
 OBJECTS := $(SOURCES:.c=.o)
 
 CC_FLAGS = -g
 
-all: libunixextra.a
+all: libunixextra.a libunixextra.so
 
 libunixextra.so: $(OBJECTS)
-	$(CC) -shared $* -o $@ $(CC_FLAGS)
+	$(CC) -shared $^ -o $@ $(CC_FLAGS)
 
 libunixextra.a: $(OBJECTS)
 	$(AR) rcs $@ $^
@@ -44,10 +45,11 @@ clean:
 	@rm -rf *.o $(TARGET)
 
 install:
-	install -d $(DESTDIR)/include
-	install -m 644 $(srcdir)/fnmatch.h $(DESTDIR)/include
-	install -m 644 $(srcdir)/string.h $(DESTDIR)/include
-	install -d $(DESTDIR)/lib
-	install -m 755 libunixextra.a $(DESTDIR)/lib
-	# install -m 755 libunixextra.so $(DESTDIR)/lib
+	install -m 644 $(srcdir)/fnmatch.h $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX
+	install -m 644 $(srcdir)/string.h $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX
+	install -m 755 libunixextra.a $(WIND_CC_SYSROOT)/usr/lib/common
+	install -m 755 libunixextra.so $(WIND_CC_SYSROOT)/usr/lib/common
+	sed -i 's/-lunix -lregex/-lunix -lunixextra -lregex/g' `which $(CC)`
+	sed -i 's/-lunix -lregex/-lunix -lunixextra -lregex/g' `which $(CXX)`
+	install -m 755 libunixextra.so $(ROOT_DIR)/lib/.
 
