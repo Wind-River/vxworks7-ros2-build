@@ -52,4 +52,6 @@ install:
 	sed -i 's/-lunix -lregex/-lunix -lunixextra -lregex/g' `which $(CC)`
 	sed -i 's/-lunix -lregex/-lunix -lunixextra -lregex/g' `which $(CXX)`
 	install -m 755 libunixextra.so $(ROOT_DIR)/lib/.
+	sed -i 's/SONAME_FOUND=false/SONAME_FOUND=true/g' `which $(CC)`
+	sed -i 's/SONAME_FOUND=false/SONAME_FOUND=true/g' `which $(CXX)`
 
