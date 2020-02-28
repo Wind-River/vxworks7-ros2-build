@@ -153,6 +153,7 @@ qemu-system-x86_64 -m 512M  -kernel $WIND_SDK_TOOLKIT/../bsps/itl_generic_2_0_1_
 
 Run ROS2 example
 ```
+telnet 192.168.200.1
 -> cmd
 [vxWorks *]# set env LD_LIBRARY_PATH="/bd0a/lib"
 [vxWorks *]# cd  /bd0a/llvm/bin/
