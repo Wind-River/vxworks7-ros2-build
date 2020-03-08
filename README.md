@@ -70,24 +70,41 @@ For the standard build you must also have:
    * https://docs.windriver.com/bundle/Workbench_4_Release_Notes_SR0610_1/page/age1446069416293.html
 * Mercurial (hg) package for Eigen (optional)
 
-## Build a simple CMake based OSS project
+## Directory Structure
+Packages
+```
+├── Docker
+├── Makefile
+├── pkg
+│   ├── asio
+│   ├── ros2
+│   ├── tinyxml2
+│   ├── turtlebot3
+│   └── unixextra
+```
+It uses Makefile to invoke ros2 and turtlebot3 colcon build, and also build some dependencies.
+A Docker (Ubuntu 18.04) based build is used to avoid a necessity for installing build dependencies.
+Build Artifacs
+```
+├── build     - pkg build artifacts
+├── downloads - download arctifacts
+├── export    - a ready-to-deploy filesystem with ROS2 libraries and binaries
+``` 
+
+## ROS2 VxWorks patches
+ROS2 patches for VxWorks are located in the separate repository
+https://github.com/Wind-River/vxworks7-layer-for-ros2
+
+It is cloned during the build to the *patches* dir
+```
+├── pkg
+│   ├── ros2
+│   │   ├── patches
 
 ```
-git clone https://github.com/Wind-River/vxworks7-ros2-build.git
-cd vxworks7-ros2-build
-export WIND_USR_MK=$PWD/mk/usr
-export TOP_BUILDDIR=$PWD
-export PACKAGE_DIR=$PWD/pkg
-
-git clone https://github.com/leethomason/tinyxml2.git
-cd tinyxml2; mkdir vxworks-build; cd vxworks-build
-cmake .. -DCMAKE_MODULE_PATH=$TOP_BUILDDIR/buildspecs/cmake -DCMAKE_TOOLCHAIN_FILE=$TOP_BUILDDIR/buildspecs/cmake/rtp.cmake
-make VERBOSE=1
-```
-
 ## Build VxWorks 7 and ROS2
 
-Clone this repository using the wrsdk branch
+Clone this repository using the master branch
 ```
 git clone https://github.com/Wind-River/vxworks7-ros2-build.git
 cd vxworks7-ros2-build
@@ -150,10 +167,14 @@ sudo ifconfig tap0 192.168.200.254 up
 cd vxworks7-ros2-build
 qemu-system-x86_64 -m 512M  -kernel $WIND_SDK_TOOLKIT/../bsps/itl_generic_2_0_1_0/boot/vxWorks -net nic  -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -monitor none -append "bootline:fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1 u=target pw=boot o=gei0" -usb -device usb-ehci,id=ehci  -device usb-storage,drive=fat32 -drive file=fat:ro:./export/root,id=fat32,format=raw,if=none
 ```
+Run QEMU with a prebuilt VxWorks kernel and the *export* directory mounted as a USB device
 
 Run ROS2 example
 ```
 telnet 192.168.200.1
+```
+
+```
 -> cmd
 [vxWorks *]# set env LD_LIBRARY_PATH="/bd0a/lib"
 [vxWorks *]# cd  /bd0a/llvm/bin/
@@ -164,6 +185,21 @@ Process 'timer_lambda.vxe' (process Id = 0xffff80000046f070) launched.
 [INFO] [minimal_timer]: Hello, world!
 [INFO] [minimal_timer]: Hello, world!
 [INFO] [minimal_timer]: Hello, world!
+```
+
+## Build a simple CMake based OSS project
+
+```
+git clone https://github.com/Wind-River/vxworks7-ros2-build.git
+cd vxworks7-ros2-build
+export WIND_USR_MK=$PWD/mk/usr
+export TOP_BUILDDIR=$PWD
+export PACKAGE_DIR=$PWD/pkg
+
+git clone https://github.com/leethomason/tinyxml2.git
+cd tinyxml2; mkdir vxworks-build; cd vxworks-build
+cmake .. -DCMAKE_MODULE_PATH=$TOP_BUILDDIR/buildspecs/cmake -DCMAKE_TOOLCHAIN_FILE=$TOP_BUILDDIR/buildspecs/cmake/rtp.cmake
+make VERBOSE=1
 ```
 
 # Legal Notices
