@@ -19,7 +19,6 @@ modification history
 #include <vxWorks.h>
 #include <ioLib.h>
 #include <sioLib.h>
-#include <sioLibCommon.h>
 #include <termios.h>
 
 int

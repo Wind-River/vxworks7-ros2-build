@@ -19,6 +19,8 @@ modification history
 #ifndef __INCtermiosh
 #define __INCtermiosh
 
+#include <sioLibCommon.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
