@@ -27,13 +27,21 @@ include $(WIND_USR_MK)/defs.common.mk
 
 SOURCES := $(wildcard $(srcdir)/*.c)
 OBJECTS := $(SOURCES:.c=.o)
+SHOBJECTS := $(SOURCES:.c=.sho)
 
 CC_FLAGS = -g
 
-all: libunixextra.a libunixextra.so
+all: cp_headers libunixextra.a libunixextra.so
 
-libunixextra.so: $(OBJECTS)
+cp_headers:
+	install -m 644 $(srcdir)/termios.h $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX
+	install -m 644 $(srcdir)/ttycom.h $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX/sys
+
+libunixextra.so: $(SHOBJECTS)
 	$(CC) -shared $^ -o $@ $(CC_FLAGS)
+
+%.sho: %.c
+	$(CC) -fpic -c $< -o $@ $(CC_FLAGS)
 
 libunixextra.a: $(OBJECTS)
 	$(AR) rcs $@ $^
