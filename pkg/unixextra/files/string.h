@@ -14,10 +14,10 @@ modification history
 13jun19 akh - created
 */
 
-#include <../public/string.h>
-
 #ifndef _STRING_UNIX
 #define _STRING_UNIX
+
+#include <../public/string.h>
 
 #ifdef __cplusplus
 extern "C" {
