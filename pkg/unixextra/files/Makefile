@@ -36,6 +36,12 @@ all: cp_headers libunixextra.a libunixextra.so
 cp_headers:
 	install -m 644 $(srcdir)/termios.h $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX
 	install -m 644 $(srcdir)/ttycom.h $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX/sys
+	sed -i 's#-I\$$WIND_SDK_TOOLKIT_INCLUDE/usr/h/published/UTILS_UNIX##g' `which $(CC)`
+	sed -i 's#-I\$$WIND_SDK_TOOLKIT_INCLUDE/usr/h/published/UTILS_UNIX##g' `which $(CXX)`
+	sed -i 's#""  -I#"" -I\$$WIND_SDK_TOOLKIT_INCLUDE/usr/h/published/UTILS_UNIX -I#g' `which $(CC)`
+	sed -i 's#""  -I#"" -I\$$WIND_SDK_TOOLKIT_INCLUDE/usr/h/published/UTILS_UNIX -I#g' `which $(CXX)`
+	sed -i 's/_WRS_INLINE/inline/g'  $(WIND_CC_SYSROOT)/usr/h/public/endian.h
+	sed -i 's/STATUS/int/g'  $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX/sys/stat.h
 
 libunixextra.so: $(SHOBJECTS)
 	$(CC) -shared $^ -o $@ $(CC_FLAGS)
