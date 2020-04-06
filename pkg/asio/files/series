@@ -4,5 +4,5 @@
 0004-commentout-some-examples.patch
 0005-add-numeric.patch
 # 0006-automake-fix.patch
-0007-openssl-fix.patch
+# 0007-openssl-fix.patch
 # acinclude.patch
