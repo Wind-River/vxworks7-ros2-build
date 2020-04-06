@@ -9,7 +9,7 @@ DEFAULT_BUILD ?= unixextra asio tinyxml2 ros2 turtlebot3
 
 ## Add missing variablse from SDK
 export TOOL=llvm
-export TGT_ARCH=$(shell echo $$CC | cut -d "-" -f 1)
+export TGT_ARCH=$(shell $$CC --version | grep Target | cut -d " " -f 2)
 export CMAKE_MODULE_PATH=$(CMAKE_MODULE_DIR)
 ## XX
 
