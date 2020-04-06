@@ -16,7 +16,7 @@ export CMAKE_MODULE_PATH=$(CMAKE_MODULE_DIR)
 .PHONY: clean_buildstamps
 
 all: $(DOWNLOADS_DIR) $(STAMP_DIR) $(EXPORT_DIR)
-	for p in $(DEFAULT_BUILD); do $(MAKE) -C pkg/$$p $$p.install; done;
+	for p in $(DEFAULT_BUILD); do $(MAKE) -C pkg/$$p $$p.install || exit 1; done;
 
 $(EXPORT_DIR):
 	@mkdir -p $(ROOT_DIR)/lib
