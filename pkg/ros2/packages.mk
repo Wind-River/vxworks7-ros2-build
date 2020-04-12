@@ -26,6 +26,7 @@ ROS2_PATCH_DIRS=eProsima/Fast-CDR \
                 ros/class_loader \
                 ros2/console_bridge_vendor \
                 ros2/demos \
+                ros2/examples \
                 ros2/libyaml_vendor \
                 ros2/rcl \
                 ros2/rclcpp \
