@@ -40,6 +40,8 @@ cp_headers:
 	sed -i 's#-I\$$WIND_SDK_TOOLKIT_INCLUDE/usr/h/published/UTILS_UNIX##g' `which $(CXX)`
 	sed -i 's#""  -I#"" -I\$$WIND_SDK_TOOLKIT_INCLUDE/usr/h/published/UTILS_UNIX -I#g' `which $(CC)`
 	sed -i 's#""  -I#"" -I\$$WIND_SDK_TOOLKIT_INCLUDE/usr/h/published/UTILS_UNIX -I#g' `which $(CXX)`
+	sed -i 's#\\"  -I#\\" -I\$$WIND_CC_SYSROOT/usr/h/published/UTILS_UNIX -I#g' `which $(CC)`
+	sed -i 's#\\"  -I#\\" -I\$$WIND_CC_SYSROOT/usr/h/published/UTILS_UNIX -I#g' `which $(CXX)`
 	sed -i 's/_WRS_INLINE/inline/g'  $(WIND_CC_SYSROOT)/usr/h/public/endian.h
 	sed -i 's/STATUS/int/g'  $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX/sys/stat.h
 
@@ -63,8 +65,22 @@ install:
 	install -m 644 $(srcdir)/string.h $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX
 	install -m 755 libunixextra.a $(WIND_CC_SYSROOT)/usr/lib/common
 	install -m 755 libunixextra.so $(WIND_CC_SYSROOT)/usr/lib/common
+	sed -i 's/ -lc  -lllvm/-lunix -lregex  -lc -lllvm/g' `which $(CC)`
+	sed -i 's/ -lc  -lllvm/-lunix -lregex  -lc -lllvm/g' `which $(CXX)`
+	sed -i 's/group   -lc/group -lnet -lunix -lregex -lc/g' `which $(CC)`
+	sed -i 's/group   -lc/group -lnet -lunix -lregex -lc/g' `which $(CXX)`
 	sed -i 's/-lunix -lregex/-lunix -lunixextra -lregex/g' `which $(CC)`
 	sed -i 's/-lunix -lregex/-lunix -lunixextra -lregex/g' `which $(CXX)`
+	sed -i 's/-I\*)/-I\*|-isystem\*|-iquote\*|-isysroot\*|-iprefix\*)/g' `which $(CC)`
+	sed -i 's/-I\*)/-I\*|-isystem\*|-iquote\*|-isysroot\*|-iprefix\*)/g' `which $(CXX)`
+	sed -i 's/if \[ "$$1" = "-I" \]; then/if \[ "$$1" = "-I" \] || \[ "$$1" = "-isystem" \] || \[ "$$1" = "-iquote" \] || \[ "$$1" = "-isysroot" \] || \[ "$$1" = "-iprefix" \]; then/g' `which $(CC)`
+	sed -i 's/if \[ "$$1" = "-I" \]; then/if \[ "$$1" = "-I" \] || \[ "$$1" = "-isystem" \] || \[ "$$1" = "-iquote" \] || \[ "$$1" = "-isysroot" \] || \[ "$$1" = "-iprefix" \]; then/g' `which $(CXX)`
+	sed -i 's/shift; CC_FLAGS=$$CC_FLAGS" -I "$$1/CC_FLAGS=$$CC_FLAGS" "$$1" "$$2; shift/g' `which $(CC)`
+	sed -i 's/shift; CC_FLAGS=$$CC_FLAGS" -I "$$1/CC_FLAGS=$$CC_FLAGS" "$$1" "$$2; shift/g' `which $(CXX)`
+	sed -i 's/LD_EXEC_LIBS=$$LD_EXEC_LIBS_DYNAMIC/LD_EXEC_LIBS="--as-needed $$LD_EXEC_LIBS_DYNAMIC"/g' `which $(CC)`
+	sed -i 's/LD_EXEC_LIBS=$$LD_EXEC_LIBS_DYNAMIC/LD_EXEC_LIBS="--as-needed $$LD_EXEC_LIBS_DYNAMIC"/g' `which $(CXX)`
+	sed -i 's/$$OBJECT_TMP $$LD_FLAGS $$LD_SHARED_LIBS/$$OBJECT_TMP --as-needed $$LD_FLAGS $$LD_SHARED_LIBS/g' `which $(CC)`
+	sed -i 's/$$OBJECT_TMP $$LD_FLAGS $$LD_SHARED_LIBS/$$OBJECT_TMP --as-needed $$LD_FLAGS $$LD_SHARED_LIBS/g' `which $(CXX)`
 	install -m 755 libunixextra.so $(ROOT_DIR)/lib/.
 	sed -i 's/SONAME_FOUND=false/SONAME_FOUND=true/g' `which $(CC)`
 	sed -i 's/SONAME_FOUND=false/SONAME_FOUND=true/g' `which $(CXX)`
