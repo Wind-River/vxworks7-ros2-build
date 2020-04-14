@@ -20,7 +20,7 @@ all: $(DOWNLOADS_DIR) $(STAMP_DIR) $(EXPORT_DIR)
 
 $(EXPORT_DIR):
 	@mkdir -p $(ROOT_DIR)/lib
-	@cp $(WIND_SDK_TOOLKIT)/include/usr/lib/common/lib*.so* $(ROOT_DIR)/lib/.
+	@cp $(WIND_CC_SYSROOT)/usr/lib/common/lib*.so* $(ROOT_DIR)/lib/.
 
 $(DOWNLOADS_DIR):
 	@mkdir -p $(DOWNLOADS_DIR)
