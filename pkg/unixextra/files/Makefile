@@ -60,5 +60,6 @@ install:
 	install -m 755 libunixextra.a $(WIND_CC_SYSROOT)/usr/lib/common
 	install -m 755 libunixextra.so $(WIND_CC_SYSROOT)/usr/lib/common
 	install -m 755 libunixextra.so $(ROOT_DIR)/lib/.
-	sed -i 's/-lunix -lregex/-lunix -lunixextra -lregex/g' $(WIND_SDK_TOOLKIT_INCLUDE)/cc-conf/default.conf
+	sed -i 's/-lregex -T/-lregex $$(LibToolCplus) -T/g' $(WIND_CC_SYSROOT)/cc-conf/default.conf
+	sed -i 's/-lunix -lregex/-lunix -lunixextra -lregex/g' $(WIND_CC_SYSROOT)/cc-conf/default.conf
 
