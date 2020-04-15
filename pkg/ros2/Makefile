@@ -53,12 +53,12 @@ define ros2_patch
                 if ls $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/$$N/usr_src/0001-* 1> /dev/null 2>&1; then \
                         PATCHES="$(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/$$N/usr_src/*.patch"; \
                         for PATCH in $$PATCHES; do \
-                                $(PATCH) -p1 -N -d $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/$$pn -p1 < $$PATCH ; \
+                                cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/$$pn ; \
+                                $(PATCH) -p1 < $$PATCH ; \
                         done; \
                 fi \
 	done;
 endef
-
 
 ros2.unpack: ros2.download
 	@$(call echo_action,Unpacking,$*)
