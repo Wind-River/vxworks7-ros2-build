@@ -25,5 +25,5 @@ TGT_CONFIGURE_OPT = \
 #	--libdir=/$(TOOL_COMMON_DIR) \
 
 TGT_MAKE_INSTALL_OPT = install DESTDIR=$(ROOT_DIR)
-TGT_CMAKE_TOOLCHAIN_FILE = -DCMAKE_TOOLCHAIN_FILE=$(TOP_BUILDDIR)/buildspecs/cmake/rtp.cmake
+TGT_CMAKE_TOOLCHAIN_FILE ?= $(TOP_BUILDDIR)/buildspecs/cmake/rtp.cmake
 

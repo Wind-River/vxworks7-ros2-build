@@ -90,8 +90,9 @@ ros2.build: ros2.configure
 		--cmake-args \
                 -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
                 -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+		-DCMAKE_PREFIX_PATH=$(ROOT_DIR) \
                 -DCMAKE_MODULE_PATH:PATH=$(CMAKE_MODULE_DIR) \
-                -DCMAKE_TOOLCHAIN_FILE:FILEPATH=$(CMAKE_MODULE_DIR)/rtp.cmake \
+		-DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
                 -DBUILD_TESTING:BOOL=OFF
 	@$(MAKE_STAMP)
 

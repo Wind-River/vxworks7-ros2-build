@@ -72,7 +72,7 @@ define pkg_configure
 	if [ -f $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR)/CMakeLists.txt ]; then \
 		cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
 		cmake $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) \
-		    $(TGT_CMAKE_TOOLCHAIN_FILE) \
+		    -DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
 		    -DCMAKE_INSTALL_PREFIX=$(CMAKE_INSTALL_PREFIX) \
 		    -DCMAKE_PREFIX_PATH=$(ROOT_DIR) \
 		    -DCMAKE_MODULE_PATH=$(CMAKE_MODULE_DIR) \
