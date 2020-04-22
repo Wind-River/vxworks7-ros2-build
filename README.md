@@ -190,11 +190,16 @@ Process 'timer_lambda.vxe' (process Id = 0xffff80000046f070) launched.
 ## Build a simple CMake based OSS project
 
 ```
+wget https://labs.windriver.com/downloads/wrsdk-vxworks7-up2-1.6.tar.bz2
+tar –jxvf wrsdk-vxworks7-up2-1.6.tar.bz2
+source ./wrsdk-vxworks7-up2/toolkit/wind_sdk_env.linux
+
 git clone https://github.com/Wind-River/vxworks7-ros2-build.git
 cd vxworks7-ros2-build
-export WIND_USR_MK=$PWD/mk/usr
 export TOP_BUILDDIR=$PWD
-export PACKAGE_DIR=$PWD/pkg
+export WIND_USR_MK=$TOP_BUILDDIR/mk/usr
+export PACKAGE_DIR=$TOP_BUILDDIR/pkg
+DEFAULT_BUILD=unixextra make
 
 git clone https://github.com/leethomason/tinyxml2.git
 cd tinyxml2; mkdir vxworks-build; cd vxworks-build
