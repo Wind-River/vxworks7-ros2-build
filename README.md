@@ -203,7 +203,7 @@ DEFAULT_BUILD=unixextra make
 
 git clone https://github.com/leethomason/tinyxml2.git
 cd tinyxml2; mkdir vxworks-build; cd vxworks-build
-cmake .. -DCMAKE_MODULE_PATH=$TOP_BUILDDIR/buildspecs/cmake -DCMAKE_TOOLCHAIN_FILE=$TOP_BUILDDIR/buildspecs/cmake/rtp.cmake
+cmake .. -DCMAKE_TOOLCHAIN_FILE=$TOP_BUILDDIR/buildspecs/cmake/rtp.cmake
 make VERBOSE=1
 ```
 

@@ -88,7 +88,6 @@ $(PKG_NAME).build: $(PKG_NAME).configure
 		--cmake-args \
                 -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
                 -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-                -DCMAKE_MODULE_PATH:PATH=$(CMAKE_MODULE_DIR) \
 		-DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
                 -DBUILD_TESTING:BOOL=OFF
 	@$(MAKE_STAMP)

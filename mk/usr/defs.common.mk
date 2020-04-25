@@ -27,8 +27,6 @@ ROOT_DIR=$(EXPORT_DIR)/root
 
 TPP_DIRS = $(DOWNLOADS_DIR) $(STAMP_DIR) $(EXPORT_DIR)
 
-CMAKE_MODULE_DIR=$(TOP_BUILDDIR)/buildspecs/cmake
-
 ECHO  ?= echo
 RM    ?= rm
 PATCH ?= patch

@@ -75,7 +75,6 @@ define pkg_configure
 		    -DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
 		    -DCMAKE_INSTALL_PREFIX=$(CMAKE_INSTALL_PREFIX) \
 		    -DCMAKE_PREFIX_PATH=$(ROOT_DIR) \
-		    -DCMAKE_MODULE_PATH=$(CMAKE_MODULE_DIR) \
 		    $(CMAKE_OPT) ; \
 	else \
 		if [ -f configure.in -o -f configure.ac ] ; then \
