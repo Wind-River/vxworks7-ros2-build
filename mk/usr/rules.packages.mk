@@ -77,7 +77,7 @@ define pkg_configure
 		    -DCMAKE_PREFIX_PATH=$(ROOT_DIR) \
 		    $(CMAKE_OPT) ; \
 	else \
-		if [ -f configure.in -o -f configure.ac ] ; then \
+		if [ ! -f ./configure ] && [ -f configure.in -o -f configure.ac ] ; then \
 			autoreconf --verbose --install --force || exit 1 ; \
 		fi ; \
 		if [ -f ./configure ]; then \
