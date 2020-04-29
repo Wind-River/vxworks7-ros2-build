@@ -59,7 +59,7 @@ PKG_MAKE_OPT = platform
 PKG_MAKE_INSTALL_OPT = libpython3.so && \
 		       install -m 755 $(BUILD_DIR)/python/$(PKG_BUILD_DIR)/python $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/bin/python3.8 && \
 		       cp $(BUILD_DIR)/python/$(PKG_BUILD_DIR)/libpython* $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/. && \
-		       install -m 755 $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/bin/python3.8 $(ROOT_DIR)/$(TOOL)/bin/python && \
+		       install -m 755 -D $(BUILD_DIR)/python/$(PKG_BUILD_DIR)/python $(ROOT_DIR)/$(TOOL)/bin/python && \
 		       install -m 755 $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/libpython3.8.so $(ROOT_DIR)/lib/
 
 include $(WIND_USR_MK)/rules.packages.mk
