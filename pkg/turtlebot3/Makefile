@@ -88,6 +88,8 @@ $(PKG_NAME).build: $(PKG_NAME).configure
 		--cmake-args \
                 -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
                 -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+		-DPYTHON_EXECUTABLE=/usr/bin/python3 \
+		-DPYTHON_LIBRARY=$(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/libpython3.8.so -DPYTHON_INCLUDE_DIR=$(WIND_CC_SYSROOT)/usr/3pp/develop/usr/include/python3.8 \
 		-DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
                 -DBUILD_TESTING:BOOL=OFF
 	@$(MAKE_STAMP)

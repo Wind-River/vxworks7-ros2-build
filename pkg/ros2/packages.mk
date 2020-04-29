@@ -30,6 +30,7 @@ ROS2_PATCH_DIRS=eProsima/Fast-CDR \
                 ros2/libyaml_vendor \
                 ros2/rcl \
                 ros2/rclcpp \
+                ros2/rclpy \
                 ros2/rcutils \
                 ros2/realtime_support \
                 ros2/rmw_implementation \
@@ -58,7 +59,7 @@ ROS_IGNORE_DIRS=ros-visualization \
 
 
 # Ignore Python-specific packages
-ROS_IGNORE_DIRS+= \
+#ROS_IGNORE_DIRS+= \
                 ament/ament_cmake/ament_cmake_pytest \
                 osrf/osrf_pycommon \
                 ros2/demos/demo_nodes_py \
