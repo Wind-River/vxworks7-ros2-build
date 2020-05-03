@@ -38,7 +38,7 @@ PKG_LICENSE = ZLib
 PKG_BUILD_DIR = build
 PKG_SRC_DIR = src
 
-PKG_MAKE_INSTALL_OPT=install DESTDIR=$(ROOT_DIR)
+PKG_MAKE_INSTALL_OPT=$(TGT_MAKE_INSTALL_OPT)
 
 tinyxml2.install : tinyxml2.build
 	@$(call echo_action,Installing,tinyxml2)
