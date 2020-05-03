@@ -15,6 +15,9 @@
 # limitations under the License.
 
 # --host and --build intentionally left to autodetct
+ifeq ($(__hosttool_defs),)
+__hosttool_defs = TRUE
+
 CONFIGURE_OPT = \
 	--prefix=/usr\
 	--infodir=/usr/share/info \
@@ -26,3 +29,4 @@ CONFIGURE_OPT = \
 	--localstatedir=/usr/var
 
 MAKE_INSTALL_OPT = install DESTDIR=$(TPP_HOST_DIR)
+endif
