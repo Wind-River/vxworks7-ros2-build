@@ -32,6 +32,25 @@ PKG_TYPE = src
 
 PKG_LICENSE = BSD
 
+define compiler_fix
+	sed -i 's/-lregex -T/-lregex $$(LibToolCplus) -T/g' $(WIND_CC_SYSROOT)/cc-conf/default.conf
+endef
+
+define vxworks_fix
+	sed -i 's/_WRS_INLINE/inline/g'  $(WIND_CC_SYSROOT)/usr/h/public/endian.h
+	sed -i 's/STATUS/int/g' `find $(WIND_CC_SYSROOT)/usr/h -name stat.h`
+endef
+
+define python_fix
+	install -m 755 files/python3.8 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/ ;
+	ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.8 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 ;
+	install -m 755 files/libpython3.8.so.1.0 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/ ;
+	sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonLibs.cmake ;
+	sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonInterp.cmake ;
+	install -m 755 files/_ssl.cpython-38-x86_64-linux-gnu.so $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/python3.8/lib-dynload/ ; \
+	python3.8 files/get-pip.py ;
+endef
+
 sdk.download :
 	@$(MAKE_STAMP)
 
@@ -55,16 +74,9 @@ sdk.build : sdk.configure
 
 sdk.install : sdk.build
 	@$(call echo_action,Installing,$*)
-	sed -i 's/_WRS_INLINE/inline/g'  $(WIND_CC_SYSROOT)/usr/h/public/endian.h
-	sed -i 's/STATUS/int/g' `find $(WIND_CC_SYSROOT)/usr/h -name stat.h`
-	sed -i 's/-lregex -T/-lregex $$(LibToolCplus) -T/g' $(WIND_CC_SYSROOT)/cc-conf/default.conf
-	install -m 755 files/python3.8 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/
-	ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.8 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3
-	install -m 755 files/libpython3.8.so.1.0 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/
-	sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonLibs.cmake
-	sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonInterp.cmake
-	install -m 755 files/_ssl.cpython-38-x86_64-linux-gnu.so $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/python3.8/lib-dynload/
-	python3.8 files/get-pip.py
+	$(call vxworks_fix,$*)
+	$(call compiler_fix,$*)
+	$(call python_fix,$*)
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
