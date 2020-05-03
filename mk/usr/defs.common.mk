@@ -19,11 +19,19 @@
 # 19may16,brk HLD review changes
 # 21mar14,brk created
 #
+
+ifeq ($(__common_defs),)
+__common_defs = TRUE
+
 PACKAGE_DIR=$(TOP_BUILDDIR)/pkg
 BUILD_DIR=$(TOP_BUILDDIR)/build
 DOWNLOADS_DIR=$(TOP_BUILDDIR)/downloads
 EXPORT_DIR=$(TOP_BUILDDIR)/export
 ROOT_DIR=$(EXPORT_DIR)/root
+3PP_DIR?=$(WIND_CC_SYSROOT)/usr/3pp
+3PP_HOST_DIR=$(3PP_DIR)/host
+3PP_DEVELOP_DIR=$(3PP_DIR)/develop
+3PP_DEPLOY_DIR=$(3PP_DIR)/deploy
 
 TPP_DIRS = $(DOWNLOADS_DIR) $(STAMP_DIR) $(EXPORT_DIR)
 
@@ -44,3 +52,4 @@ WGET_OPT  ?= -O
 
 CHMOD ?= chmod
 TOUCH = touch
+endif
