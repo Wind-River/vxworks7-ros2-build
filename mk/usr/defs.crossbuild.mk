@@ -27,6 +27,6 @@ TGT_CONFIGURE_OPT = \
 #	--bindir=/$(TOOL_SPECIFIC_DIR)/bin \
 #	--libdir=/$(TOOL_COMMON_DIR) \
 
-TGT_MAKE_INSTALL_OPT = install DESTDIR=$(ROOT_DIR)
+TGT_MAKE_INSTALL_OPT = install DESTDIR=$(3PP_DEVELOP_DIR)/usr
 TGT_CMAKE_TOOLCHAIN_FILE ?= $(TOP_BUILDDIR)/buildspecs/cmake/toolchain.cmake
 endif
