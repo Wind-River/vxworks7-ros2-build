@@ -184,20 +184,20 @@ define fetch_cvs
 endef
 
 define fetch_web
-	$(ECHO) "fetch_web $1 $2 $3 $4"; \
+	$(ECHO) "fetch_web $1 $2 $3"; \
 	if [ -f $$(which $(CURL)) ]; then  \
-		$(CURL) $(CURL_OPT) $(PKG_FILE_NAME) $(PKG_URL) ; \
+		$(CURL) $(CURL_OPT) $(3) $(2) ; \
 	elif [ -f $$(which $(WGET)) ]; then \
-		$(WGET) $(WGET_OPT) $(PKG_FILE_NAME) $(PKG_URL) ; \
+		$(WGET) $(WGET_OPT) $(3) $(2) ; \
 	fi
 endef
 
 define fetch_ftp
-	$(ECHO) "fetch_ftp $1 $2 $3 $4"; \
+	$(ECHO) "fetch_ftp $1 $2 $3"; \
 	if [ -f $$(which $(CURL)) ]; then  \
-		$(CURL) $(CURL_OPT) $(PKG_FILE_NAME) $(PKG_URL) ; \
+		$(CURL) $(CURL_OPT) $(3) $(2) ; \
 	elif [ -f $$(which $(WGET)) ]; then \
-		$(WGET) $(WGET_OPT) $(PKG_FILE_NAME) $(PKG_URL) ; \
+		$(WGET) $(WGET_OPT) $(3) $(2) ; \
 	fi
 endef
 
