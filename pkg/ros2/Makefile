@@ -80,23 +80,23 @@ ros2.configure: ros2.patch
 	for i in $(ROS_IGNORE_DIRS); do \
 		touch $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/$$i/COLCON_IGNORE; \
 	done;
+	pip3 install numpy;
+	pip3 install lark-parser;
 	@$(MAKE_STAMP)
 
 ros2.build: ros2.configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
-	export WIND_ROOT_DIR=$(ROOT_DIR); \
+	export PATH=$(3PP_HOST_DIR)/bin:$(PATH); \
+	export PYTHONPATH=$(3PP_HOST_DIR)/lib/python3.8/site-packages:$(PYTHONPATH); \
 	colcon build --symlink-install --cmake-force-configure --packages-up-to $(PKG_PKGS_UP_TO) \
 		--cmake-args \
                 -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
                 -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-		-DCMAKE_PREFIX_PATH=$(ROOT_DIR) \
-		-DPYTHON_EXECUTABLE=/usr/bin/python3 \
-		-DPYTHON_LIBRARY=$(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/libpython3.8.so -DPYTHON_INCLUDE_DIR=$(WIND_CC_SYSROOT)/usr/3pp/develop/usr/include/python3.8 \
+		-DCMAKE_PREFIX_PATH=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/install \
 		-DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
                 -DBUILD_TESTING:BOOL=OFF
 	@$(MAKE_STAMP)
-
 
 ros2.install : ros2.build
 	@$(call echo_action,Installing,$*)
