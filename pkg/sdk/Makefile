@@ -73,9 +73,11 @@ sdk.build : sdk.configure
 	@$(MAKE_STAMP)
 
 sdk.install : sdk.build
-	@$(call echo_action,Installing,$*)
+	@$(call echo_action,Applying VxWorks patches,$*)
 	$(call vxworks_fix,$*)
+	@$(call echo_action,Applying Compiler patches,$*)
 	$(call compiler_fix,$*)
+	@$(call echo_action,Applying Python patches,$*)
 	$(call python_fix,$*)
 	@$(MAKE_STAMP)
 
