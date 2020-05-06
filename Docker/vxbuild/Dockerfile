@@ -8,10 +8,13 @@ RUN dpkg --add-architecture i386 && \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENV GID 1000
+ARG UID=1000
+ARG GID=1000
+
+ENV GID ${GID}
 ENV GROUP wruser
 ENV INSTALL_DIR /opt/windriver
-ENV UID 1000
+ENV UID ${UID}
 ENV USER wruser
 ENV HOME /home/${USER}
 ENV WRENV vxworks-7

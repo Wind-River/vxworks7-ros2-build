@@ -113,7 +113,7 @@ cd vxworks7-ros2-build
 Build Docker image
 ```
 cd Docker/vxbuild
-docker build -t vxbuild:1.0 .
+docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t vxbuild:1.0 .
 cd Docker/vxros2build
 docker build -t vxros2build:1.0 .
 ```
