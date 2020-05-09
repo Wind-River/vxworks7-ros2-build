@@ -38,14 +38,13 @@ PKG_LICENSE = ZLib
 PKG_BUILD_DIR = build
 PKG_SRC_DIR = src
 
-PKG_MAKE_INSTALL_OPT=$(TGT_MAKE_INSTALL_OPT)
+PKG_MAKE_INSTALL_OPT=install
 
 tinyxml2.install : tinyxml2.build
 	@$(call echo_action,Installing,tinyxml2)
 	$(call pkg_install,tinyxml2)
-	install -d $(ROOT_DIR)/$(TOOL)/bin
-	install -m 755 $(BUILD_DIR)/tinyxml2/$(PKG_BUILD_DIR)/xmltest* $(ROOT_DIR)/$(TOOL)/bin
+	install -d $(ROOT_DIR)/bin
+	install -m 755 $(BUILD_DIR)/tinyxml2/$(PKG_BUILD_DIR)/xmltest* $(ROOT_DIR)/bin
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
-
