@@ -56,8 +56,8 @@ if (VX_TARGET_TYPE STREQUAL "DKM")
     set(CMAKE_C_FLAGS_INIT "-dkm")
     set(CMAKE_CXX_FLAGS_INIT "-dkm")
 
-    # no prefix path for kernel
-    set(__VXWORKS_PREFIX_PATH__ "")
+    # set root to find a package
+    set(__VXWORKS_PREFIX_PATH__ /usr/3pp/develop/krnl)
     # set VxWorks kernel header path
     set(__VXWORKS_INCLUDE_PATH__
         /krnl/h/published/UTILS_UNIX
@@ -88,6 +88,22 @@ if (VX_TARGET_TYPE STREQUAL "RTP")
         /usr/lib/common)
 endif()
 
+set (__VXWORKS_INSTALL_PREFIX__ $ENV{WIND_CC_SYSROOT}${__VXWORKS_PREFIX_PATH__})
+
+if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
+    list(APPEND __VXWORKS_PREFIX_PATH__
+        # Project install destination.
+        "${CMAKE_INSTALL_PREFIX}"
+    )
+    if(CMAKE_STAGING_PREFIX)
+        list(APPEND __VXWORKS_PREFIX_PATH__
+        # User-supplied staging prefix.
+        "${CMAKE_STAGING_PREFIX}")
+    endif()
+    list(APPEND CMAKE_FIND_ROOT_PATH ${CMAKE_INSTALL_PREFIX})
+endif()
+
+
 # CMake find_* commands will look in the sysroot, and the
 # CMAKE_FIND_ROOT_PATH entries by default in all cases, 
 # as well as looking in the host system root prefix
@@ -100,7 +116,7 @@ endif()
 # CMAKE_SYSTEM_LIBRARY_PATH
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-#set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-#set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-#set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
