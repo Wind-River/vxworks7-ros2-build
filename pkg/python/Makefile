@@ -58,6 +58,9 @@ PKG_MAKE_OPT = platform
 # install python and shared libs
 PKG_MAKE_INSTALL_OPT = libpython3.so && \
 		       install -m 755 $(BUILD_DIR)/python/$(PKG_BUILD_DIR)/python $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/bin/python3.8 && \
-		       cp $(BUILD_DIR)/python/$(PKG_BUILD_DIR)/libpython* $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/.
+		       cp $(BUILD_DIR)/python/$(PKG_BUILD_DIR)/libpython* $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/. ; \
+		       cp $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/bin/python3.8 $(DEPLOY_DIR)/bin/. ; \
+		       cp $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/bin/python3.8 $(DEPLOY_DIR)/bin/python3 ; \
+		       cp $(BUILD_DIR)/python/$(PKG_BUILD_DIR)/libpython3.8.so* $(DEPLOY_DIR)/lib/.
 
 include $(WIND_USR_MK)/rules.packages.mk
