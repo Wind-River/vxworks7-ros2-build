@@ -67,6 +67,10 @@ unixextra.install : unixextra.build
 	echo "MAKE_OPT: $(PKG_MAKE_OPT)" && \
 	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \
 	$(PKG_MAKE_INSTALL_VAR) $(MAKE) -C $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) -f $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/Makefile $(PKG_MAKE_INSTALL_OPT) $(PKG_MAKE_OPT)
+	sed -i 's/-lunix -lregex/-lunix -lunixextra -lregex/g' $(WIND_CC_SYSROOT)/cc-conf/default.conf
+	@$(call echo_action,Deploying,$*)
+	cp $(WIND_CC_SYSROOT)/usr/lib/common/libunixextra.so $(3PP_DEPLOY_DIR)/lib/.
+	cp $(WIND_CC_SYSROOT)/usr/lib/common/libunixextra.so $(DEPLOY_DIR)/lib/.
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
