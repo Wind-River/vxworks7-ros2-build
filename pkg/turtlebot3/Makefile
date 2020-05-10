@@ -96,6 +96,10 @@ $(PKG_NAME).build: $(PKG_NAME).configure
 
 $(PKG_NAME).install : $(PKG_NAME).build
 	@$(call echo_action,Installing,$*)
+	cp $(ROOT_DIR)/lib/lib* $(DEPLOY_DIR)/lib/.
+	cp $(ROOT_DIR)/lib/hls_lfcd_lds_driver/*  $(DEPLOY_DIR)/bin/.
+	cp $(ROOT_DIR)/lib/turtlebot3_node/*  $(DEPLOY_DIR)/bin/.
+	cp -r $(ROOT_DIR)/lib/python3.8/* $(DEPLOY_DIR)/lib/python3.8/.
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
