@@ -99,9 +99,15 @@ ros2.build: ros2.configure
 	@$(MAKE_STAMP)
 
 ros2.install : ros2.build
-	@$(call echo_action,Installing dependencies,$*)
-	pip3 install --ignore-installed --prefix=$(WIND_CC_SYSROOT)/usr/3pp/develop/usr setuptools
-	pip3 install --ignore-installed --prefix=$(WIND_CC_SYSROOT)/usr/3pp/develop/usr catkin_pkg
+	@$(call echo_action,Installing runtime dependencies,$*)
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) setuptools
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) catkin_pkg
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyyaml
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) empy
+	cp $(ROOT_DIR)/bin/* $(DEPLOY_DIR)/bin/.
+	cp $(ROOT_DIR)/lib/lib* $(DEPLOY_DIR)/lib/.
+	cp -r $(ROOT_DIR)/lib/python3.8/* $(DEPLOY_DIR)/lib/python3.8/.
+	find $(ROOT_DIR)/lib/examples_rclcpp_minimal_* -type f -exec cp {} $(DEPLOY_DIR)/bin \;
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
