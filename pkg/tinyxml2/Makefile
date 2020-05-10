@@ -43,8 +43,9 @@ PKG_MAKE_INSTALL_OPT=install
 tinyxml2.install : tinyxml2.build
 	@$(call echo_action,Installing,tinyxml2)
 	$(call pkg_install,tinyxml2)
-	install -d $(ROOT_DIR)/bin
-	install -m 755 $(BUILD_DIR)/tinyxml2/$(PKG_BUILD_DIR)/xmltest* $(ROOT_DIR)/bin
+	install -d $(DEPLOY_DIR)/bin
+	install -m 755 $(BUILD_DIR)/tinyxml2/$(PKG_BUILD_DIR)/xmltest* $(DEPLOY_DIR)/bin
+	cp $(ROOT_DIR)/lib/libtinyxml2*.so $(DEPLOY_DIR)/lib/.
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
