@@ -36,6 +36,12 @@ define compiler_fix
 	sed -i 's/-lregex -T/-lregex $$(LibToolCplus) -T/g' $(WIND_CC_SYSROOT)/cc-conf/default.conf
 endef
 
+define sdk_fix
+	if [ -f $(WIND_SDK_HOME)/bsps/itl_generic_2_0_2_1/boot/vxWorks ]; then \
+		cp files/vxWorks $(WIND_SDK_HOME)/bsps/itl_generic_2_0_2_1/boot/vxWorks; \
+	fi ;
+endef
+
 define vxworks_fix
 	sed -i 's/_WRS_INLINE/inline/g'  $(WIND_CC_SYSROOT)/usr/h/public/endian.h
 	sed -i 's/STATUS/int/g' `find $(WIND_CC_SYSROOT)/usr/h -name stat.h`
@@ -73,6 +79,8 @@ sdk.build : sdk.configure
 	@$(MAKE_STAMP)
 
 sdk.install : sdk.build
+	@$(call echo_action,Applying SDK patches,$*)
+	$(call sdk_fix,$*)
 	@$(call echo_action,Applying VxWorks patches,$*)
 	$(call vxworks_fix,$*)
 	@$(call echo_action,Applying Compiler patches,$*)
@@ -82,7 +90,7 @@ sdk.install : sdk.build
 	@$(call echo_action,Deploying SDK artifacts,$*)
 	cp $(3PP_DEPLOY_DIR)/lib/* $(DEPLOY_DIR)/lib/.
 	cp $(3PP_DEPLOY_DIR)/usr/bin/* $(DEPLOY_DIR)/bin/.
-	cp $(3PP_DEPLOY_DIR)/usr/lib/lib*.so $(DEPLOY_DIR)/lib/.
+	cp $(3PP_DEPLOY_DIR)/usr/lib/lib*.so* $(DEPLOY_DIR)/lib/.
 	cp -r $(3PP_DEPLOY_DIR)/usr/lib/python3.8 $(DEPLOY_DIR)/lib/.
 	@$(MAKE_STAMP)
 
