@@ -108,6 +108,7 @@ ros2.install : ros2.build
 	cp $(ROOT_DIR)/lib/lib* $(DEPLOY_DIR)/lib/.
 	cp -r $(ROOT_DIR)/lib/python3.8/* $(DEPLOY_DIR)/lib/python3.8/.
 	find $(ROOT_DIR)/lib/examples_rclcpp_minimal_* -type f -exec cp {} $(DEPLOY_DIR)/bin \;
+	sed -i "s/getpass.getuser()/'`getent passwd $USER | cut -f 5 -d : | cut -f 1 -d ,`'/g" $(DEPLOY_DIR)/lib/python3.8/site-packages/ros2pkg/verb/create.py
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
