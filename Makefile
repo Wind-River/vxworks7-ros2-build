@@ -5,7 +5,7 @@ include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.crossbuild.mk
 
-DEFAULT_BUILD ?= unixextra asio tinyxml2 ros2 turtlebot3
+DEFAULT_BUILD ?= unixextra asio tinyxml2 ros2 micro-ros
 
 ## Add missing variablse from SDK
 export TOOL=llvm
