@@ -62,4 +62,7 @@ install:
 	install -m 755 libunixextra.so $(ROOT_DIR)/lib/.
 	sed -i 's/-lregex -T/-lregex $$(LibToolCplus) -T/g' $(WIND_CC_SYSROOT)/cc-conf/default.conf
 	sed -i 's/-lunix -lregex/-lunix -lunixextra -lregex/g' $(WIND_CC_SYSROOT)/cc-conf/default.conf
+	if [ -z "`grep VxWorks $(WIND_SDK_TOOLKIT)/host_tools/x86_64-linux/share/cmake-3.8/Modules/CMakePlatformId.h.in`" ]; then \
+		sed -i '/__QNX__/i #elif defined(__VXWORKS__)\n# define PLATFORM_ID \"VxWorks\"\n' $(WIND_SDK_TOOLKIT)/host_tools/x86_64-linux/share/cmake-3.8/Modules/CMakePlatformId.h.in; \
+	fi
 
