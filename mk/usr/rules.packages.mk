@@ -73,11 +73,11 @@ define pkg_configure
 		cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
 		cmake $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) \
 		    -DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
-		    -DCMAKE_INSTALL_PREFIX=$(CMAKE_INSTALL_PREFIX) \
+		    -DCMAKE_INSTALL_PREFIX=$(ROOT_DIR) \
 		    -DCMAKE_PREFIX_PATH=$(ROOT_DIR) \
 		    $(CMAKE_OPT) ; \
 	else \
-		if [ -f configure.in -o -f configure.ac ] ; then \
+		if [ ! -f ./configure ] && [ -f configure.in -o -f configure.ac ] ; then \
 			autoreconf --verbose --install --force || exit 1 ; \
 		fi ; \
 		if [ -f ./configure ]; then \
@@ -184,20 +184,20 @@ define fetch_cvs
 endef
 
 define fetch_web
-	$(ECHO) "fetch_web $1 $2 $3 $4"; \
+	$(ECHO) "fetch_web $1 $2 $3"; \
 	if [ -f $$(which $(CURL)) ]; then  \
-		$(CURL) $(CURL_OPT) $(PKG_FILE_NAME) $(PKG_URL) ; \
+		$(CURL) $(CURL_OPT) $(3) $(2) ; \
 	elif [ -f $$(which $(WGET)) ]; then \
-		$(WGET) $(WGET_OPT) $(PKG_FILE_NAME) $(PKG_URL) ; \
+		$(WGET) $(WGET_OPT) $(3) $(2) ; \
 	fi
 endef
 
 define fetch_ftp
-	$(ECHO) "fetch_ftp $1 $2 $3 $4"; \
+	$(ECHO) "fetch_ftp $1 $2 $3"; \
 	if [ -f $$(which $(CURL)) ]; then  \
-		$(CURL) $(CURL_OPT) $(PKG_FILE_NAME) $(PKG_URL) ; \
+		$(CURL) $(CURL_OPT) $(3) $(2) ; \
 	elif [ -f $$(which $(WGET)) ]; then \
-		$(WGET) $(WGET_OPT) $(PKG_FILE_NAME) $(PKG_URL) ; \
+		$(WGET) $(WGET_OPT) $(3) $(2) ; \
 	fi
 endef
 

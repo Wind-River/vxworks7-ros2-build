@@ -80,31 +80,35 @@ ros2.configure: ros2.patch
 	for i in $(ROS_IGNORE_DIRS); do \
 		touch $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/$$i/COLCON_IGNORE; \
 	done;
+	pip3 install numpy;
+	pip3 install lark-parser;
 	@$(MAKE_STAMP)
 
 ros2.build: ros2.configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
-	export WIND_ROOT_DIR=$(ROOT_DIR); \
-	colcon build --symlink-install --cmake-force-configure --packages-up-to $(PKG_PKGS_UP_TO) \
+	export PATH=$(3PP_HOST_DIR)/bin:$(PATH); \
+	export PYTHONPATH=$(3PP_HOST_DIR)/lib/python3.8/site-packages:$(PYTHONPATH); \
+	colcon build --merge-install --install-base $(ROOT_DIR) --cmake-force-configure --packages-up-to $(PKG_PKGS_UP_TO) \
 		--cmake-args \
                 -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
                 -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-		-DCMAKE_PREFIX_PATH=$(ROOT_DIR) \
 		-DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
+		-DPYTHON_SOABI=cpython-38-vxworks \
                 -DBUILD_TESTING:BOOL=OFF
 	@$(MAKE_STAMP)
 
-
 ros2.install : ros2.build
-	@$(call echo_action,Installing,$*)
-	@# copy PRJ libs and binaries to VSB
-	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) && \
-	if [ -d install ]; then \
-		find install -name *.so* -exec install -m 644 {} $(ROOT_DIR)/lib/ \;; \
-		find install -name *.vxe -exec install -m 644 {} $(ROOT_DIR)/$(TOOL)/bin/ \;; \
-		find install -name *.urdf -exec install -m 755 {} $(ROOT_DIR)/$(TOOL)/bin/ \;; \
-	fi
+	@$(call echo_action,Installing runtime dependencies,$*)
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) setuptools
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) catkin_pkg
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyyaml
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) empy
+	cp $(ROOT_DIR)/bin/* $(DEPLOY_DIR)/bin/.
+	cp $(ROOT_DIR)/lib/lib* $(DEPLOY_DIR)/lib/.
+	cp -r $(ROOT_DIR)/lib/python3.8/* $(DEPLOY_DIR)/lib/python3.8/.
+	find $(ROOT_DIR)/lib/examples_rclcpp_minimal_* -type f -exec cp {} $(DEPLOY_DIR)/bin \;
+	sed -i "s/getpass.getuser()/'`getent passwd $$USER | cut -f 5 -d : | cut -f 1 -d ,`'/g" $(DEPLOY_DIR)/lib/python3.8/site-packages/ros2pkg/verb/create.py
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk

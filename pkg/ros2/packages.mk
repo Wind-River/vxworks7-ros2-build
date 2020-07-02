@@ -30,6 +30,7 @@ ROS2_PATCH_DIRS=eProsima/Fast-CDR \
                 ros2/libyaml_vendor \
                 ros2/rcl \
                 ros2/rclcpp \
+                ros2/rclpy \
                 ros2/rcutils \
                 ros2/realtime_support \
                 ros2/rmw_implementation \
@@ -58,7 +59,7 @@ ROS_IGNORE_DIRS=ros-visualization \
 
 
 # Ignore Python-specific packages
-ROS_IGNORE_DIRS+= \
+#ROS_IGNORE_DIRS+= \
                 ament/ament_cmake/ament_cmake_pytest \
                 osrf/osrf_pycommon \
                 ros2/demos/demo_nodes_py \
@@ -77,7 +78,12 @@ ROS2_EXAMPLES=examples_rclcpp_minimal_action_client \
 	examples_rclcpp_minimal_service \
 	examples_rclcpp_minimal_timer
 
+ROS2_PYTHON_TOOLS=ros2action ros2component ros2msg ros2node ros2pkg \
+	ros2service ros2topic ros2cli ros2lifecycle ros2multicast ros2param \
+	ros2run ros2srv
+
 PKG_PKGS_UP_TO=$(ROS2_EXAMPLES) \
+	$(ROS2_PYTHON_TOOLS) \
 	pendulum_control
 
 #	dummy_map_server \

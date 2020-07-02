@@ -77,7 +77,10 @@ Packages
 ├── Makefile
 ├── pkg
 │   ├── asio
+│   ├── colcon
+│   ├── python
 │   ├── ros2
+│   ├── sdk
 │   ├── tinyxml2
 │   ├── turtlebot3
 │   └── unixextra
@@ -86,9 +89,11 @@ It uses Makefile to invoke ros2 and turtlebot3 colcon build, and also build some
 A Docker (Ubuntu 18.04) based build is used to avoid a necessity for installing build dependencies.
 Build Artifacs
 ```
-├── build     - pkg build artifacts
-├── downloads - download arctifacts
-├── export    - a ready-to-deploy filesystem with ROS2 libraries and binaries
+├── build      - pkg build artifacts
+├── downloads  - download arctifacts
+├── export     
+    ├── deploy - a ready-to-deploy filesystem with ROS2 libraries and binaries
+    └── root   - a development artifacts with ROS2 libraries and headers
 ``` 
 
 ## ROS2 VxWorks patches
@@ -120,12 +125,12 @@ docker build -t vxros2build:1.0 .
 
 Download the VxWorks SDK for IA - UP Squared from https://labs.windriver.com/downloads/wrsdk.html
 ```
-wget https://labs.windriver.com/downloads/wrsdk-vxworks7-up2-1.6.tar.bz2
+wget https://labs.windriver.com/downloads/wrsdk-vxworks7-up2-1.7.tar.bz2
 ```
 
 Extract the VxWorks SDK tarball
 ```
-tar –jxvf wrsdk-vxworks7-up2-1.6.tar.bz2
+tar –jxvf wrsdk-vxworks7-up2-1.7.tar.bz2
 ```
 
 Run Docker image
@@ -144,10 +149,10 @@ Inside Docker container: Run make to build ROS2 using the SDK
 wruser@d19165730517:/work make
 ```
 
-Buid artifacts are in export directory
+Build artifacts are in the export directory
 ```
-wruser@d19165730517:/work ls export/root/
-include  lib  llvm
+wruser@d19165730517:/work ls export/deploy/
+bin  lib
 ```
 
 Rebuild from scratch
@@ -156,7 +161,7 @@ wruser@d19165730517:/work make distclean
 wruser@d19165730517:/work make
 ```
 
-## Run ROS2 examples
+## Run ROS2 C/C++ examples
 
 Run QEMU
 ```
@@ -165,7 +170,7 @@ sudo tunctl -u $USER -t tap0
 sudo ifconfig tap0 192.168.200.254 up
 
 cd vxworks7-ros2-build
-qemu-system-x86_64 -m 512M  -kernel $WIND_SDK_TOOLKIT/../bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic  -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -monitor none -append "bootline:fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1 u=target pw=boot o=gei0" -usb -device usb-ehci,id=ehci  -device usb-storage,drive=fat32 -drive file=fat:ro:./export/root,id=fat32,format=raw,if=none
+qemu-system-x86_64 -m 512M  -kernel $WIND_SDK_HOME/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic  -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -monitor none -append "bootline:fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1 u=target pw=boot o=gei0" -usb -device usb-ehci,id=ehci  -device usb-storage,drive=fat32 -drive file=fat:ro:./export/deploy,id=fat32,format=raw,if=none
 ```
 Run QEMU with a prebuilt VxWorks kernel and the *export* directory mounted as a USB device
 
@@ -177,21 +182,29 @@ telnet 192.168.200.1
 ```
 -> cmd
 [vxWorks *]# set env LD_LIBRARY_PATH="/bd0a/lib"
-[vxWorks *]# cd  /bd0a/llvm/bin/
-[vxWorks *]# rtp exec -u 0x20000 timer_lambda.vxe
-Launching process 'timer_lambda.vxe' ...
-Process 'timer_lambda.vxe' (process Id = 0xffff80000046f070) launched.
+[vxWorks *]# cd  /bd0a/bin/
+[vxWorks *]# rtp exec -u 0x20000 timer_lambda
+Launching process 'timer_lambda' ...
+Process 'timer_lambda' (process Id = 0xffff80000046f070) launched.
 [INFO] [minimal_timer]: Hello, world!
 [INFO] [minimal_timer]: Hello, world!
 [INFO] [minimal_timer]: Hello, world!
 [INFO] [minimal_timer]: Hello, world!
 ```
+
+## Run ROS2 Python examples
+```
+[vxWorks *]# rtp exec -u 0x20000 python ros2
+Launching process 'python' ...
+Process 'python' (process Id = 0xffff80000046f070) launched.
+```
+
 
 ## Build a simple CMake based OSS project
 
 ```
-wget https://labs.windriver.com/downloads/wrsdk-vxworks7-up2-1.6.tar.bz2
-tar –jxvf wrsdk-vxworks7-up2-1.6.tar.bz2
+wget https://labs.windriver.com/downloads/wrsdk-vxworks7-up2-1.7.tar.bz2
+tar –jxvf wrsdk-vxworks7-up2-1.7.tar.bz2
 source ./wrsdk-vxworks7-up2/toolkit/wind_sdk_env.linux
 
 git clone https://github.com/Wind-River/vxworks7-ros2-build.git

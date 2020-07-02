@@ -15,6 +15,9 @@
 # limitations under the License.
 
 # --host and --build intentionally left to autodetect
+ifeq ($(__crossbuild_defs),)
+__crossbuild_defs = TRUE
+
 TGT_CONFIGURE_OPT = \
 	--build=x86_64-pc-linux-gnu \
         --host=$(TGT_ARCH)-wrs-vxworks \
@@ -25,5 +28,5 @@ TGT_CONFIGURE_OPT = \
 #	--libdir=/$(TOOL_COMMON_DIR) \
 
 TGT_MAKE_INSTALL_OPT = install DESTDIR=$(ROOT_DIR)
-TGT_CMAKE_TOOLCHAIN_FILE ?= $(TOP_BUILDDIR)/buildspecs/cmake/rtp.cmake
-
+TGT_CMAKE_TOOLCHAIN_FILE ?= $(TOP_BUILDDIR)/buildspecs/cmake/toolchain.cmake
+endif

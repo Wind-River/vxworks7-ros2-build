@@ -83,24 +83,23 @@ $(PKG_NAME).configure: $(PKG_NAME).patch
 $(PKG_NAME).build: $(PKG_NAME).configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/ros2/$(PKG_BUILD_DIR); \
-	export WIND_ROOT_DIR=$(ROOT_DIR); \
-        colcon build --symlink-install --cmake-force-configure --packages-up-to $(PKG_PKGS_UP_TO) \
+	export PATH=$(3PP_HOST_DIR)/bin:$(PATH); \
+	export PYTHONPATH=$(3PP_HOST_DIR)/lib/python3.8/site-packages:$(PYTHONPATH); \
+        colcon build --merge-install --install-base $(ROOT_DIR) --cmake-force-configure --packages-up-to $(PKG_PKGS_UP_TO) \
 		--cmake-args \
                 -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
                 -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
 		-DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
+		-DPYTHON_SOABI=cpython-38-vxworks \
                 -DBUILD_TESTING:BOOL=OFF
 	@$(MAKE_STAMP)
 
 $(PKG_NAME).install : $(PKG_NAME).build
 	@$(call echo_action,Installing,$*)
-	@# copy PRJ libs and binaries to VSB
-	cd $(BUILD_DIR)/ros2/$(PKG_BUILD_DIR) && \
-	if [ -d install ]; then \
-		find install -name *.so* -exec install -m 644 {} $(ROOT_DIR)/lib/ \;; \
-		find install -name *.vxe -exec install -m 644 {} $(ROOT_DIR)/$(TOOL)/bin/ \;; \
-		find install -name *.urdf -exec install -m 755 {} $(ROOT_DIR)/$(TOOL)/bin/ \;; \
-	fi
+	cp $(ROOT_DIR)/lib/lib* $(DEPLOY_DIR)/lib/.
+	cp $(ROOT_DIR)/lib/hls_lfcd_lds_driver/*  $(DEPLOY_DIR)/bin/.
+	cp $(ROOT_DIR)/lib/turtlebot3_node/*  $(DEPLOY_DIR)/bin/.
+	cp -r $(ROOT_DIR)/lib/python3.8/* $(DEPLOY_DIR)/lib/python3.8/.
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk

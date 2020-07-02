@@ -20,8 +20,9 @@
 # 21mar14,brk created
 #
 
+ifeq ($(__packages_defs),)
 __packages_defs = TRUE
-PATH := $(TPP_HOST_DIR)/usr/bin:$(PATH)
+
 VPATH             = $(STAMP_DIR)
 
 STAMP_DIR         = $(BUILD_DIR)/.stamp
@@ -37,6 +38,7 @@ BUILD_SYS_FILES = vxworks.make vxworks.mak vxworks.rtp.mak vxworks.lib.mak vxwor
 
 ####
 
+# PATH := $(TPP_HOST_DIR)/usr/bin:$(PATH)
 # LD_LIBRARY_PATH := $(TPP_HOST_DIR)/usr/lib:$(LD_LIBRARY_PATH)
 # PKG_CONFIG_PATH := $(TPP_HOST_DIR)/usr/lib/pkgconfig:$(PKG_CONFIG_PATH)
 #PYTHONPATH := $(shell test -d $TPP_HOST_DIR && find $(TPP_HOST_DIR) -maxdepth 3 -type d -path '*/usr/lib/python*' -exec echo \{\}: \;)$(PYTHONPATH)
@@ -65,4 +67,5 @@ endif
 
 export LIB_FORMAT
 export EXE_FORMAT
-export PATH
+# export PATH
+endif
