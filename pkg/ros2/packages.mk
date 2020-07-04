@@ -35,6 +35,7 @@ ROS2_PATCH_DIRS=eProsima/Fast-CDR \
                 ros2/realtime_support \
                 ros2/rmw_implementation \
                 ros2/robot_state_publisher \
+                ros2/ros2cli \
                 ros2/rosidl \
                 ros2/rosidl_defaults \
                 ros2/rosidl_typesupport \
