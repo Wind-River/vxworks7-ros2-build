@@ -66,6 +66,7 @@ $(PKG_NAME).unpack: $(PKG_NAME).download
 	cd $(BUILD_DIR)/ros2/$(PKG_BUILD_DIR); \
 	curl -o $(PKG_NAME).repos $(PKG_REPO_URL); \
 	sed -i 's#/eProsima#/razr#g' $(PKG_NAME).repos ; \
+	sed -i 's#/microROS#/razr#g' $(PKG_NAME).repos ; \
 	vcs import src < $(PKG_NAME).repos
 	@$(MAKE_STAMP)
 
