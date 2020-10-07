@@ -21,7 +21,6 @@
 #
 
 __packages_defs = TRUE
-PATH := $(TPP_HOST_DIR)/usr/bin:$(PATH)
 VPATH             = $(STAMP_DIR)
 
 STAMP_DIR         = $(BUILD_DIR)/.stamp
@@ -65,4 +64,3 @@ endif
 
 export LIB_FORMAT
 export EXE_FORMAT
-export PATH
