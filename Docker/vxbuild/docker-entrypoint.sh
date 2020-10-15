@@ -35,6 +35,8 @@ if [ ! -f ${INIT_STAMP} ]; then
     fi 2> /dev/null
     if ! id -g ${USER} && ! id -ng ${UID}; then
         useradd --create-home --shell /bin/bash --uid ${UID} --gid ${GID} --home-dir ${HOME} ${USER}
+        su -c 'git config --global user.email "you@example.com"' -p ${USER}
+        su -c 'git config --global user.name "Your Name"' -p ${USER}
     fi 2> /dev/null
 
     mkdir -p ${INSTALL_DIR}
