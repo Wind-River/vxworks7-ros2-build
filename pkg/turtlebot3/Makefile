@@ -33,7 +33,7 @@ PKG_URL = https://github.com/Wind-River/vxworks7-layer-for-ros2.git
 PKG_TYPE = git
 PKG_COMMIT_ID = dashing-release-SR0620
 
-PKG_REPO_COMMIT_ID = ros2-devel
+PKG_REPO_COMMIT_ID = dashing-devel
 PKG_REPO_URL = https://raw.githubusercontent.com/ROBOTIS-GIT/${PKG_NAME}/${PKG_REPO_COMMIT_ID}/${PKG_NAME}.repos
 
 PKG_LICENSE = BSD
