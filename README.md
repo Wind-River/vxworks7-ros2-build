@@ -170,9 +170,27 @@ sudo tunctl -u $USER -t tap0
 sudo ifconfig tap0 192.168.200.254 up
 
 cd vxworks7-ros2-build
-qemu-system-x86_64 -m 512M  -kernel $WIND_SDK_HOME/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic  -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -monitor none -append "bootline:fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1 u=target pw=boot o=gei0" -usb -device usb-ehci,id=ehci  -device usb-storage,drive=fat32 -drive file=fat:ro:./export/deploy,id=fat32,format=raw,if=none
 ```
-Run QEMU with a prebuilt VxWorks kernel and the *export* directory mounted as a USB device
+
+### Method 1: USB mount
+
+Run QEMU with a prebuilt VxWorks kernel and the *export* directory mounted as a USB device.
+Check the directory size, it could be that you can get an error described in [#16](https://github.com/Wind-River/vxworks7-ros2-build/issues/16) then use [Method 2](#method-2-hdd-image)
+
+Tested with
+
+```bash
+$ qemu-system-x86_64 --version
+QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.2)
+Copyright (c) 2003-2021 Fabrice Bellard and the QEMU Project developers
+```
+
+```bash
+$ du -sh ./export/deploy
+494M    export/deploy/
+
+$ sudo qemu-system-x86_64 -m 512M  -kernel $WIND_SDK_HOME/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic  -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -monitor none -append "bootline:fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1 u=target pw=boot o=gei0" -usb -device usb-ehci,id=ehci  -device usb-storage,drive=fat32 -drive file=fat:rw:./export/deploy,id=fat32,format=raw,if=none
+```
 
 Run ROS2 example
 ```
@@ -182,7 +200,46 @@ telnet 192.168.200.1
 ```
 -> cmd
 [vxWorks *]# set env LD_LIBRARY_PATH="/bd0a/lib"
-[vxWorks *]# cd  /bd0a/bin/
+[vxWorks *]# cd /bd0a/bin/
+[vxWorks *]# rtp exec -u 0x20000 timer_lambda
+Launching process 'timer_lambda' ...
+Process 'timer_lambda' (process Id = 0xffff80000046f070) launched.
+[INFO] [minimal_timer]: Hello, world!
+[INFO] [minimal_timer]: Hello, world!
+[INFO] [minimal_timer]: Hello, world!
+[INFO] [minimal_timer]: Hello, world!
+```
+
+### Method 2: HDD image
+
+Run QEMU with a prebuilt VxWorks kernel and HDD.
+
+```bash
+# create a disk 800MB
+$ dd if=/dev/zero of=ros2.img count=800 bs=1M
+# format it as a FAT32
+$ mkfs.vfat -F 32 ./ros2.img
+
+# mount, copy, unmount, you need to be sudo 
+$ mkdir -p ~/tmp/mount
+$ sudo mount -o loop -t vfat ./ros2.img $HOME/tmp/mount
+$ sudo cp -r -L ./export/deploy/* $HOME/tmp/mount/.
+$ sudo umount $HOME/tmp/mount
+```
+
+```bash
+sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk-vxworks7-up2-1.7/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+```
+
+Run ROS2 example
+```
+telnet 192.168.200.1
+```
+
+```
+-> cmd
+[vxWorks *]# set env LD_LIBRARY_PATH="/ata4/lib"
+[vxWorks *]# cd /ata4/bin/
 [vxWorks *]# rtp exec -u 0x20000 timer_lambda
 Launching process 'timer_lambda' ...
 Process 'timer_lambda' (process Id = 0xffff80000046f070) launched.
