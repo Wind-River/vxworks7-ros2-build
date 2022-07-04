@@ -260,21 +260,36 @@ Process 'python' (process Id = 0xffff80000046f070) launched.
 ## Build a simple CMake based OSS project
 
 ```
-wget https://labs.windriver.com/downloads/wrsdk-vxworks7-up2-1.7.tar.bz2
-tar –jxvf wrsdk-vxworks7-up2-1.7.tar.bz2
-source ./wrsdk-vxworks7-up2/toolkit/wind_sdk_env.linux
+$ cd vxworks7-ros2-build
+$ docker run -ti -v <path-to-the-wrsdk>:/wrsdk -v $PWD:/work vxros2build:1.0
+$ source /wrsdk/toolkit/wind_sdk_env.linux
 
-git clone https://github.com/Wind-River/vxworks7-ros2-build.git
-cd vxworks7-ros2-build
-export TOP_BUILDDIR=$PWD
-export WIND_USR_MK=$TOP_BUILDDIR/mk/usr
-export PACKAGE_DIR=$TOP_BUILDDIR/pkg
-DEFAULT_BUILD=unixextra make
+$ git clone https://github.com/ttroy50/cmake-examples.git
+$ cd cmake-examples/01-basic/A-hello-cmake; mkdir vxworks-build; cd vxworks-build
+$ cmake .. -DCMAKE_TOOLCHAIN_FILE=/work/buildspecs/cmake/toolchain.cmake
+-- The C compiler identification is Clang 9.0.1
+-- The CXX compiler identification is Clang 9.0.1
+-- Check for working C compiler: /wrsdk/toolkit/host_tools/x86_64-linux/bin/wr-cc
+-- Check for working C compiler: /wrsdk/toolkit/host_tools/x86_64-linux/bin/wr-cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /wrsdk/toolkit/host_tools/x86_64-linux/bin/wr-c++
+-- Check for working CXX compiler: /wrsdk/toolkit/host_tools/x86_64-linux/bin/wr-c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /work/cmake-examples/01-basic/A-hello-cmake/vxworks-build
 
-git clone https://github.com/leethomason/tinyxml2.git
-cd tinyxml2; mkdir vxworks-build; cd vxworks-build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=$TOP_BUILDDIR/buildspecs/cmake/rtp.cmake
-make VERBOSE=1
+$ make
+Scanning dependencies of target hello_cmake
+[ 50%] Building CXX object CMakeFiles/hello_cmake.dir/main.cpp.o
+[100%] Linking CXX executable hello_cmake
+[100%] Built target hello_cmake
 ```
 
 # Legal Notices
