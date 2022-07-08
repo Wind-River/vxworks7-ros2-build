@@ -250,10 +250,14 @@ Process 'timer_lambda' (process Id = 0xffff80000046f070) launched.
 ```
 
 ## Run ROS2 Python examples
+
 ```
-[vxWorks *]# rtp exec -u 0x20000 python3 ros2
-Launching process 'python' ...
-Process 'python' (process Id = 0xffff80000046f070) launched.
+[vxWorks *]# set env AMENT_PREFIX_PATH="/ata4"
+[vxWorks *]# cd /ata4/bin
+[vxWorks *]# rtp exec -u 0x20000 python3 ros2 pkg list
+Launching process 'python3' ...
+Process 'python3' (process Id = 0xffff80000046f070) launched.
+[vxWorks *]#
 ```
 
 
