@@ -161,6 +161,13 @@ wruser@d19165730517:/work make distclean
 wruser@d19165730517:/work make
 ```
 
+It could be that the build fails if it runs behind the firewall, see [#22](https://github.com/Wind-River/vxworks7-ros2-build/issues/22).
+In this case rerun it without a certificate check as
+
+```bash
+WGET_OPT="--no-check-certificate -O" CURL="" make
+```
+
 ## Run ROS2 C/C++ examples
 
 Run QEMU
