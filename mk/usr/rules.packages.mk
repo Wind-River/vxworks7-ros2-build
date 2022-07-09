@@ -185,18 +185,18 @@ endef
 
 define fetch_web
 	$(ECHO) "fetch_web $1 $2 $3"; \
-	if [ -f $$(which $(CURL)) ]; then  \
+	if [ -f "$$(which $(CURL))" ]; then  \
 		$(CURL) $(CURL_OPT) $(3) $(2) ; \
-	elif [ -f $$(which $(WGET)) ]; then \
+	elif [ -f "$$(which $(WGET))" ]; then \
 		$(WGET) $(WGET_OPT) $(3) $(2) ; \
 	fi
 endef
 
 define fetch_ftp
 	$(ECHO) "fetch_ftp $1 $2 $3"; \
-	if [ -f $$(which $(CURL)) ]; then  \
+	if [ -f "$$(which $(CURL))" ]; then  \
 		$(CURL) $(CURL_OPT) $(3) $(2) ; \
-	elif [ -f $$(which $(WGET)) ]; then \
+	elif [ -f "$$(which $(WGET))" ]; then \
 		$(WGET) $(WGET_OPT) $(3) $(2) ; \
 	fi
 endef
