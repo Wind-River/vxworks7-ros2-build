@@ -13,8 +13,13 @@ export TGT_ARCH=$(shell $$CC -print-target-triple -c dummy.c | sed -e 's/arm64/a
 
 .PHONY: clean_buildstamps
 
-all: $(DOWNLOADS_DIR) $(STAMP_DIR) $(EXPORT_DIR)
+all: check-env $(DOWNLOADS_DIR) $(STAMP_DIR) $(EXPORT_DIR)
 	for p in $(DEFAULT_BUILD); do $(MAKE) -C pkg/$$p $$p.install || exit 1; done;
+
+check-env:
+ifeq ($(WIND_CC_SYSROOT),)
+	$(error WIND_CC_SYSROOT is not set, please source the environment)
+endif
 
 $(EXPORT_DIR):
 	@mkdir -p $(ROOT_DIR)
