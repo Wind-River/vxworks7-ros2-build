@@ -303,6 +303,24 @@ Scanning dependencies of target hello_cmake
 [100%] Built target hello_cmake
 ```
 
+## Native ROS2 compilation
+
+It is possible to build ROS2 natively using the same docker image
+
+```bash
+$ cd vxworks7-ros2-build
+$ docker run -ti -v <path-to-the-wrsdk>:/wrsdk -v $PWD:/work vxros2build:1.0
+wruser@90c3e6ebcc76:/work$ mkdir -p build/ros2/ros2_native/src && cd build/ros2/ros2_native
+wruser@90c3e6ebcc76:/work/build/ros2/ros2_native$ vcs import src < /work/build/ros2/ros2_ws/ros2.repos
+wruser@90c3e6ebcc76:/work/build/ros2/ros2_native$ colcon build --merge-install --cmake-force-configure --packages-up-to-regex examples_rcl* ros2action ros2component ros2msg ros2node ros2pkg ros2service ros2topic ros2cli ros2lifecycle ros2multicast ros2param ros2run ros2srv pendulum_control --cmake-args -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_TESTING:BOOL=OFF
+
+wruser@90c3e6ebcc76:/work/build/ros2/ros2_native/install$ source setup.bash
+wruser@90c3e6ebcc76:/work/build/ros2/ros2_native/install$ ros2 run demo_nodes_py talker
+[INFO] [talker]: Publishing: "Hello World: 0"
+[INFO] [talker]: Publishing: "Hello World: 1"
+[INFO] [talker]: Publishing: "Hello World: 2"
+```
+
 # Legal Notices
 
 All product names, logos, and brands are property of their respective owners. All company,

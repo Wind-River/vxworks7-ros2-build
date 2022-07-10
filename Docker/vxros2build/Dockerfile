@@ -94,6 +94,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     libtinyxml2-dev \
     libeigen3-dev \
     libopencv-dev \
+    libpcre3-dev \
+    liblog4cxx-dev \
+    python3-numpy \
     && rm -rf /var/lib/apt/lists/*
 
 # Add development headers for rviz
