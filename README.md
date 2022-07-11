@@ -134,10 +134,19 @@ tar –jxvf wrsdk-vxworks7-up2-1.7.tar.bz2
 ```
 
 Run Docker image
-```
+
+```bash
 cd vxworks7-ros2-build
 docker run -ti -v <path-to-the-wrsdk>:/wrsdk -v $PWD:/work vxros2build:1.0
 ```
+
+By default it runs as a user ```wruser``` with ```uid=1000(wruser) gid=1000(wruser)```, if you have different ids, run it as
+
+```bash
+$ docker run -ti -e UID=`id -u` -e GID=`id -g` -v <path-to-the-wrsdk>:/wrsdk -v $PWD:/work vxros2build:1.0
+```
+
+See [Dockerfile](Docker/vxbuild/Dockerfile) for the complete list of environment variables
 
 Inside Docker container: Source the development environment
 ```
