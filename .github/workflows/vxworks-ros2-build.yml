@@ -1,0 +1,88 @@
+# This is a workflow for the VxWorks ROS2 build.
+# It builds a ROS2 VxWorks port against the VxWorks SDK 
+#
+# The workflow can be started 
+#  - manually
+
+name: 'VxWorks ROS2 build'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        branch: [dashing-release-SR0640-python]
+        sdk: [wrsdk-vxworks7-up2-1.7]
+
+    runs-on: ubuntu-20.04
+    steps:
+
+      - name: Checks-out a branch ${{ matrix.branch }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Get uid and gid
+        run: |
+          echo "uid=`id -u`" >> $GITHUB_ENV
+          echo "gid=`id -g`" >> $GITHUB_ENV
+
+      - name: Download the ${{ matrix.sdk }} SDK
+        uses: carlosperate/download-file-action@v1
+        with:
+          file-url: 'https://labs.windriver.com/downloads/${{ matrix.sdk }}.tar.bz2'
+          location: '${{ runner.temp }}/_github_home'
+
+      - name: Extract the ${{ matrix.sdk }} SDK
+        run: |
+          mkdir ${{ runner.temp }}/_github_home/wrsdk
+          cd ${{ runner.temp }}/_github_home/wrsdk
+          tar xvfj ${{ runner.temp }}/_github_home/${{ matrix.sdk }}.tar.bz2 --strip 1
+
+#      - name: Build vxbuild docker image
+#        uses: docker/build-push-action@v3
+#        with:
+#          context: Docker/vxbuild/.
+#          push: false
+#          tags: vxbuild:1.0
+
+#      - name: Build vxros2build docker image
+#        uses: docker/build-push-action@v3
+#        with:
+#          context: Docker/vxros2build/.
+#          push: false
+#          tags: vxros2build:1.0
+
+      - name: Build ROS2 ${{ matrix.branch }} against VxWorks ${{ matrix.sdk }}
+        env:
+          UID: ${{ env.uid }}
+          GID: ${{ env.gid }}
+        uses: docker://razr/vxros2build:1.0
+        with:
+          args: source /github/home/wrsdk/toolkit/wind_sdk_env.linux && make -C /github/workspace
+
+      - name: Create an HDD image
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dosfstools
+          cd ${{ github.workspace }}
+          dd if=/dev/zero of=ros2.img count=800 bs=1M
+          mkfs.vfat -F 32 ./ros2.img
+          mkdir -p /tmp/mount
+          sudo mount -o loop -t vfat ./ros2.img /tmp/mount
+          sudo cp -r -L ./export/deploy/* /tmp/mount/.
+          sudo umount /tmp/mount
+
+      - name: Prepare artifacts
+        run: |
+          cp ${{ runner.temp }}/_github_home/wrsdk/bsps/itl_generic_2_0_2_1/boot/vxWorks ${{ github.workspace }}
+
+      - name: Upload VxWorks and the HDD image
+        uses: actions/upload-artifact@v2
+        with:
+          name: HDD image ${{ matrix.sdk }} ${{ matrix.branch }}
+          path: |
+            ${{ github.workspace }}/ros2.img
+            ${{ github.workspace }}/vxWorks
