@@ -2,6 +2,8 @@ VxWorks® 7 ROS2 Build Scripts
 ===
 ---
 
+![vxworks ros2 build workflow](https://github.com/razr/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml/badge.svg)
+
 # Overview
 
 The VxWorks 7 ROS2 Build Scripts provide build scripts to automate building
