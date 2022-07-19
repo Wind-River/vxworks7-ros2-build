@@ -2,7 +2,7 @@ VxWorks® 7 ROS2 Build Scripts
 ===
 ---
 
-![vxworks ros2 build workflow](https://github.com/razr/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml/badge.svg)
+![vxworks ros2 build workflow](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml/badge.svg)
 
 # Overview
 
