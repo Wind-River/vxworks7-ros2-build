@@ -104,6 +104,7 @@ ros2.install : ros2.build
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) catkin_pkg
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyyaml
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) empy
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyelftools
 	cp $(ROOT_DIR)/bin/* $(DEPLOY_DIR)/bin/.
 	cp $(ROOT_DIR)/lib/lib* $(DEPLOY_DIR)/lib/.
 	cp -r $(ROOT_DIR)/lib/python3.8/* $(DEPLOY_DIR)/lib/python3.8/.
