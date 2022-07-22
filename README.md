@@ -1,12 +1,10 @@
-VxWorks® 7 ROS2 Build Scripts
-===
----
+# VxWorks® 7 ROS2 Build
 
 ![vxworks ros2 build workflow](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml/badge.svg)
 
-# Overview
+## Overview
 
-The VxWorks 7 ROS2 Build Scripts provide build scripts to automate building
+The VxWorks 7 ROS2 Build project provides a build environment to automate building
 ROS2 with a VxWorks SDK.
 
 The Robot Operating System 2 is a set of software libraries and tools that
@@ -21,9 +19,8 @@ These new use cases include:
 * Production environment
 * Design patterns for building and structuring systems
 
-
 The default configuration build configuration will build a minimal set of
-ROS2 packages necessary for running the example applications.
+ROS2 packages necessary for running the Turtlebot 3 and example Python and C++ applications.
 
 This configuration is suited for prototyping and personal
 use.  Please refer to the details of each individual ROS2 package for details
@@ -33,7 +30,7 @@ on what requirements and terms of use they may have.
 use the resources available or contact your Wind River sales representative
 to arrange for consulting services.
 
-# Project License
+## Project License
 
 The source code for this project is provided under the Apache 2.0 license license.
 Text for the ROS2 dependencies and other applicable license notices can be found in
@@ -50,7 +47,7 @@ By downloading, installing or using the software, you acknowledge that you
 have read, understand, and are agreeing to the terms of the License.
 Subject to the License, you can proceed to download the VxWorks SDK.
 
-# Prerequisite(s)
+## Prerequisite(s)
 
 * Download a VxWorks Software Development Kit from Wind River Labs
    * https://labs.windriver.com/downloads/wrsdk.html
@@ -73,135 +70,182 @@ For the standard build you must also have:
 * Mercurial (hg) package for Eigen (optional)
 
 ## Directory Structure
-Packages
-```
-├── Docker
+
+The project uses Makefile to invoke a ros2 and turtlebot3 colcon based build, and also builds some dependencies.
+
+```bash
+├── Docker          - Dockefiles used to build ROS 2
 ├── Makefile
 ├── pkg
-│   ├── asio
-│   ├── colcon
-│   ├── python
-│   ├── ros2
-│   ├── sdk
-│   ├── tinyxml2
-│   ├── turtlebot3
-│   └── unixextra
+│   ├── asio        - Fast-RTPS dependency
+│   ├── colcon      - host tool to build ROS2
+│   ├── python      - python 3.8 version used by VxWorks
+│   ├── ros2        - ROS 2 middleware
+│   ├── sdk         - various SDK improvements necessary to build ROS2
+│   ├── tinyxml2    - ROS2 dependency
+│   ├── turtlebot3  - Turtlebot3 packages
+│   └── unixextra   - extra Unix functions necessary to build ROS2
 ```
-It uses Makefile to invoke ros2 and turtlebot3 colcon build, and also build some dependencies.
-A Docker (Ubuntu 18.04) based build is used to avoid a necessity for installing build dependencies.
-Build Artifacs
-```
+
+After the build following artifacs will be created:
+
+```bash
 ├── build      - pkg build artifacts
-├── downloads  - download arctifacts
+    ├── asio
+    ├── colcon
+    ├── python
+    ├── ros2
+        ├── patches
+        └── ros2_ws - ROS2 workspace
+    ├── tinyxml2
+    └── unixextra
+├── downloads  - download artifacts
 ├── export     
     ├── deploy - a ready-to-deploy filesystem with ROS2 libraries and binaries
     └── root   - a development artifacts with ROS2 libraries and headers
 ``` 
 
 ## ROS2 VxWorks patches
-ROS2 patches for VxWorks are located in the separate repository
-https://github.com/Wind-River/vxworks7-layer-for-ros2
 
-It is cloned during the build to the *patches* dir
-```
-├── pkg
+Patches are necessary to build ROS2 for VxWorks which are located in the separate [repository](https://github.com/Wind-River/vxworks7-layer-for-ros2)
+The repository is cloned during the build to the *patches* dir
+
+```bash
+├── build
 │   ├── ros2
 │   │   ├── patches
-
 ```
-## Build VxWorks 7 and ROS2
 
-Clone this repository using the master branch
-```
+## Build ROS2 and its dependecies
+
+### Clone this repository using the `master` branch
+
+```bash
 git clone https://github.com/Wind-River/vxworks7-ros2-build.git
 cd vxworks7-ros2-build
 ```
 
-Build Docker image
-```
-cd Docker/vxbuild
-docker build -t vxbuild:1.0 .
-cd Docker/vxros2build
-docker build -t vxros2build:1.0 .
+### Build Docker image
+
+A Docker (Ubuntu 18.04) based build is recommended to avoid a necessity of installing build dependencies.
+
+```bash
+docker build -t vxbuild:1.0 Docker/vxbuild/.
+docker build -t vxros2build:1.0 Docker/vxros2build/.
 ```
 
-Download the VxWorks SDK for IA - UP Squared from https://labs.windriver.com/downloads/wrsdk.html
-```
+### Download and extract the VxWorks SDK
+
+The SDK for IA - UP Squared shall be used from https://labs.windriver.com/downloads/wrsdk.html
+
+```bash
+cd Downloads
 wget https://labs.windriver.com/downloads/wrsdk-vxworks7-up2-1.7.tar.bz2
-```
-
-Extract the VxWorks SDK tarball
-```
 tar –jxvf wrsdk-vxworks7-up2-1.7.tar.bz2
 ```
 
-Run Docker image
+### Run Docker image
 
 ```bash
 cd vxworks7-ros2-build
-docker run -ti -v <path-to-the-wrsdk>:/wrsdk -v $PWD:/work vxros2build:1.0
+docker run -ti -v ~/Downloads/wrsdk-vxworks7-up2-1.7:/wrsdk -v $PWD:/work vxros2build:1.0
 ```
 
 By default it runs as a user ```wruser``` with ```uid=1000(wruser) gid=1000(wruser)```, if you have different ids, run it as
 
 ```bash
-$ docker run -ti -e UID=`id -u` -e GID=`id -g` -v <path-to-the-wrsdk>:/wrsdk -v $PWD:/work vxros2build:1.0
+$ docker run -ti -e UID=`id -u` -e GID=`id -g` -v ~/Downloads/wrsdk-vxworks7-up2-1.7:/wrsdk -v $PWD:/work vxros2build:1.0
 ```
 
 See [Dockerfile](Docker/vxbuild/Dockerfile) for the complete list of environment variables
 
-Inside Docker container: Source the development environment
-```
+### Start build
+
+Inside Docker container: source the development environment and start build
+
+```bash
 wruser@d19165730517:/work source /wrsdk/toolkit/wind_sdk_env.linux
-```
-
-Inside Docker container: Run make to build ROS2 using the SDK
-```
 wruser@d19165730517:/work make
+wruser@d19165730517:/work exit
 ```
 
-Build artifacts are in the export directory
-```
+Build artifacts are in the `export` directory
+
+```bash
 wruser@d19165730517:/work ls export/deploy/
 bin  lib
 ```
 
 Rebuild from scratch
-```
+
+```bahs
 wruser@d19165730517:/work make distclean
 wruser@d19165730517:/work make
+wruser@d19165730517:/work exit
 ```
 
 It could be that the build fails if it runs behind the firewall, see [#22](https://github.com/Wind-River/vxworks7-ros2-build/issues/22).
 In this case rerun it without a certificate check as
 
 ```bash
-WGET_OPT="--no-check-certificate -O" CURL="" make
+wruser@d19165730517:/work WGET_OPT="--no-check-certificate -O" CURL="" make
 ```
 
-## Run ROS2 C/C++ examples
+## Run ROS2 examples
 
-Run QEMU
-```
+QEMU is used to boot VxWorks and run Python and C++ ROS2 examples, for that `tap0` interface shall be configured.
+
+```bash
 sudo apt-get install uml-utilities
 sudo tunctl -u $USER -t tap0
 sudo ifconfig tap0 192.168.200.254 up
-
-cd vxworks7-ros2-build
 ```
 
-### Method 1: USB mount
-
-Run QEMU with a prebuilt VxWorks kernel and the *export* directory mounted as a USB device.
-Check the directory size, it could be that you can get an error described in [#16](https://github.com/Wind-River/vxworks7-ros2-build/issues/16) then use [Method 2](#method-2-hdd-image)
-
-Tested with
+VxWorks is tested with
 
 ```bash
 $ qemu-system-x86_64 --version
 QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.2)
 Copyright (c) 2003-2021 Fabrice Bellard and the QEMU Project developers
 ```
+
+Filesystem with ROS2 artifacts needs to be prepared to boot with VxWorks.
+
+### Method 1: Create an HDD image
+
+Run QEMU with a prebuilt VxWorks kernel and a created HDD image.
+
+```bash
+# create a disk 800MB
+$ dd if=/dev/zero of=ros2.img count=800 bs=1M
+# format it as a FAT32
+$ mkfs.vfat -F 32 ./ros2.img
+
+# mount, copy, unmount, you need to be `sudo`
+$ mkdir -p ~/tmp/mount
+$ sudo mount -o loop -t vfat ./ros2.img ~/tmp/mount
+$ sudo cp -r -L ./export/deploy/* ~/tmp/mount/.
+$ sudo umount ~/tmp/mount
+```
+
+```bash
+sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk-vxworks7-up2-1.7/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+```
+
+The HDD image will be mounted inside VxWorks as a `/ata4` device
+
+```bash
+-> ls "/ata4"
+/ata4/bin
+/ata4/lib
+/ata4/share
+```
+
+### Method 2: USB mount (obsolete)
+
+Used in the past, when a directory size was less than 512MB. Check the directory size, it could be that you can get an error described in [#16](https://github.com/Wind-River/vxworks7-ros2-build/issues/16) then use [Method 1](#method-1-create-an-hdd-image).
+
+Run QEMU with a prebuilt VxWorks kernel and the *deploy* directory mounted as a USB device.
 
 ```bash
 $ du -sh ./export/deploy
@@ -210,74 +254,84 @@ $ du -sh ./export/deploy
 $ sudo qemu-system-x86_64 -m 512M  -kernel $WIND_SDK_HOME/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic  -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -monitor none -append "bootline:fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1 u=target pw=boot o=gei0" -usb -device usb-ehci,id=ehci  -device usb-storage,drive=fat32 -drive file=fat:rw:./export/deploy,id=fat32,format=raw,if=none
 ```
 
-Run ROS2 example
+The USB disk will be mounted inside VxWorks as a `/bd0a` device
+
+```bash
+-> ls "/bd0a"
+/bd0a/bin
+/bd0a/lib
 ```
+
+### Telnet to the VxWorks QEMU target
+
+```bash
 telnet 192.168.200.1
 ```
 
-```
--> cmd
-[vxWorks *]# set env LD_LIBRARY_PATH="/bd0a/lib"
-[vxWorks *]# cd /bd0a/bin/
-[vxWorks *]# rtp exec -u 0x20000 timer_lambda
-Launching process 'timer_lambda' ...
-Process 'timer_lambda' (process Id = 0xffff80000046f070) launched.
-[INFO] [minimal_timer]: Hello, world!
-[INFO] [minimal_timer]: Hello, world!
-[INFO] [minimal_timer]: Hello, world!
-[INFO] [minimal_timer]: Hello, world!
-```
+### Run ROS2 C++ examples
 
-### Method 2: HDD image
-
-Run QEMU with a prebuilt VxWorks kernel and HDD.
+It is possible to run examples by directly invoking binaries
 
 ```bash
-# create a disk 800MB
-$ dd if=/dev/zero of=ros2.img count=800 bs=1M
-# format it as a FAT32
-$ mkfs.vfat -F 32 ./ros2.img
-
-# mount, copy, unmount, you need to be sudo 
-$ mkdir -p ~/tmp/mount
-$ sudo mount -o loop -t vfat ./ros2.img $HOME/tmp/mount
-$ sudo cp -r -L ./export/deploy/* $HOME/tmp/mount/.
-$ sudo umount $HOME/tmp/mount
-```
-
-```bash
-sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk-vxworks7-up2-1.7/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
-```
-
-Run ROS2 example
-```
-telnet 192.168.200.1
-```
-
-```
 -> cmd
-[vxWorks *]# set env LD_LIBRARY_PATH="/ata4/lib"
 [vxWorks *]# cd /ata4/bin/
+[vxWorks *]# set env LD_LIBRARY_PATH="/ata4/lib"
 [vxWorks *]# rtp exec -u 0x20000 timer_lambda
 Launching process 'timer_lambda' ...
 Process 'timer_lambda' (process Id = 0xffff80000046f070) launched.
 [INFO] [minimal_timer]: Hello, world!
 [INFO] [minimal_timer]: Hello, world!
-[INFO] [minimal_timer]: Hello, world!
-[INFO] [minimal_timer]: Hello, world!
 ```
 
-## Run ROS2 Python examples
+Or by using the `ros2cli` interface
 
-```
+```bash
+[vxWorks *]# cd /ata4/bin/
+[vxWorks *]# set env LD_LIBRARY_PATH="/ata4/lib"
 [vxWorks *]# set env AMENT_PREFIX_PATH="/ata4"
-[vxWorks *]# cd /ata4/bin
-[vxWorks *]# rtp exec -u 0x20000 python3 ros2 pkg list
+[vxWorks *]# rtp exec -u 0x20000 python3 ros2 run examples_rclcpp_minimal_timer timer_lambda
 Launching process 'python3' ...
-Process 'python3' (process Id = 0xffff80000046f070) launched.
-[vxWorks *]#
+Process 'python3' (process Id = 0xffff800008268ac0) launched.
+[INFO] [minimal_timer]: Hello, world!
+[INFO] [minimal_timer]: Hello, world!
 ```
 
+### Run ROS2 Python examples
+
+It is possible to run examples by directly invoking python scripts. First figure out the full path.
+
+```bash
+[vxWorks *]# rtp exec -u 0x20000 python3 ros2 pkg executables --full-path demo_nodes_py
+ Launching process 'python3' ...
+ Process 'python3' (process Id = 0xffff80000046f070) launched.
+/ata4/lib/demo_nodes_py/add_two_ints_client
+/ata4/lib/demo_nodes_py/add_two_ints_client_async
+/ata4/lib/demo_nodes_py/add_two_ints_server
+/ata4/lib/demo_nodes_py/listener
+/ata4/lib/demo_nodes_py/listener_qos
+/ata4/lib/demo_nodes_py/listener_serialized
+/ata4/lib/demo_nodes_py/talker
+/ata4/lib/demo_nodes_py/talker_qos
+```
+
+Then Invoke Python interpreter and pass the script as a parameter
+
+```bash
+[vxWorks *]# rtp exec -u 0x20000 python3 /ata4/lib/demo_nodes_py/talker
+[INFO] [talker]: Publishing: "Hello World: 0"
+[INFO] [talker]: Publishing: "Hello World: 1"
+```
+
+Or by using the `ros2cli` interface
+
+```bash
+[vxWorks *]# rtp exec -u 0x20000 python3 ros2 run demo_nodes_py talker
+Launching process 'python3' ...
+Process 'python3' (process Id = 0xffff800008269c00) launched.
+
+[INFO] [talker]: Publishing: "Hello World: 0"
+[INFO] [talker]: Publishing: "Hello World: 1"
+```
 
 ## Build a simple CMake based OSS project
 
@@ -316,11 +370,11 @@ Scanning dependencies of target hello_cmake
 
 ## Native ROS2 compilation
 
-It is possible to build ROS2 natively using the same docker image
+Native ROS2 is used mostly for the fast prototyping during the ROS 2 development. Use the same docker image for that.
 
 ```bash
 $ cd vxworks7-ros2-build
-$ docker run -ti -v <path-to-the-wrsdk>:/wrsdk -v $PWD:/work vxros2build:1.0
+$ docker run -ti -v $PWD:/work vxros2build:1.0
 wruser@90c3e6ebcc76:/work$ mkdir -p build/ros2/ros2_native/src && cd build/ros2/ros2_native
 wruser@90c3e6ebcc76:/work/build/ros2/ros2_native$ vcs import src < /work/build/ros2/ros2_ws/ros2.repos
 wruser@90c3e6ebcc76:/work/build/ros2/ros2_native$ colcon build --merge-install --cmake-force-configure --packages-up-to-regex examples_rcl* ros2action ros2component ros2msg ros2node ros2pkg ros2service ros2topic ros2cli ros2lifecycle ros2multicast ros2param ros2run ros2srv pendulum_control --cmake-args -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_TESTING:BOOL=OFF
@@ -329,10 +383,9 @@ wruser@90c3e6ebcc76:/work/build/ros2/ros2_native/install$ source setup.bash
 wruser@90c3e6ebcc76:/work/build/ros2/ros2_native/install$ ros2 run demo_nodes_py talker
 [INFO] [talker]: Publishing: "Hello World: 0"
 [INFO] [talker]: Publishing: "Hello World: 1"
-[INFO] [talker]: Publishing: "Hello World: 2"
 ```
 
-# Legal Notices
+## Legal Notices
 
 All product names, logos, and brands are property of their respective owners. All company,
 product and service names used in this software are for identification purposes only.
