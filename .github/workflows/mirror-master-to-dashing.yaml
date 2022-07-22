@@ -1,0 +1,13 @@
+name: Mirror master to dashing-release-SR0640-python
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  mirror-master-to-dashing:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: zofrex/mirror-branch@v1
+      with:
+        target-branch: dashing-release-SR0640-python
