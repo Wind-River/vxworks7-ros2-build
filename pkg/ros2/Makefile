@@ -89,7 +89,7 @@ ros2.build: ros2.configure
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
 	export PATH=$(3PP_HOST_DIR)/bin:$(PATH); \
 	export PYTHONPATH=$(3PP_HOST_DIR)/lib/python3.8/site-packages:$(PYTHONPATH); \
-	colcon build --merge-install --install-base $(ROOT_DIR) --cmake-force-configure --packages-up-to $(PKG_PKGS_UP_TO) \
+	colcon build --merge-install --install-base $(ROOT_DIR) --cmake-force-configure --packages-up-to-regex $(PKG_PKGS_UP_TO) \
 		--cmake-args \
                 -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
                 -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
@@ -105,10 +105,10 @@ ros2.install : ros2.build
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyyaml
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) empy
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyelftools
-	cp $(ROOT_DIR)/bin/* $(DEPLOY_DIR)/bin/.
-	cp $(ROOT_DIR)/lib/lib* $(DEPLOY_DIR)/lib/.
-	cp -r $(ROOT_DIR)/lib/python3.8/* $(DEPLOY_DIR)/lib/python3.8/.
-	find $(ROOT_DIR)/lib/examples_rclcpp_minimal_* -type f -exec cp {} $(DEPLOY_DIR)/bin \;
+	@$(call echo_action,Installing build artifacts,$*)
+	cp -r $(ROOT_DIR)/bin/* $(DEPLOY_DIR)/bin/.
+	cp -r $(ROOT_DIR)/lib/* $(DEPLOY_DIR)/lib/.
+	cp -r $(ROOT_DIR)/share $(DEPLOY_DIR)/.
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
