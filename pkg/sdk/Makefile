@@ -51,13 +51,16 @@ define python_fix
 	install -m 755 files/python3.8 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/ ;
 	ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.8 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 ;
 	install -m 755 files/libpython3.8.so.1.0 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/ ;
-	sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonLibs.cmake ;
-	sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonInterp.cmake ;
 	install -m 755 files/_ssl.cpython-38-x86_64-linux-gnu.so $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/python3.8/lib-dynload/ ; \
 	if [ ! -f $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 ]; then \
 		$(CURL) "https://bootstrap.pypa.io/get-pip.py" -o "$(DOWNLOADS_DIR)/get-pip.py" ; \
 		python3 $(DOWNLOADS_DIR)/get-pip.py ; \
 	fi ;
+endef
+
+define cmake_fix
+	sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonLibs.cmake ;
+	sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonInterp.cmake ;
 endef
 
 sdk.download :
@@ -90,6 +93,8 @@ sdk.install : sdk.build
 	$(call compiler_fix,$*)
 	@$(call echo_action,Applying Host Python patches,$*)
 	$(call python_fix,$*)
+	@$(call echo_action,Applying CMake patches,$*)
+	$(call cmake_fix,$*)
 	@$(call echo_action,Deploying SDK artifacts,$*)
 	cp $(3PP_DEPLOY_DIR)/lib/* $(DEPLOY_DIR)/lib/.
 	cp $(3PP_DEPLOY_DIR)/usr/bin/* $(DEPLOY_DIR)/bin/.
