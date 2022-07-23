@@ -54,7 +54,10 @@ define python_fix
 	sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonLibs.cmake ;
 	sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonInterp.cmake ;
 	install -m 755 files/_ssl.cpython-38-x86_64-linux-gnu.so $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/python3.8/lib-dynload/ ; \
-	python3.8 files/get-pip.py ;
+	if [ ! -f $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 ]; then \
+		$(CURL) "https://bootstrap.pypa.io/get-pip.py" -o "$(DOWNLOADS_DIR)/get-pip.py" ; \
+		python3 $(DOWNLOADS_DIR)/get-pip.py ; \
+	fi ;
 endef
 
 sdk.download :
@@ -85,7 +88,7 @@ sdk.install : sdk.build
 	$(call vxworks_fix,$*)
 	@$(call echo_action,Applying Compiler patches,$*)
 	$(call compiler_fix,$*)
-	@$(call echo_action,Applying Python patches,$*)
+	@$(call echo_action,Applying Host Python patches,$*)
 	$(call python_fix,$*)
 	@$(call echo_action,Deploying SDK artifacts,$*)
 	cp $(3PP_DEPLOY_DIR)/lib/* $(DEPLOY_DIR)/lib/.
