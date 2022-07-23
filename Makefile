@@ -3,7 +3,6 @@ export WIND_USR_MK=$(TOP_BUILDDIR)/mk/usr
 
 include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk
-include $(WIND_USR_MK)/defs.crossbuild.mk
 
 DEFAULT_BUILD ?= sdk python unixextra asio tinyxml2 colcon ros2 turtlebot3
 
@@ -33,11 +32,11 @@ $(STAMP_DIR):
 	@mkdir -p $(STAMP_DIR)
 
 clean_buildstamps:
-	@rm -f $(TOP_BUILDDIR)/build/.stamp/*
+	@rm -f $(STAMP_DIR)/*
 
 distclean: clean
 	@rm -rf $(DOWNLOADS_DIR)
-	@rm -rf $(TOP_BUILDDIR)/build
+	@rm -rf $(BUILD_DIR)
 	@rm -rf $(EXPORT_DIR)
 
 clean: clean_buildstamps
