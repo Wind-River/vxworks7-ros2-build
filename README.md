@@ -148,13 +148,13 @@ tar –jxvf wrsdk-vxworks7-up2-1.7.tar.bz2
 
 ```bash
 cd vxworks7-ros2-build
-docker run -ti -v ~/Downloads/wrsdk-vxworks7-up2-1.7:/wrsdk -v $PWD:/work vxros2build:1.0
+docker run -ti -v ~/Downloads/wrsdk-vxworks7-up2:/wrsdk -v $PWD:/work vxros2build:1.0
 ```
 
 By default it runs as a user ```wruser``` with ```uid=1000(wruser) gid=1000(wruser)```, if you have different ids, run it as
 
 ```bash
-$ docker run -ti -e UID=`id -u` -e GID=`id -g` -v ~/Downloads/wrsdk-vxworks7-up2-1.7:/wrsdk -v $PWD:/work vxros2build:1.0
+$ docker run -ti -e UID=`id -u` -e GID=`id -g` -v ~/Downloads/wrsdk-vxworks7-up2:/wrsdk -v $PWD:/work vxros2build:1.0
 ```
 
 See [Dockerfile](Docker/vxbuild/Dockerfile) for the complete list of environment variables
@@ -229,7 +229,7 @@ $ sudo umount ~/tmp/mount
 ```
 
 ```bash
-sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk-vxworks7-up2-1.7/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk-vxworks7-up2/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
 
 The HDD image will be mounted inside VxWorks as a `/ata4` device
@@ -251,7 +251,7 @@ Run QEMU with a prebuilt VxWorks kernel and the *deploy* directory mounted as a 
 $ du -sh ./export/deploy
 494M    export/deploy/
 
-$ sudo qemu-system-x86_64 -m 512M  -kernel $WIND_SDK_HOME/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic  -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -monitor none -append "bootline:fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1 u=target pw=boot o=gei0" -usb -device usb-ehci,id=ehci  -device usb-storage,drive=fat32 -drive file=fat:rw:./export/deploy,id=fat32,format=raw,if=none
+$ sudo qemu-system-x86_64 -m 512M  -kernel ~/Downloads/wrsdk-vxworks7-up2/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic  -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -monitor none -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=target pw=boot o=gei0" -usb -device usb-ehci,id=ehci  -device usb-storage,drive=fat32 -drive file=fat:rw:./export/deploy,id=fat32,format=raw,if=none
 ```
 
 The USB disk will be mounted inside VxWorks as a `/bd0a` device
@@ -337,12 +337,12 @@ Process 'python3' (process Id = 0xffff800008269c00) launched.
 
 ```
 $ cd vxworks7-ros2-build
-$ docker run -ti -v <path-to-the-wrsdk>:/wrsdk -v $PWD:/work vxros2build:1.0
-$ source /wrsdk/toolkit/wind_sdk_env.linux
+$ docker run -ti -v ~/Downloads/wrsdk-vxworks7-up2:/wrsdk -v $PWD:/work vxros2build:1.0
+wruser@690af330acaa:/work$ source /wrsdk/toolkit/wind_sdk_env.linux
 
-$ git clone https://github.com/ttroy50/cmake-examples.git
-$ cd cmake-examples/01-basic/A-hello-cmake; mkdir vxworks-build; cd vxworks-build
-$ cmake .. -DCMAKE_TOOLCHAIN_FILE=/work/buildspecs/cmake/toolchain.cmake
+wruser@690af330acaa:/work$ git clone https://github.com/ttroy50/cmake-examples.git
+wruser@690af330acaa:/work$ cd cmake-examples/01-basic/A-hello-cmake; mkdir vxworks-build; cd vxworks-build
+wruser@690af330acaa:/work/cmake-examples/01-basic/A-hello-cmake/vxworks-build$ cmake .. -DCMAKE_TOOLCHAIN_FILE=/work/buildspecs/cmake/toolchain.cmake
 -- The C compiler identification is Clang 9.0.1
 -- The CXX compiler identification is Clang 9.0.1
 -- Check for working C compiler: /wrsdk/toolkit/host_tools/x86_64-linux/bin/wr-cc
@@ -361,7 +361,7 @@ $ cmake .. -DCMAKE_TOOLCHAIN_FILE=/work/buildspecs/cmake/toolchain.cmake
 -- Generating done
 -- Build files have been written to: /work/cmake-examples/01-basic/A-hello-cmake/vxworks-build
 
-$ make
+wruser@690af330acaa:/work/cmake-examples/01-basic/A-hello-cmake/vxworks-build$ make
 Scanning dependencies of target hello_cmake
 [ 50%] Building CXX object CMakeFiles/hello_cmake.dir/main.cpp.o
 [100%] Linking CXX executable hello_cmake
@@ -374,15 +374,135 @@ Native ROS2 is used mostly for the fast prototyping during the ROS 2 development
 
 ```bash
 $ cd vxworks7-ros2-build
-$ docker run -ti -v $PWD:/work vxros2build:1.0
-wruser@90c3e6ebcc76:/work$ mkdir -p build/ros2/ros2_native/src && cd build/ros2/ros2_native
-wruser@90c3e6ebcc76:/work/build/ros2/ros2_native$ vcs import src < /work/build/ros2/ros2_ws/ros2.repos
-wruser@90c3e6ebcc76:/work/build/ros2/ros2_native$ colcon build --merge-install --cmake-force-configure --packages-up-to-regex examples_rcl* ros2action ros2component ros2msg ros2node ros2pkg ros2service ros2topic ros2cli ros2lifecycle ros2multicast ros2param ros2run ros2srv pendulum_control --cmake-args -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_TESTING:BOOL=OFF
+$ docker run -ti -h ros2native -v $PWD:/work vxros2build:1.0
+wruser@ros2native:/work$ mkdir -p ros2_native/src && cd ros2_native
+wruser@ros2native:/work/ros2_native$ vcs import src < /work/build/ros2/ros2_ws/ros2.repos
+wruser@ros2native:/work/ros2_native$ colcon build --merge-install --cmake-force-configure --packages-up-to-regex examples_rcl* ros2action ros2component ros2msg ros2node ros2pkg ros2service ros2topic ros2cli ros2lifecycle ros2multicast ros2param ros2run ros2srv pendulum_control --cmake-args -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_TESTING:BOOL=OFF
 
-wruser@90c3e6ebcc76:/work/build/ros2/ros2_native/install$ source setup.bash
-wruser@90c3e6ebcc76:/work/build/ros2/ros2_native/install$ ros2 run demo_nodes_py talker
+wruser@ros2native:/work/ros2_native/install$ source setup.bash
+wruser@ros2native:/work/ros2_native/install$ ros2 run demo_nodes_py talker
 [INFO] [talker]: Publishing: "Hello World: 0"
 [INFO] [talker]: Publishing: "Hello World: 1"
+```
+
+## VxWorks ROS2 development
+
+The following example shows how to develop and run ROS2 package called `my_package` under VxWorks. It is recommended to prototype it first under the native ROS 2 build environment that contains the same ROS 2 version as a VxWorks one. After package is developed and tested, it can be copied and compiled under VxWorks ROS2 build environment.
+
+### Step 1: create and test new ROS2 package under native ROS2 build environment
+
+1. Follow [the procedure](#native-ros2-compilation) of how to prepare native ROS2 build environment.
+2. Create a new ROS2 package
+
+```bash
+wruser@ros2native:/work$ cd ros2_native/src
+wruser@ros2native:/work/ros2_native/src$ source ../install/setup.bash
+wruser@ros2native:/work/ros2_native/src$ ros2 pkg create --build-type ament_cmake my_package
+going to create a new package
+package name: my_package
+destination directory: /work/ros2_ws/src
+package format: 3
+version: 0.0.0
+description: TODO: Package description
+maintainer: ['wruser <wruser@todo.todo>']
+licenses: ['TODO: License declaration']
+build type: ament_cmake
+dependencies: []
+creating folder ./my_package
+creating ./my_package/package.xml
+creating source and include folder
+creating folder ./my_package/src
+creating folder ./my_package/include/my_package
+creating ./my_package/CMakeLists.txt
+```
+
+3. Create `my_package.cpp` file
+
+```bash
+wruser@ros2native:/work/ros2_native/src$ cd my_package/src
+wruser@ros2native:/work/ros2_native/src/my_package/src$ cat > my_package.cpp <<EOF
+#include <iostream>
+
+using namespace std;
+
+int main(int argc, char * argv[])
+{
+  cout << "Hello World!" << endl;
+  return 0;
+}
+EOF
+```
+
+4. Modify `CMakeLists.txt` to build `my_package`
+
+Add the following lines to the `CMakeLists.txt` before `if(BUILD_TESTING)`
+
+```bash
+add_executable(my_package src/my_package.cpp)
+
+install(TARGETS
+  my_package
+  DESTINATION lib/${PROJECT_NAME}
+)
+```
+
+You can use `sed` for it.
+
+```bash
+wruser@ros2native:/work/ros2_native/src/my_package$ sed -i '/find_package(<depen/aadd_executable(my_package src/my_package.cpp)\ninstall(TARGETS\n  my_package\n  DESTINATION lib/\${PROJECT_NAME}\n)' CMakeLists.txt
+```
+
+5. Build `my_package`
+
+```bash
+wruser@ros2native:/work/ros2_native/src/my_package$ cd ../..
+wruser@ros2native:/work/ros2_native$ colcon build --merge-install --packages-up-to my_package
+```
+
+6. Run `my_package`
+
+```bash
+wruser@ros2native:/work/ros2_native$
+wruser@ros2native:/work/ros2_ws/install$ ros2 run my_package my_package
+Hello World!
+```
+
+### Step 2: Build and run new ROS2 package under VxWorks ROS2 build environment
+
+1. Start docker and copy `my_package` to the VxWorks `ros2_ws` workspace
+
+```bash
+$ docker run -ti -v ~/Downloads/wrsdk-vxworks7-up2:/wrsdk -v $PWD:/work vxros2build:1.0
+wruser@690af330acaa:/work$ cp -r ros2_native/src/my_package build/ros2/ros2_ws/src/.
+```
+
+2. Rebuild ROS2 with `my_package`
+
+```bash
+wruser@690af330acaa:/work$ source /wrsdk/toolkit/wind_sdk_env.linux
+wruser@690af330acaa:/work$ rm /work/build/.stamp/ros2.build
+wruser@690af330acaa:/work$ PKG_PKGS_UP_TO=my_package DEFAULT_BUILD=ros2 make
+wruser@690af330acaa:/work$ exit
+```
+
+3. Create `ros2.img` as described [here](#method-1-create-an-hdd-image) and start QEMU
+
+```bash
+$ sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk-vxworks7-up2/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+```
+
+4. Setup environment variables and run `my_package`
+
+```bash
+-> cmd
+[vxWorks *]# cd /ata4/bin
+[vxWorks *]# set env LD_LIBRARY_PATH="/ata4/lib"
+[vxWorks *]# set env AMENT_PREFIX_PATH="/ata4"
+
+[vxWorks *]# rtp exec -u 0x20000 python3 ros2 run my_package my_package
+Launching process 'python3' ...
+Process 'python3' (process Id = 0xffff80000036cb10) launched.
+Hello World!
 ```
 
 ## Legal Notices
