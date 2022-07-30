@@ -53,7 +53,7 @@ define python_fix
 	install -m 755 files/libpython3.8.so.1.0 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/ ;
 	install -m 755 files/_ssl.cpython-38-x86_64-linux-gnu.so $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/python3.8/lib-dynload/ ; \
 	if [ ! -f $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 ]; then \
-		$(CURL) "https://bootstrap.pypa.io/get-pip.py" -o "$(DOWNLOADS_DIR)/get-pip.py" ; \
+		cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),https://bootstrap.pypa.io/get-pip.py,get-pip.py) ; \
 		python3 $(DOWNLOADS_DIR)/get-pip.py ; \
 	fi ;
 endef
