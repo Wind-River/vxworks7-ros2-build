@@ -8,6 +8,8 @@ RUN dpkg --add-architecture i386 && \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN  ln -s /usr/lib/x86_64-linux-gnu/libffi.so.6 /usr/lib/x86_64-linux-gnu/libffi.so.7
+
 ENV GID 1000
 ENV GROUP wruser
 ENV INSTALL_DIR /opt/windriver
