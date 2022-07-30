@@ -54,6 +54,7 @@ colcon.patch: colcon.unpack
 
 colcon.configure: colcon.patch
 	@$(call echo_action,Configuring,$*)
+	pip3 install --upgrade --force-reinstall setuptools
 	pip3 install testresources
 	cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),$(PKG_URL2),$(PKG_FILE_NAME2))
 	pip3 install -r $(DOWNLOADS_DIR)/$(PKG_FILE_NAME2)
