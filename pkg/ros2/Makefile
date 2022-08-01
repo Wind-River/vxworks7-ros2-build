@@ -109,6 +109,7 @@ ros2.install : ros2.build
 	cp -r $(ROOT_DIR)/bin/* $(DEPLOY_DIR)/bin/.
 	cp -r $(ROOT_DIR)/lib/* $(DEPLOY_DIR)/lib/.
 	cp -r $(ROOT_DIR)/share $(DEPLOY_DIR)/.
+	cp files/vxscript $(DEPLOY_DIR)/.
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
