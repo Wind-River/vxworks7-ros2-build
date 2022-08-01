@@ -229,37 +229,17 @@ $ sudo umount ~/tmp/mount
 ```
 
 ```bash
-sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk-vxworks7-up2/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk-vxworks7-up2/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
 
-The HDD image will be mounted inside VxWorks as a `/ata4` device
+The HDD image will be mounted inside VxWorks under `/usr` directory
 
 ```bash
--> ls "/ata4"
-/ata4/bin
-/ata4/lib
-/ata4/share
-```
-
-### Method 2: USB mount (obsolete)
-
-Used in the past, when a directory size was less than 512MB. Check the directory size, it could be that you can get an error described in [#16](https://github.com/Wind-River/vxworks7-ros2-build/issues/16) then use [Method 1](#method-1-create-an-hdd-image).
-
-Run QEMU with a prebuilt VxWorks kernel and the *deploy* directory mounted as a USB device.
-
-```bash
-$ du -sh ./export/deploy
-494M    export/deploy/
-
-$ sudo qemu-system-x86_64 -m 512M  -kernel ~/Downloads/wrsdk-vxworks7-up2/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic  -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -monitor none -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=target pw=boot o=gei0" -usb -device usb-ehci,id=ehci  -device usb-storage,drive=fat32 -drive file=fat:rw:./export/deploy,id=fat32,format=raw,if=none
-```
-
-The USB disk will be mounted inside VxWorks as a `/bd0a` device
-
-```bash
--> ls "/bd0a"
-/bd0a/bin
-/bd0a/lib
+-> ls "/usr"
+/usr/bin
+/usr/lib
+/usr/share
+/usr/vxscript
 ```
 
 ### Telnet to the VxWorks QEMU target
@@ -274,9 +254,7 @@ It is possible to run examples by directly invoking binaries
 
 ```bash
 -> cmd
-[vxWorks *]# cd /ata4/bin/
-[vxWorks *]# set env LD_LIBRARY_PATH="/ata4/lib"
-[vxWorks *]# rtp exec -u 0x20000 timer_lambda
+[vxWorks *]# /usr/lib/examples_rclcpp_minimal_timer/timer_lambda
 Launching process 'timer_lambda' ...
 Process 'timer_lambda' (process Id = 0xffff80000046f070) launched.
 [INFO] [minimal_timer]: Hello, world!
@@ -286,10 +264,8 @@ Process 'timer_lambda' (process Id = 0xffff80000046f070) launched.
 Or by using the `ros2cli` interface
 
 ```bash
-[vxWorks *]# cd /ata4/bin/
-[vxWorks *]# set env LD_LIBRARY_PATH="/ata4/lib"
-[vxWorks *]# set env AMENT_PREFIX_PATH="/ata4"
-[vxWorks *]# rtp exec -u 0x20000 python3 ros2 run examples_rclcpp_minimal_timer timer_lambda
+-> cmd
+[vxWorks *]# python3 ros2 run examples_rclcpp_minimal_timer timer_lambda
 Launching process 'python3' ...
 Process 'python3' (process Id = 0xffff800008268ac0) launched.
 [INFO] [minimal_timer]: Hello, world!
@@ -301,23 +277,23 @@ Process 'python3' (process Id = 0xffff800008268ac0) launched.
 It is possible to run examples by directly invoking python scripts. First figure out the full path.
 
 ```bash
-[vxWorks *]# rtp exec -u 0x20000 python3 ros2 pkg executables --full-path demo_nodes_py
+[vxWorks *]# python3 ros2 pkg executables --full-path demo_nodes_py
  Launching process 'python3' ...
  Process 'python3' (process Id = 0xffff80000046f070) launched.
-/ata4/lib/demo_nodes_py/add_two_ints_client
-/ata4/lib/demo_nodes_py/add_two_ints_client_async
-/ata4/lib/demo_nodes_py/add_two_ints_server
-/ata4/lib/demo_nodes_py/listener
-/ata4/lib/demo_nodes_py/listener_qos
-/ata4/lib/demo_nodes_py/listener_serialized
-/ata4/lib/demo_nodes_py/talker
-/ata4/lib/demo_nodes_py/talker_qos
+/usr/lib/demo_nodes_py/add_two_ints_client
+/usr/lib/demo_nodes_py/add_two_ints_client_async
+/usr/lib/demo_nodes_py/add_two_ints_server
+/usr/lib/demo_nodes_py/listener
+/usr/lib/demo_nodes_py/listener_qos
+/usr/lib/demo_nodes_py/listener_serialized
+/usr/lib/demo_nodes_py/talker
+/usr/lib/demo_nodes_py/talker_qos
 ```
 
 Then Invoke Python interpreter and pass the script as a parameter
 
 ```bash
-[vxWorks *]# rtp exec -u 0x20000 python3 /ata4/lib/demo_nodes_py/talker
+[vxWorks *]# python3 /usr/lib/demo_nodes_py/talker
 [INFO] [talker]: Publishing: "Hello World: 0"
 [INFO] [talker]: Publishing: "Hello World: 1"
 ```
@@ -325,7 +301,7 @@ Then Invoke Python interpreter and pass the script as a parameter
 Or by using the `ros2cli` interface
 
 ```bash
-[vxWorks *]# rtp exec -u 0x20000 python3 ros2 run demo_nodes_py talker
+[vxWorks *]# python3 ros2 run demo_nodes_py talker
 Launching process 'python3' ...
 Process 'python3' (process Id = 0xffff800008269c00) launched.
 
@@ -488,18 +464,14 @@ wruser@690af330acaa:/work$ exit
 3. Create `ros2.img` as described [here](#method-1-create-an-hdd-image) and start QEMU
 
 ```bash
-$ sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk-vxworks7-up2/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+$ sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk-vxworks7-up2/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
 
 4. Setup environment variables and run `my_package`
 
 ```bash
 -> cmd
-[vxWorks *]# cd /ata4/bin
-[vxWorks *]# set env LD_LIBRARY_PATH="/ata4/lib"
-[vxWorks *]# set env AMENT_PREFIX_PATH="/ata4"
-
-[vxWorks *]# rtp exec -u 0x20000 python3 ros2 run my_package my_package
+[vxWorks *]# python3 ros2 run my_package my_package
 Launching process 'python3' ...
 Process 'python3' (process Id = 0xffff80000036cb10) launched.
 Hello World!
