@@ -211,7 +211,7 @@ Copyright (c) 2003-2021 Fabrice Bellard and the QEMU Project developers
 
 Filesystem with ROS2 artifacts needs to be prepared to boot with VxWorks.
 
-### Method 1: Create an HDD image
+### Create an HDD image
 
 Run QEMU with a prebuilt VxWorks kernel and a created HDD image.
 
