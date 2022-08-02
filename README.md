@@ -2,6 +2,14 @@
 
 ![vxworks ros2 build workflow](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml/badge.svg)
 
+## VxWorks SDK and ROS 2 support
+
+Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details
+
+|           | [SR0640 SDK](https://labs.windriver.com/downloads/wrsdk_prev.html)   |
+|:---------:|:-------------|
+|**[dashing](https://docs.ros.org/en/dashing/)**| [Intel UP2](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/README-up2.html)<br />[Raspberry Pi4](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/README-raspberrypi4b.html) |
+
 ## Overview
 
 The VxWorks 7 ROS2 Build project provides a build environment to automate building
@@ -50,7 +58,7 @@ Subject to the License, you can proceed to download the VxWorks SDK.
 ## Prerequisite(s)
 
 * Download a VxWorks Software Development Kit from Wind River Labs
-   * https://labs.windriver.com/downloads/wrsdk.html
+   * https://labs.windriver.com/downloads/wrsdk_prev.html
 
 * The build system will need to download source code from github.com and bitbucket.org.  A
   working Internet connection with access to both sites is required.
@@ -136,7 +144,7 @@ docker build -t vxros2build:1.0 Docker/vxros2build/.
 
 ### Download and extract the VxWorks SDK
 
-The SDK for IA - UP Squared shall be used from https://labs.windriver.com/downloads/wrsdk.html
+The SDK for IA - UP Squared shall be used from https://labs.windriver.com/downloads/wrsdk_prev.html
 
 ```bash
 cd Downloads
