@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         branch: [dashing-release-SR0640-python]
-        sdk: [wrsdk-vxworks7-up2-1.7]
+        sdk: [wrsdk-vxworks7-up2-1.7, wrsdk-vxworks7-raspberrypi4b-1.0]
 
     runs-on: ubuntu-20.04
     steps:
@@ -77,7 +77,7 @@ jobs:
 
       - name: Prepare artifacts
         run: |
-          cp ${{ runner.temp }}/_github_home/wrsdk/bsps/itl_generic_2_0_2_1/boot/vxWorks ${{ github.workspace }}
+          cp ${{ runner.temp }}/_github_home/wrsdk/bsps/*/boot/vxWorks ${{ github.workspace }}
 
       - name: Upload VxWorks and the HDD image
         uses: actions/upload-artifact@v2
