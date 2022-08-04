@@ -33,13 +33,12 @@ PKG_VER = 1.0
 
 PKG_LICENSE = BSD
 
-PKG_BUILD_DIR = build
+PKG_BUILD_DIR = src
 PKG_SRC_DIR = src
 PKG_PATCH_DIR = files
 
 PKG_CONFIGURE_OPT = $(TGT_CONFIGURE_OPT)
-PKG_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT)
-PKG_MAKE_OPT = srcdir=../$(PKG_SRC_DIR)
+PKG_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT) DESTDIR=$(WIND_CC_SYSROOT) PREFIX=/usr INCLUDE_PATH=h/published/UTILS_UNIX LIBRARY_PATH=lib/common
 
 unixextra.download :
 	@$(MAKE_STAMP)
@@ -50,7 +49,7 @@ unixextra.check : unixextra.download
 unixextra.unpack : unixextra.check
 	@$(call echo_action,Unpacking,unixextra)
 	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)
-	cp $(PACKAGE_DIR)/$(PKG_NAME)/files/* $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)
+	cp -r $(PACKAGE_DIR)/$(PKG_NAME)/files/* $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)
 	@$(MAKE_STAMP)
 
 unixextra.build : unixextra.configure

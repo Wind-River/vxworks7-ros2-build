@@ -22,39 +22,49 @@
 # This file contains the makefile rules for building the extra functions
 # UNIX library
 #
-#
-include $(WIND_USR_MK)/defs.common.mk
 
-SOURCES := $(wildcard $(srcdir)/*.c)
+TARGET = libunixextra
+SOURCES := $(wildcard *.c)
 OBJECTS := $(SOURCES:.c=.o)
 SHOBJECTS := $(SOURCES:.c=.sho)
 
-CC_FLAGS = -g
+PREFIX ?= /usr/local
+INCLUDE_PATH ?= include
+LIBRARY_PATH ?= lib
 
-all: cp_headers libunixextra.a libunixextra.so
+CC_FLAGS ?= -g
 
-cp_headers:
-	install -m 644 $(srcdir)/termios.h $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX
-	install -m 644 $(srcdir)/ttycom.h $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX/sys
+all: $(TARGET).a $(TARGET).so
 
-libunixextra.so: $(SHOBJECTS)
+$(TARGET).so: $(SHOBJECTS)
 	$(CC) -shared $^ -o $@ $(CC_FLAGS)
 
 %.sho: %.c
-	$(CC) -fpic -c $< -o $@ $(CC_FLAGS)
+	$(CC) -fpic -c $< -o $@ -I. $(CC_FLAGS)
 
-libunixextra.a: $(OBJECTS)
+$(TARGET).a: $(OBJECTS)
 	$(AR) rcs $@ $^
 
 %.o: %.c
-	$(CC) -static -c $< -o $@ $(CC_FLAGS)
+	$(CC) -static -c $< -o $@ -I. $(CC_FLAGS)
 
 clean:
-	@rm -rf *.o $(TARGET)
+	@rm -rf *.o *.sho $(TARGET).*
 
-install:
-	install -m 644 $(srcdir)/fnmatch.h $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX
-	install -m 644 $(srcdir)/string.h $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX
-	install -m 755 libunixextra.a $(WIND_CC_SYSROOT)/usr/lib/common
-	install -m 755 libunixextra.so $(WIND_CC_SYSROOT)/usr/lib/common
-
+install: $(TARGET).a $(TARGET).so
+ifneq (,$(findstring fnmatch.c,$(SOURCES)))
+	install -d $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
+	install -m 644 fnmatch.h $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
+endif
+ifneq (,$(findstring memccpy.c,$(SOURCES)))
+	install -d $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
+	install -m 644 string.h $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
+endif
+ifneq (,$(findstring termios.c,$(SOURCES)))
+	install -d $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)/sys
+	install -m 644 termios.h $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
+	install -m 644 sys/ttycom.h $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)/sys
+endif
+	install -d $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)
+	install -m 755 $(TARGET).a $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)
+	install -m 755 $(TARGET).so $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)

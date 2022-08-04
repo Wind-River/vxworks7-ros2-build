@@ -17,7 +17,12 @@ modification history
 #ifndef _STRING_UNIX
 #define _STRING_UNIX
 
+#ifdef __VXWORKS__
 #include <../public/string.h>
+#else
+#include <string.h>
+#include <stddef.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
