@@ -51,13 +51,14 @@
  * Window/terminal size structure.  This information is stored by the kernel
  * in order to provide a consistent interface, but is not used by the kernel.
  */
+#ifdef __VXWORKS__
 struct winsize {
 	unsigned short	ws_row;		/* rows, in characters */
 	unsigned short	ws_col;		/* columns, in characters */
 	unsigned short	ws_xpixel;	/* horizontal size, pixels */
 	unsigned short	ws_ypixel;	/* vertical size, pixels */
 };
-
+#endif
 						/* 0-2 compat */
 						/* 3-7 unused */
 						/* 8-10 compat */

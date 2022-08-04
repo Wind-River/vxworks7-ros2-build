@@ -16,9 +16,12 @@ modification history
 06apr19, akh  created
 */
 
+#include <stdio.h>
+#ifdef __VXWORKS__
 #include <vxWorks.h>
 #include <ioLib.h>
 #include <sioLib.h>
+#endif
 #include <termios.h>
 
 int
@@ -45,8 +48,9 @@ cfsetispeed(struct termios *t, speed_t speed)
 int
 tcgetattr(int fd, struct termios *t)
 {
-        int ret;
-        int options = 0;
+        int ret = 0;
+#ifdef __VXWORKS__
+	int options = 0;
 
         options = ioctl(fd, FIOGETOPTIONS, NULL);
 
@@ -77,13 +81,15 @@ tcgetattr(int fd, struct termios *t)
         ret = ioctl(fd, SIO_HW_OPTS_GET, &t->c_cflag);
         if (ret ==  0)
                 ret = ioctl(fd, SIO_BAUD_GET, &t->c_ospeed);
+#endif
         return (ret);
 }
 
 int
 tcsetattr(int fd, int opt, const struct termios *t)
 {
-        int ret;
+        int ret = -1;
+#ifdef __VXWORKS__
         int options;
 
         /* translation needed between termios flags and vxWorks OPT_XXX flags */
@@ -119,18 +125,22 @@ tcsetattr(int fd, int opt, const struct termios *t)
         default:
             printf(" OPT %d  \r\n", opt);
         }
-        return (-1);
+#endif
+        return (ret);
 }
 
 int
 cfmakeraw(struct termios *t)
 {
+#ifdef __VXWORKS__
 	t->c_iflag &= ~(IGNBRK | BRKINT | ISTRIP
 	                | INLCR | IGNCR | ICRNL | IXON);
 	t->c_oflag &= ~OPOST;
 	t->c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG );
 	t->c_cflag &= ~(CSIZE | PARENB);
 	t->c_cflag |= CS8;
+#endif
+	return 0;
 }
 
 int tcflush(int fildes, int queue_selector)

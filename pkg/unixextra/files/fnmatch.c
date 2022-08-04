@@ -52,7 +52,7 @@ static char sccsid[] = "@(#)fnmatch.c	8.2 (Berkeley) 4/16/94";
 
 #include "fnmatch.h"
 
-#ifndef __RTP__
+#if !defined(__RTP__) && defined(__VXWORKS__)
 #include <vxWorks.h>
 #endif
 
