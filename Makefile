@@ -8,7 +8,7 @@ DEFAULT_BUILD ?= sdk python unixextra asio tinyxml2 colcon ros2 turtlebot3
 
 ## Add missing variablse from SDK
 export TOOL=llvm
-export TGT_ARCH=$(shell $$CC -print-target-triple -c dummy.c | sed -e 's/arm64/aarch64/g')
+export TGT_ARCH=$(shell $$CC -print-target-triple -c README.md | cut -d '-' -f 1 | sed -e 's/arm64/aarch64/g')
 
 .PHONY: clean_buildstamps
 

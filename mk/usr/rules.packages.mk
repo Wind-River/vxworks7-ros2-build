@@ -59,7 +59,7 @@ define pkg_build
 	cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) && \
 	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \
 	echo "MAKE_OPT: $(PKG_MAKE_OPT)" && \
-	$(MAKE) -j$(nproc) -C $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) -f Makefile $(PKG_MAKE_OPT)
+	$(PKG_MAKE_BUILD_VAR) $(MAKE) -j$(nproc) -C $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) -f Makefile $(PKG_MAKE_OPT)
 endef
 
 define pkg_configure
