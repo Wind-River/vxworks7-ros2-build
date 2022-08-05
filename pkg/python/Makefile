@@ -39,8 +39,8 @@ PKG_SRC_DIR = $(PKG_NAME)-$(PKG_VER)
 PKG_PATCH_DIR = files
 
 PKG_CONFIGURE_OPT = \
-		--build=x86_64-pc-linux-gnu \
-		--host=$(TGT_ARCH)-wrs-vxworks \
+		--build=$(AUTOTOOLS_BUILD) \
+		--host=$(AUTOTOOLS_HOST) \
 		--enable-shared                            \
 		--prefix=$(WIND_CC_SYSROOT)/usr/3pp/develop/usr        \
 		--with-libm=no                             \
@@ -50,7 +50,7 @@ PKG_CONFIGURE_OPT = \
 		CONFIG_SITE=$(TOP_BUILDDIR)/pkg/python/files/config.vx.app                  \
 		CFLAGS="-w"                                \
 		PKG_CONFIG_PATH=$(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/pkgconfig \
-		CC=wr-cc CXX=wr-c++ CPP='wr-cc -E' LD=wr-ld AR=wr-ar NM=wr-nm OBJCOPY=wr-objcopy OBJDUMP=wr-objdump RANLIB=wr-ranlib READELF=wr-readelf SIZE=wr-size STRIP=wr-strip
+		$(AUTOTOOLS_ENV) CPP='wr-cc -E'
 
 # build python and sharedlibs
 PKG_MAKE_OPT = platform

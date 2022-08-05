@@ -39,6 +39,7 @@ PKG_PATCH_DIR = files
 
 PKG_CONFIGURE_OPT = $(TGT_CONFIGURE_OPT)
 PKG_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT) DESTDIR=$(WIND_CC_SYSROOT) PREFIX=/usr INCLUDE_PATH=h/published/UTILS_UNIX LIBRARY_PATH=lib/common
+PKG_MAKE_BUILD_VAR = $(AUTOTOOLS_ENV)
 
 unixextra.download :
 	@$(MAKE_STAMP)
@@ -50,14 +51,6 @@ unixextra.unpack : unixextra.check
 	@$(call echo_action,Unpacking,unixextra)
 	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)
 	cp -r $(PACKAGE_DIR)/$(PKG_NAME)/files/* $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)
-	@$(MAKE_STAMP)
-
-unixextra.build : unixextra.configure
-	@$(call echo_action,Building,$*)
-	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) && \
-	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \
-	echo "MAKE_OPT: $(PKG_MAKE_OPT)" && \
-	$(MAKE) -C $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) -f $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/Makefile $(PKG_MAKE_OPT)
 	@$(MAKE_STAMP)
 
 unixextra.install : unixextra.build

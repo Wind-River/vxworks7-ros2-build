@@ -18,11 +18,14 @@
 ifeq ($(__crossbuild_defs),)
 __crossbuild_defs = TRUE
 
+include $(WIND_CC_SYSROOT)/mk/defs.autotools.mk
+
 TGT_CONFIGURE_OPT = \
-	--build=x86_64-pc-linux-gnu \
-        --host=$(TGT_ARCH)-wrs-vxworks \
+	--build=$(AUTOTOOLS_BUILD) \
+        --host=$(AUTOTOOLS_HOST) \
 	--prefix= \
-	--includedir=/include
+	--includedir=/include \
+	$(AUTOTOOLS_ENV)
 
 #	--bindir=/$(TOOL_SPECIFIC_DIR)/bin \
 #	--libdir=/$(TOOL_COMMON_DIR) \

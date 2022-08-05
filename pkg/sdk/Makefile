@@ -22,7 +22,6 @@
 # SYNOPSIS        extra UNIX functions not included into -lunix
 include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk
-include $(WIND_USR_MK)/defs.crossbuild.mk
 
 PACKAGES += sdk
 
@@ -39,6 +38,9 @@ endef
 define sdk_fix
 	if [ -f $(WIND_SDK_HOME)/bsps/itl_generic_2_0_2_1/boot/vxWorks ]; then \
 		cp files/vxWorks $(WIND_SDK_HOME)/bsps/itl_generic_2_0_2_1/boot/vxWorks; \
+	fi ; \
+	if [ ! -f $(WIND_CC_SYSROOT)/mk/defs.autotools.mk ]; then \
+		cp files/defs.autotools.mk $(WIND_CC_SYSROOT)/mk/.; \
 	fi ;
 endef
 
