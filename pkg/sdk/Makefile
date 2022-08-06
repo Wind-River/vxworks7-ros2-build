@@ -47,6 +47,7 @@ endef
 define vxworks_fix
 	sed -i 's/_WRS_INLINE/inline/g'  $(WIND_CC_SYSROOT)/usr/h/public/endian.h
 	sed -i 's/STATUS/int/g' `find $(WIND_CC_SYSROOT)/usr/h -name stat.h`
+	sed -i 's/u_int/unsigned int/g'  $(WIND_CC_SYSROOT)/usr/h/public/net/ifaddrs.h
 endef
 
 define python_fix
