@@ -62,8 +62,10 @@ define python_fix
 endef
 
 define cmake_fix
-	sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonLibs.cmake ;
-	sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonInterp.cmake ;
+	if [ -d $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8 ]; then \
+		sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonLibs.cmake ; \
+		sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonInterp.cmake ; \
+	fi ;
 endef
 
 sdk.download :
