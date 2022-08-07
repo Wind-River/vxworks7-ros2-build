@@ -84,13 +84,13 @@ $(PKG_NAME).build: $(PKG_NAME).configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/ros2/$(PKG_BUILD_DIR); \
 	export PATH=$(3PP_HOST_DIR)/bin:$(PATH); \
-	export PYTHONPATH=$(3PP_HOST_DIR)/lib/python3.8/site-packages:$(PYTHONPATH); \
+	export PYTHONPATH=$(3PP_HOST_DIR)/lib/python3.$(TGT_PYTHON_MINOR)/site-packages:$(PYTHONPATH); \
         colcon build --merge-install --install-base $(ROOT_DIR) --cmake-force-configure --packages-up-to $(PKG_PKGS_UP_TO) \
 		--cmake-args \
                 -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
                 -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
 		-DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
-		-DPYTHON_SOABI=cpython-38-vxworks \
+		-DPYTHON_SOABI=cpython-3$(TGT_PYTHON_MINOR)-vxworks \
                 -DBUILD_TESTING:BOOL=OFF
 	@$(MAKE_STAMP)
 
@@ -99,7 +99,7 @@ $(PKG_NAME).install : $(PKG_NAME).build
 	cp $(ROOT_DIR)/lib/lib* $(DEPLOY_DIR)/lib/.
 	cp $(ROOT_DIR)/lib/hls_lfcd_lds_driver/*  $(DEPLOY_DIR)/bin/.
 	cp $(ROOT_DIR)/lib/turtlebot3_node/*  $(DEPLOY_DIR)/bin/.
-	cp -r $(ROOT_DIR)/lib/python3.8/* $(DEPLOY_DIR)/lib/python3.8/.
+	cp -r $(ROOT_DIR)/lib/python3.* $(DEPLOY_DIR)/lib/.
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk

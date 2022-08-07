@@ -51,10 +51,13 @@ define vxworks_fix
 endef
 
 define python_fix
-	install -m 755 files/python3.8 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/ ;
-	ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.8 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 ;
-	install -m 755 files/libpython3.8.so.1.0 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/ ;
-	install -m 755 files/_ssl.cpython-38-x86_64-linux-gnu.so $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/python3.8/lib-dynload/ ; \
+	if [ $(TGT_PYTHON_MINOR) == "8" ]; then \
+		install -m 755 files/python3.8 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/ ; \
+		install -m 755 files/libpython3.8.so.1.0 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/ ; \
+		install -m 755 files/_ssl.cpython-38-x86_64-linux-gnu.so $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/python3.8/lib-dynload/ ; \
+	fi ; \
+	ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.$(TGT_PYTHON_MINOR) $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 ; \
+	ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.$(TGT_PYTHON_MINOR) $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python ; \
 	if [ ! -f $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 ]; then \
 		cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),https://bootstrap.pypa.io/get-pip.py,get-pip.py) ; \
 		python3 $(DOWNLOADS_DIR)/get-pip.py ; \
@@ -104,7 +107,7 @@ sdk.install : sdk.build
 	cp $(3PP_DEPLOY_DIR)/lib/* $(DEPLOY_DIR)/lib/.
 	cp $(3PP_DEPLOY_DIR)/usr/bin/* $(DEPLOY_DIR)/bin/.
 	cp $(3PP_DEPLOY_DIR)/usr/lib/lib*.so* $(DEPLOY_DIR)/lib/.
-	cp -r $(3PP_DEPLOY_DIR)/usr/lib/python3.8 $(DEPLOY_DIR)/lib/.
+	cp -r $(3PP_DEPLOY_DIR)/usr/lib/python3.* $(DEPLOY_DIR)/lib/.
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
