@@ -41,6 +41,13 @@ define sdk_fix
 	fi ; \
 	if [ ! -f $(WIND_CC_SYSROOT)/mk/defs.autotools.mk ]; then \
 		cp files/defs.autotools.mk $(WIND_CC_SYSROOT)/mk/.; \
+	fi ; \
+	if [ $(WIND_RELEASE_ID) == 22.03 ]; then \
+		cp files/$(WIND_RELEASE_ID)/x86_64-linux/lib/lib* $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/. ; \
+		ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libffi.so.7.1.0 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libffi.so.7 ; \
+		ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libffi.so.7.1.0 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libffi.so ; \
+		ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libssl.so.1.1 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libssl.so ; \
+		ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libcrypto.so.1.1 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libcrypto.so ; \
 	fi ;
 endef
 
