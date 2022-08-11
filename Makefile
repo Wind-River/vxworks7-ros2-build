@@ -29,7 +29,7 @@ $(STAMP_DIR):
 	@mkdir -p $(STAMP_DIR)
 
 clean_buildstamps:
-	@rm -f $(STAMP_DIR)/*
+	for p in $(DEFAULT_BUILD); do rm -rf $(STAMP_DIR)/$$p.*; done;
 
 distclean: clean
 	@rm -rf $(DOWNLOADS_DIR)
@@ -37,6 +37,7 @@ distclean: clean
 	@rm -rf $(EXPORT_DIR)
 
 clean: clean_buildstamps
+	for p in $(DEFAULT_BUILD); do rm -rf $(BUILD_DIR)/$$p; done;
 
 info:
 	@$(ECHO) "DEFAULT_BUILD: $(DEFAULT_BUILD)"
