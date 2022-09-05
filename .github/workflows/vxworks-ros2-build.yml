@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        branch: [dashing-release-SR0640-python]
+        branch: [dashing-release-SR0640]
         sdk: [wrsdk-vxworks7-up2-1.7, wrsdk-vxworks7-raspberrypi4b-1.0]
 
     runs-on: ubuntu-20.04
