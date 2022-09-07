@@ -469,7 +469,7 @@ wruser@690af330acaa:/work$ PKG_PKGS_UP_TO=my_package DEFAULT_BUILD=ros2 make
 wruser@690af330acaa:/work$ exit
 ```
 
-3. Create `ros2.img` as described [here](#method-1-create-an-hdd-image) and start QEMU
+3. Create `ros2.img` as described [here](#create-an-hdd-image) and start QEMU
 
 ```bash
 $ sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk-vxworks7-up2/bsps/itl_generic_2_0_2_1/boot/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
