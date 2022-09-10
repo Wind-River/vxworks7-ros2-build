@@ -28,14 +28,14 @@ include $(WIND_USR_MK)/defs.crossbuild.mk
 PACKAGES += ros2
 
 PKG_NAME = ros2
-PKG_VER =  dashing
+PKG_VER = $(ROS_DISTRO)
 
-#PKG_URL = https://github.com/Wind-River/vxworks7-layer-for-ros2.git
+# use the same branch for the patches
 PKG_URL = https://github.com/Wind-River/vxworks7-layer-for-ros2.git
 PKG_TYPE = git
-PKG_COMMIT_ID = dashing-release-SR0640
+PKG_COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
 
-PKG_REPO_COMMIT_ID = dashing-release
+PKG_REPO_COMMIT_ID = $(PKG_VER)-release
 PKG_REPO_URL = https://raw.githubusercontent.com/ros2/ros2/${PKG_REPO_COMMIT_ID}/${PKG_NAME}.repos
 
 PKG_LICENSE = BSD

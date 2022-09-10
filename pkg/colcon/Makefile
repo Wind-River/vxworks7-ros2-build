@@ -26,7 +26,7 @@ include $(WIND_USR_MK)/defs.crossbuild.mk
 PACKAGES += colcon
 
 PKG_NAME = colcon
-PKG_VER =  dashing
+PKG_VER = $(ROS_DISTRO)
 
 PKG_FILE_NAME = colcon.repos
 PKG_COMMIT_ID = 8ce711f4c47bd3336e3f24f685e8b481d2bbcfe7

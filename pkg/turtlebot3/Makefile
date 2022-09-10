@@ -25,15 +25,16 @@ include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.crossbuild.mk
 
 PKG_NAME = turtlebot3
-PKG_VER =  dashing
+PKG_VER = $(ROS_DISTRO)
 
 PACKAGES += ${PKG_NAME}
 
+# use the same branch for the patches
 PKG_URL = https://github.com/Wind-River/vxworks7-layer-for-ros2.git
 PKG_TYPE = git
-PKG_COMMIT_ID = dashing-release-SR0620
+PKG_COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
 
-PKG_REPO_COMMIT_ID = dashing-devel
+PKG_REPO_COMMIT_ID = $(PKG_VER)-devel
 PKG_REPO_URL = https://raw.githubusercontent.com/ROBOTIS-GIT/${PKG_NAME}/${PKG_REPO_COMMIT_ID}/${PKG_NAME}.repos
 
 PKG_LICENSE = BSD
