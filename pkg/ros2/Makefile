@@ -87,8 +87,6 @@ ros2.configure: ros2.patch
 ros2.build: ros2.configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
-	export PATH=$(3PP_HOST_DIR)/bin:$(PATH); \
-	export PYTHONPATH=$(3PP_HOST_DIR)/lib/python3.$(TGT_PYTHON_MINOR)/site-packages:$(PYTHONPATH); \
 	colcon build --merge-install --install-base $(ROOT_DIR) --cmake-force-configure --packages-up-to-regex $(PKG_PKGS_UP_TO) \
 		--cmake-args \
                 -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
