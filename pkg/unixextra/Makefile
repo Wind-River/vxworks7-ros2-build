@@ -51,6 +51,7 @@ unixextra.unpack : unixextra.check
 	@$(call echo_action,Unpacking,unixextra)
 	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)
 	cp -r $(PACKAGE_DIR)/$(PKG_NAME)/files/* $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)
+	sed -i 's/-lunix -lunixextra -lregex/-lunix -lregex/g' $(WIND_CC_SYSROOT)/cc-conf/default.conf
 	@$(MAKE_STAMP)
 
 unixextra.install : unixextra.build
