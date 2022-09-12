@@ -35,6 +35,10 @@ endif
 export TOOL=llvm
 export TGT_ARCH=$(shell $$CC -print-target-triple -c README.md | cut -d '-' -f 1 | sed -e 's/arm64/aarch64/g')
 
+3PP_DIR?=$(WIND_CC_SYSROOT)/usr/3pp
+3PP_DEVELOP_DIR=$(3PP_DIR)/develop
+3PP_DEPLOY_DIR=$(3PP_DIR)/deploy
+
 WIND_RELEASE_ID=$(shell grep _WRS_CONFIG_CORE_RELEASE $(WIND_CC_SYSROOT)/h/config/auto.conf | cut -d '=' -f 2)
 ifeq ($(WIND_RELEASE_ID),)
 	WIND_RELEASE_ID=SR0640

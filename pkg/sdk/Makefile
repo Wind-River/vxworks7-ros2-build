@@ -21,6 +21,7 @@
 
 # SYNOPSIS        extra UNIX functions not included into -lunix
 include $(WIND_USR_MK)/defs.common.mk
+include $(WIND_USR_MK)/defs.vxworks.mk
 include $(WIND_USR_MK)/defs.packages.mk
 
 PACKAGES += sdk
