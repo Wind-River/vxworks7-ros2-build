@@ -23,6 +23,7 @@
 include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.vxworks.mk
 include $(WIND_USR_MK)/defs.packages.mk
+include files/$(WIND_RELEASE_ID)/defs.sdk.mk
 
 PACKAGES += sdk
 
@@ -31,56 +32,6 @@ PKG_VER = 1.0
 PKG_TYPE = src
 
 PKG_LICENSE = BSD
-
-define compiler_fix
-	sed -i 's/-lregex -T/-lregex $$(LibToolCplus) -T/g' $(WIND_CC_SYSROOT)/cc-conf/default.conf
-endef
-
-define sdk_fix
-	if [ -f $(WIND_SDK_HOME)/bsps/itl_generic_2_0_2_1/boot/vxWorks ]; then \
-		cp files/vxWorks $(WIND_SDK_HOME)/bsps/itl_generic_2_0_2_1/boot/vxWorks; \
-	fi ; \
-	if [ ! -f $(WIND_CC_SYSROOT)/mk/defs.autotools.mk ]; then \
-		cp files/defs.autotools.mk $(WIND_CC_SYSROOT)/mk/.; \
-	fi ; \
-	if [ $(WIND_RELEASE_ID) == 22.03 ]; then \
-		cp files/$(WIND_RELEASE_ID)/x86_64-linux/lib/lib* $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/. ; \
-		ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libffi.so.7.1.0 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libffi.so.7 ; \
-		ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libffi.so.7.1.0 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libffi.so ; \
-		ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libssl.so.1.1 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libssl.so ; \
-		ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libcrypto.so.1.1 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/libcrypto.so ; \
-	fi ;
-endef
-
-define vxworks_fix
-	sed -i 's/_WRS_INLINE/inline/g'  $(WIND_CC_SYSROOT)/usr/h/public/endian.h
-	sed -i 's/STATUS/int/g' `find $(WIND_CC_SYSROOT)/usr/h -name stat.h`
-	sed -i 's/u_int/unsigned int/g'  $(WIND_CC_SYSROOT)/usr/h/public/net/ifaddrs.h
-endef
-
-define python_fix
-	if [ $(TGT_PYTHON_MINOR) == "8" ]; then \
-		install -m 755 files/python3.8 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/ ; \
-		install -m 755 files/libpython3.8.so.1.0 $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/ ; \
-		install -m 755 files/_ssl.cpython-38-x86_64-linux-gnu.so $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/python3.8/lib-dynload/ ; \
-	fi ; \
-	ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.$(TGT_PYTHON_MINOR) $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 ; \
-	ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.$(TGT_PYTHON_MINOR) $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python ; \
-	if [ ! -f $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 ]; then \
-		cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),https://bootstrap.pypa.io/get-pip.py,get-pip.py) ; \
-		python3 $(DOWNLOADS_DIR)/get-pip.py ; \
-	fi ; \
-	if [ -d $(3PP_DEPLOY_DIR)/usr/lib/python3.$(TGT_PYTHON_MINOR)/site-packages ]; then \
-		cp -r $(3PP_DEPLOY_DIR)/usr/lib/python3.$(TGT_PYTHON_MINOR)/site-packages $(3PP_DEVELOP_DIR)/usr/lib/python3.$(TGT_PYTHON_MINOR)/. ; \
-	fi
-endef
-
-define cmake_fix
-	if [ -d $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8 ]; then \
-		sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonLibs.cmake ; \
-		sed -i 's/_PYTHON3_VERSIONS 3.7/_PYTHON3_VERSIONS 3.8 3.7/g' $(WIND_SDK_HOST_TOOLS)/x86_64-linux/share/cmake-3.8/Modules/FindPythonInterp.cmake ; \
-	fi ;
-endef
 
 sdk.download :
 	@$(MAKE_STAMP)
@@ -95,6 +46,8 @@ sdk.buildsys : sdk.unpack
 	@$(MAKE_STAMP)
 
 sdk.patch : sdk.buildsys
+	@$(call echo_action,Applying SDK patches,$*)
+	$(call sdk_patch,$*)
 	@$(MAKE_STAMP)
 
 sdk.configure : sdk.patch
@@ -104,21 +57,8 @@ sdk.build : sdk.configure
 	@$(MAKE_STAMP)
 
 sdk.install : sdk.build
-	@$(call echo_action,Applying SDK patches,$*)
-	$(call sdk_fix,$*)
-	@$(call echo_action,Applying VxWorks patches,$*)
-	$(call vxworks_fix,$*)
-	@$(call echo_action,Applying Compiler patches,$*)
-	$(call compiler_fix,$*)
-	@$(call echo_action,Applying Host Python patches,$*)
-	$(call python_fix,$*)
-	@$(call echo_action,Applying CMake patches,$*)
-	$(call cmake_fix,$*)
 	@$(call echo_action,Deploying SDK artifacts,$*)
-	cp $(WIND_CC_SYSROOT)/usr/lib/common/lib*.so.1 $(DEPLOY_DIR)/lib/.
-	cp $(3PP_DEVELOP_DIR)/usr/bin/* $(DEPLOY_DIR)/bin/.
-	cp $(3PP_DEVELOP_DIR)/usr/lib/lib*.so* $(DEPLOY_DIR)/lib/.
-	cp -r $(3PP_DEVELOP_DIR)/usr/lib/python3.* $(DEPLOY_DIR)/lib/.
+	$(call sdk_deploy,$*)
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
