@@ -26,7 +26,7 @@ include $(WIND_USR_MK)/defs.crossbuild.mk
 PACKAGES += colcon
 
 PKG_NAME = colcon
-PKG_VER =  dashing
+PKG_VER = $(ROS_DISTRO)
 
 PKG_FILE_NAME = colcon.repos
 PKG_COMMIT_ID = 8ce711f4c47bd3336e3f24f685e8b481d2bbcfe7
@@ -63,7 +63,7 @@ colcon.configure: colcon.patch
 colcon.build: colcon.configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
-	./src/colcon-core/bin/colcon build --merge-install --install-base=$(3PP_HOST_DIR) --paths src/* 
+	./src/colcon-core/bin/colcon build --merge-install --install-base=$(WIND_SDK_HOST_TOOLS)/x86_64-linux --paths src/*
 	@$(MAKE_STAMP)
 
 colcon.install : colcon.build

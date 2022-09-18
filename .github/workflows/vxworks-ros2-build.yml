@@ -15,6 +15,9 @@ jobs:
       matrix:
         branch: [dashing-release-SR0640]
         sdk: [wrsdk-vxworks7-up2-1.7, wrsdk-vxworks7-raspberrypi4b-1.0]
+        include:
+          - branch: dashing-release-22.03
+            sdk: wrsdk-vxworks7-qemu-1.10
 
     runs-on: ubuntu-20.04
     steps:
@@ -24,15 +27,18 @@ jobs:
         with:
           ref: ${{ matrix.branch }}
 
-      - name: Get uid and gid
+      - name: Setup environment
         run: |
           echo "uid=`id -u`" >> $GITHUB_ENV
           echo "gid=`id -g`" >> $GITHUB_ENV
+          echo "url=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {url} | .url][0]' ./.github/workflows/vxros2build.json`" >> $GITHUB_ENV
+          echo "script=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {script} | .script][0]' ./.github/workflows/vxros2build.json`" >> $GITHUB_ENV
+          echo "image=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {image} | .image][0]' ./.github/workflows/vxros2build.json`" >> $GITHUB_ENV
 
       - name: Download the ${{ matrix.sdk }} SDK
         uses: carlosperate/download-file-action@v1
         with:
-          file-url: 'https://labs.windriver.com/downloads/${{ matrix.sdk }}.tar.bz2'
+          file-url: '${{ env.url }}'
           location: '${{ runner.temp }}/_github_home'
 
       - name: Extract the ${{ matrix.sdk }} SDK
@@ -61,7 +67,7 @@ jobs:
           GID: ${{ env.gid }}
         uses: docker://razr/vxros2build:1.0
         with:
-          args: source /github/home/wrsdk/toolkit/wind_sdk_env.linux && make -C /github/workspace
+          args: source /github/home/wrsdk/${{ env.script }} && make -C /github/workspace
 
       - name: Create an HDD image
         run: |
@@ -77,7 +83,7 @@ jobs:
 
       - name: Prepare artifacts
         run: |
-          cp ${{ runner.temp }}/_github_home/wrsdk/bsps/*/boot/vxWorks ${{ github.workspace }}
+          cp ${{ runner.temp }}/_github_home/wrsdk/${{ env.image }} ${{ github.workspace }}
 
       - name: Upload VxWorks and the HDD image
         uses: actions/upload-artifact@v2

@@ -20,12 +20,6 @@ ifndef __packages_defs
 include $(WIND_USR_MK)/defs.packages.mk
 endif
 
-define echo_action
-	@$(ECHO) "--------------------------------------------------------------------------------"; \
-	$(ECHO) "$1"; \
-	$(ECHO) "--------------------------------------------------------------------------------";
-endef
-
 define pkg_install
 	cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) && \
 	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \

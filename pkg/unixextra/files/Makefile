@@ -31,13 +31,15 @@ SHOBJECTS := $(SOURCES:.c=.sho)
 PREFIX ?= /usr/local
 INCLUDE_PATH ?= include
 LIBRARY_PATH ?= lib
+LIBRARY_VER ?= 1
 
 CC_FLAGS ?= -g
 
-all: $(TARGET).a $(TARGET).so
+all: $(TARGET).a $(TARGET).so.${LIBRARY_VER}
 
-$(TARGET).so: $(SHOBJECTS)
-	$(CC) -shared $^ -o $@ $(CC_FLAGS)
+$(TARGET).so.${LIBRARY_VER}: $(SHOBJECTS)
+	$(CC) -shared -Wl,-soname,$@ $^ -o $@ $(CC_FLAGS)
+	ln -s $@ $(TARGET).so
 
 %.sho: %.c
 	$(CC) -fpic -c $< -o $@ -I. $(CC_FLAGS)
@@ -67,4 +69,4 @@ ifneq (,$(findstring termios.c,$(SOURCES)))
 endif
 	install -d $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)
 	install -m 755 $(TARGET).a $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)
-	install -m 755 $(TARGET).so $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)
+	install -m 755 $(TARGET).so* $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)

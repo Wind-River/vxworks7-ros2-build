@@ -25,15 +25,16 @@ include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.crossbuild.mk
 
 PKG_NAME = turtlebot3
-PKG_VER =  dashing
+PKG_VER = $(ROS_DISTRO)
 
 PACKAGES += ${PKG_NAME}
 
+# use the same branch for the patches
 PKG_URL = https://github.com/Wind-River/vxworks7-layer-for-ros2.git
 PKG_TYPE = git
-PKG_COMMIT_ID = dashing-release-SR0620
+PKG_COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
 
-PKG_REPO_COMMIT_ID = dashing-devel
+PKG_REPO_COMMIT_ID = $(PKG_VER)-devel
 PKG_REPO_URL = https://raw.githubusercontent.com/ROBOTIS-GIT/${PKG_NAME}/${PKG_REPO_COMMIT_ID}/${PKG_NAME}.repos
 
 PKG_LICENSE = BSD
@@ -83,8 +84,6 @@ $(PKG_NAME).configure: $(PKG_NAME).patch
 $(PKG_NAME).build: $(PKG_NAME).configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/ros2/$(PKG_BUILD_DIR); \
-	export PATH=$(3PP_HOST_DIR)/bin:$(PATH); \
-	export PYTHONPATH=$(3PP_HOST_DIR)/lib/python3.$(TGT_PYTHON_MINOR)/site-packages:$(PYTHONPATH); \
         colcon build --merge-install --install-base $(ROOT_DIR) --cmake-force-configure --packages-up-to $(PKG_PKGS_UP_TO) \
 		--cmake-args \
                 -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
