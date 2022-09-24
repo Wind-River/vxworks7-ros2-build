@@ -33,6 +33,7 @@ PKG_VER = $(ROS_DISTRO)
 # use the same branch for the patches
 PKG_URL = https://github.com/Wind-River/vxworks7-layer-for-ros2.git
 PKG_TYPE = git
+# a layer branch is always aligned with the current build branch
 PKG_COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
 
 PKG_REPO_COMMIT_ID = $(PKG_VER)-release
@@ -45,7 +46,7 @@ PKG_SRC_DIR = patches
 
 PKG_BUILD_TYPE := Debug
 
-include $(PACKAGE_DIR)/ros2/packages.mk
+include $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/packages.mk
 
 define ros2_patch
         for pn in $(1); do \
@@ -82,18 +83,16 @@ ros2.configure: ros2.patch
 	done;
 	pip3 install numpy;
 	pip3 install lark-parser;
+	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default;
+	cp files/$(ROS_DISTRO)/*.mixin $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/.;
+	sed -i "s/-3./-3$(TGT_PYTHON_MINOR)/g" $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin;
 	@$(MAKE_STAMP)
 
 ros2.build: ros2.configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
-	colcon build --merge-install --install-base $(ROOT_DIR) --cmake-force-configure --packages-up-to-regex $(PKG_PKGS_UP_TO) \
-		--cmake-args \
-                -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
-                -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-		-DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
-		-DPYTHON_SOABI=cpython-3$(TGT_PYTHON_MINOR)-vxworks \
-                -DBUILD_TESTING:BOOL=OFF
+	export COLCON_HOME=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon; \
+	colcon build --mixin vxworks --packages-up-to-regex $(PKG_PKGS_UP_TO)
 	@$(MAKE_STAMP)
 
 ros2.install : ros2.build
@@ -107,7 +106,7 @@ ros2.install : ros2.build
 	cp -r $(ROOT_DIR)/bin/* $(DEPLOY_DIR)/bin/.
 	cp -r $(ROOT_DIR)/lib/* $(DEPLOY_DIR)/lib/.
 	cp -r $(ROOT_DIR)/share $(DEPLOY_DIR)/.
-	cp files/vxscript $(DEPLOY_DIR)/.
+	cp files/$(ROS_DISTRO)/vxscript $(DEPLOY_DIR)/.
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
