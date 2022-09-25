@@ -1,6 +1,13 @@
 {
   "vxros2build": [
     {
+      "sdk": "wrsdk-vxworks7-qemu-1.10",
+      "url": "https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.10.tar.bz2",
+      "branch": "humble-release-22.03",
+      "script": "./sdkenv.sh",
+      "image": "./vxsdk/bsps/*/vxWorks"
+    },
+    {
       "sdk": "wrsdk-vxworks7-up2-1.7",
       "url": "https://labs.windriver.com/downloads/wrsdk-vxworks7-up2-1.7.tar.bz2",
       "branch": "dashing-release-SR0640",

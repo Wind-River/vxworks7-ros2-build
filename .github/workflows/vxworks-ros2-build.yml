@@ -13,11 +13,8 @@ jobs:
   build:
     strategy:
       matrix:
-        branch: [dashing-release-SR0640]
-        sdk: [wrsdk-vxworks7-up2-1.7, wrsdk-vxworks7-raspberrypi4b-1.0]
-        include:
-          - branch: dashing-release-22.03
-            sdk: wrsdk-vxworks7-qemu-1.10
+        branch: [humble-release-22.03]
+        sdk: [wrsdk-vxworks7-qemu-1.10]
 
     runs-on: ubuntu-20.04
     steps:
@@ -65,7 +62,7 @@ jobs:
         env:
           UID: ${{ env.uid }}
           GID: ${{ env.gid }}
-        uses: docker://razr/vxros2build:1.0
+        uses: docker://razr/vxros2build:humble
         with:
           args: source /github/home/wrsdk/${{ env.script }} && make -C /github/workspace
 
