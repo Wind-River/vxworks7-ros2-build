@@ -1,13 +1,17 @@
-name: Mirror master to dashing-releases
+name: Mirror master to supported ROS2 releases
 
 on:
   push:
     branches: [ master ]
 
 jobs:
-  mirror-master-to-dashing:
+  mirror-master-to-supported-releases:
     runs-on: ubuntu-latest
     steps:
+    - name: Mirror to "humble-release-22.03"
+      uses: zofrex/mirror-branch@v1
+      with:
+        target-branch: humble-release-22.03
     - name: Mirror to "dashing-release-SR0640"
       uses: zofrex/mirror-branch@v1
       with:
