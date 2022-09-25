@@ -9,7 +9,11 @@ include $(WIND_USR_MK)/defs.vxworks.mk
 ifeq ($(WIND_RELEASE_ID),SR0640)
 DEFAULT_BUILD ?= sdk python unixextra asio tinyxml2 colcon ros2 turtlebot3
 else
+ifeq ($(ROS_DISTRO),dashing)
 DEFAULT_BUILD ?= sdk unixextra asio tinyxml2 colcon ros2 turtlebot3
+else
+DEFAULT_BUILD ?= sdk unixextra colcon ros2
+endif
 endif
 
 .PHONY: clean_buildstamps
@@ -29,7 +33,7 @@ $(STAMP_DIR):
 	@mkdir -p $(STAMP_DIR)
 
 clean_buildstamps:
-	@rm -f $(STAMP_DIR)/*
+	for p in $(DEFAULT_BUILD); do rm -rf $(STAMP_DIR)/$$p.*; done;
 
 distclean: clean
 	@rm -rf $(DOWNLOADS_DIR)
@@ -37,6 +41,7 @@ distclean: clean
 	@rm -rf $(EXPORT_DIR)
 
 clean: clean_buildstamps
+	for p in $(DEFAULT_BUILD); do rm -rf $(BUILD_DIR)/$$p; done;
 
 info:
 	@$(ECHO) "DEFAULT_BUILD: $(DEFAULT_BUILD)"

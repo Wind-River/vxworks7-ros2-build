@@ -23,9 +23,9 @@ export HOSTREF
 export UID
 export USER
 export WRENV
-export BASELINE
+export WORKSPACE_DIR
 
-set -e
+# set -e
 
 INIT_STAMP=/.initialized
 
@@ -38,10 +38,22 @@ if [ ! -f ${INIT_STAMP} ]; then
     fi 2> /dev/null
 
     mkdir -p ${INSTALL_DIR}
-    chown ${USER} ${INSTALL_DIR}
+    chown ${UID}:${GID} ${INSTALL_DIR}
     chmod 755 ${INSTALL_DIR}
+
+    mkdir -p ${WORKSPACE_DIR}
+    chown ${UID}:${GID} ${WORKSPACE_DIR}
+    chmod 755 ${WORKSPACE_DIR}
 
     touch ${INIT_STAMP}
 
-    su -c "$*" -p ${USER}
+    # Check if the container is interactive
+    tty > /dev/null
+    if [ $? -eq 0 ]; then
+        # echo "(interactive shell with pty)"
+        su -p -s /bin/bash ${USER}
+    else
+        # echo "(not interactive with pty)"
+        su -c "$*" -p ${USER}
+    fi
 fi

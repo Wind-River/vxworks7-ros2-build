@@ -84,13 +84,8 @@ $(PKG_NAME).configure: $(PKG_NAME).patch
 $(PKG_NAME).build: $(PKG_NAME).configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/ros2/$(PKG_BUILD_DIR); \
-        colcon build --merge-install --install-base $(ROOT_DIR) --cmake-force-configure --packages-up-to $(PKG_PKGS_UP_TO) \
-		--cmake-args \
-                -DCMAKE_BUILD_TYPE:STRING=$(PKG_BUILD_TYPE) \
-                -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-		-DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
-		-DPYTHON_SOABI=cpython-3$(TGT_PYTHON_MINOR)-vxworks \
-                -DBUILD_TESTING:BOOL=OFF
+        export COLCON_HOME=$(BUILD_DIR)/ros2/$(PKG_BUILD_DIR)/.colcon; \
+        colcon build --mixin vxworks --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO)
 	@$(MAKE_STAMP)
 
 $(PKG_NAME).install : $(PKG_NAME).build

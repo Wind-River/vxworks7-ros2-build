@@ -27,6 +27,7 @@ TARGET = libunixextra
 SOURCES := $(wildcard *.c)
 OBJECTS := $(SOURCES:.c=.o)
 SHOBJECTS := $(SOURCES:.c=.sho)
+TESTS := $(patsubst %.c,%,$(wildcard tests/*.c))
 
 PREFIX ?= /usr/local
 INCLUDE_PATH ?= include
@@ -35,7 +36,7 @@ LIBRARY_VER ?= 1
 
 CC_FLAGS ?= -g
 
-all: $(TARGET).a $(TARGET).so.${LIBRARY_VER}
+all: $(TARGET).a $(TARGET).so.${LIBRARY_VER} $(TESTS)
 
 $(TARGET).so.${LIBRARY_VER}: $(SHOBJECTS)
 	$(CC) -shared -Wl,-soname,$@ $^ -o $@ $(CC_FLAGS)
@@ -50,8 +51,11 @@ $(TARGET).a: $(OBJECTS)
 %.o: %.c
 	$(CC) -static -c $< -o $@ -I. $(CC_FLAGS)
 
+$(TESTS): %: %.c $(TARGET).a
+	$(CC) -static -o $@ $< $(CC_FLAGS) $(TARGET).a
+
 clean:
-	@rm -rf *.o *.sho $(TARGET).*
+	@rm -rf *.o *.sho $(TARGET).* $(TESTS)
 
 install: $(TARGET).a $(TARGET).so
 ifneq (,$(findstring fnmatch.c,$(SOURCES)))
@@ -66,6 +70,14 @@ ifneq (,$(findstring termios.c,$(SOURCES)))
 	install -d $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)/sys
 	install -m 644 termios.h $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
 	install -m 644 sys/ttycom.h $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)/sys
+endif
+ifneq (,$(findstring flock.c,$(SOURCES)))
+	install -d $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)/sys
+	install -m 644 sys/file.h $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)/sys
+endif
+ifneq (,$(findstring pthread_getname.c,$(SOURCES)))
+	install -d $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
+	install -m 644 pthread.h $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
 endif
 	install -d $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)
 	install -m 755 $(TARGET).a $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)

@@ -1,0 +1,16 @@
+{
+    "build": {
+        "vxworks": {
+            "merge-install": true,
+            "install-base": "/work/export/root",
+            "cmake-force-configure": true,
+            "cmake-args": [
+                "-DCMAKE_BUILD_TYPE:STRING=Debug",
+                "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON",
+                "-DCMAKE_TOOLCHAIN_FILE=/work/buildspecs/cmake/toolchain.cmake",
+                "-DPYTHON_SOABI=cpython-39-vxworks",
+                "-DBUILD_TESTING:BOOL=OFF"
+            ]
+        }
+    }
+}
