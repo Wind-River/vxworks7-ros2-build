@@ -83,10 +83,10 @@ For the standard build you must also have:
 
 The following branches are active
 
-- [x] `master` - builds [ROS2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against ROS2 `22.03` SDK
-- [x] `humble-release-22.03` - builds [ROS2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against ROS2 `22.03` SDK
-- [x] `dashing-release-22.03` - builds [ROS2 `dashing-release`](https://github.com/ros2/ros2/tree/dashing-release) against ROS2 `22.03` SDK
-- [ ] `dashing-release-SR0640` - builds [ROS2 `dashing-release`](https://github.com/ros2/ros2/tree/dashing-release) against ROS2 `SR0640` SDK
+- [x] `master` - builds [ROS2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `22.03` SDK
+- [x] `humble-release-22.03` - builds [ROS2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `22.03` SDK
+- [x] `dashing-release-22.03` - builds [ROS2 `dashing-release`](https://github.com/ros2/ros2/tree/dashing-release) against VxWorks `22.03` SDK
+- [ ] `dashing-release-SR0640` - builds [ROS2 `dashing-release`](https://github.com/ros2/ros2/tree/dashing-release) against VxWorks `SR0640` SDK
 
 ## Directory Structure
 
@@ -135,7 +135,7 @@ The repository is cloned during the build to the *patches* dir.
 
 The branch name of the `layer` repository is the same as the name of the `build` repository.
 
-## Build ROS2 and its dependecies
+## Build ROS2 and its dependencies
 
 ### Clone this repository using the `master` branch
 
@@ -149,8 +149,8 @@ cd vxworks7-ros2-build
 A Docker (Ubuntu 22.04) based build is recommended to avoid a necessity of installing build dependencies.
 
 ```bash
-docker build -t vxbuild:22.04 Docker/vxbuild/.
-docker build -t vxros2build:humble Docker/vxros2build/.
+docker build -t vxbuild:22.04 Docker/22.04/vxbuild/.
+docker build -t vxros2build:humble Docker/22.04/vxros2build/.
 ```
 
 ### Download and extract the VxWorks SDK
@@ -181,9 +181,12 @@ See [Dockerfile](Docker/vxbuild/Dockerfile) for the complete list of environment
 
 ### Start build
 
-Inside Docker container: source the development environment and start build
+Inside Docker container: check `ROS_DISTRO` version, source the development environment and start build
 
 ```bash
+wruser@d19165730517:/work echo $ROS_DISTRO
+humble
+
 wruser@d19165730517:/work source /wrsdk/sdkenv.sh
 wruser@d19165730517:/work make
 wruser@d19165730517:/work exit
