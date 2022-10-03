@@ -1,0 +1,50 @@
+# This is a workflow for the vxros2build docker build.
+# It builds a docker container for the humble ROS2 VxWorks builds
+#
+# The workflow can be started
+#  - manually
+
+name: 'Docker build'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        ubuntu: [22.04]
+        ros2: [humble]
+
+    runs-on: ubuntu-22.04
+    steps:
+
+      - name: Checks-out a branch ${{ github.ref_name }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Build vxbuild:${{ matrix.ubuntu }} docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: Docker/${{ matrix.ubuntu }}/vxbuild/.
+          push: false
+          tags: vxbuild:${{ matrix.ubuntu }}
+
+      - name: Build vxros2build:${{ matrix.ros2 }} docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: Docker/${{ matrix.ubuntu }}/vxros2build/.
+          push: false
+          tags: vxros2build:${{ matrix.ros2 }}
+
+      - name: Save vxros2build:${{ matrix.ros2 }} Docker Image
+        run: |
+          docker save vxros2build:${{ matrix.ros2 }} | gzip > ${{ github.workspace }}/vxros2build.${{ matrix.ros2 }}.tar.gz
+
+      - name: Upload vxros2build:${{ matrix.ros2 }} Docker Image
+        uses: actions/upload-artifact@v2
+        with:
+          name: Docker Image vxros2build ${{ matrix.ros2 }}
+          path: |
+            ${{ github.workspace }}/vxros2build.${{ matrix.ros2 }}.tar.gz
