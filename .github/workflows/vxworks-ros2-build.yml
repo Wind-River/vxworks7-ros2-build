@@ -16,7 +16,7 @@ jobs:
         branch: [humble-release-22.03]
         sdk: [wrsdk-vxworks7-qemu-1.10]
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
 
       - name: Checks-out a branch ${{ matrix.branch }}
@@ -26,8 +26,6 @@ jobs:
 
       - name: Setup environment
         run: |
-          echo "uid=`id -u`" >> $GITHUB_ENV
-          echo "gid=`id -g`" >> $GITHUB_ENV
           echo "url=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {url} | .url][0]' ./.github/workflows/vxros2build.json`" >> $GITHUB_ENV
           echo "script=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {script} | .script][0]' ./.github/workflows/vxros2build.json`" >> $GITHUB_ENV
           echo "image=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {image} | .image][0]' ./.github/workflows/vxros2build.json`" >> $GITHUB_ENV
@@ -36,35 +34,50 @@ jobs:
         uses: carlosperate/download-file-action@v1
         with:
           file-url: '${{ env.url }}'
-          location: '${{ runner.temp }}/_github_home'
+          location: '/tmp'
 
       - name: Extract the ${{ matrix.sdk }} SDK
         run: |
-          mkdir ${{ runner.temp }}/_github_home/wrsdk
-          cd ${{ runner.temp }}/_github_home/wrsdk
-          tar xvfj ${{ runner.temp }}/_github_home/${{ matrix.sdk }}.tar.bz2 --strip 1
+          mkdir -p /tmp/wrsdk
+          cd /tmp/wrsdk
+          tar xvfj /tmp/${{ matrix.sdk }}.tar.bz2 --strip 1
 
-#      - name: Build vxbuild docker image
-#        uses: docker/build-push-action@v3
-#        with:
-#          context: Docker/vxbuild/.
-#          push: false
-#          tags: vxbuild:1.0
+      - name: store runners uid and gid
+        run: |
+          echo "`id -u`" > /tmp/wrsdk/uid
+          echo "`id -g`" > /tmp/wrsdk/gid
 
-#      - name: Build vxros2build docker image
-#        uses: docker/build-push-action@v3
-#        with:
-#          context: Docker/vxros2build/.
-#          push: false
-#          tags: vxros2build:1.0
+      - name: Build vxbuild docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: Docker/22.04/vxbuild/.
+          push: false
+          tags: vxbuild:22.04
+
+      - name: Build vxros2build docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: Docker/22.04/vxros2build/.
+          push: false
+          tags: vxros2build:humble
 
       - name: Build ROS2 ${{ matrix.branch }} against VxWorks ${{ matrix.sdk }}
-        env:
-          UID: ${{ env.uid }}
-          GID: ${{ env.gid }}
-        uses: docker://razr/vxros2build:humble
+        uses: addnab/docker-run-action@v3
         with:
-          args: source /github/home/wrsdk/${{ env.script }} && make -C /github/workspace
+          image: vxros2build:humble
+          options: -v ${{ github.workspace }}:/work -v /tmp/wrsdk:/wrsdk
+          run:  |
+            groupadd -g "`cat /wrsdk/gid`" wruser
+            useradd -u "`cat /wrsdk/uid`" -m wruser -g wruser
+            su wruser -c 'source /wrsdk/sdkenv.sh && make -C /work'
+
+#      - name: Build ROS2 ${{ matrix.branch }} against VxWorks ${{ matrix.sdk }}
+#        env:
+#          UID: ${{ env.uid }}
+#          GID: ${{ env.gid }}
+#        uses: docker://razr/vxros2build:humble
+#        with:
+#          args: source /github/home/wrsdk/${{ env.script }} && make -C /github/workspace
 
       - name: Create an HDD image
         run: |
@@ -80,7 +93,7 @@ jobs:
 
       - name: Prepare artifacts
         run: |
-          cp ${{ runner.temp }}/_github_home/wrsdk/${{ env.image }} ${{ github.workspace }}
+          cp /tmp/wrsdk/${{ env.image }} ${{ github.workspace }}
 
       - name: Upload VxWorks and the HDD image
         uses: actions/upload-artifact@v2
