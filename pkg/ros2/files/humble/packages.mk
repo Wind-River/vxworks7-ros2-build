@@ -23,7 +23,7 @@
 
 ROS2_PATCH_DIRS=eclipse-iceoryx/iceoryx \
 		eclipse-cyclonedds/cyclonedds \
-		ros-tracing/ros2_tracing \
+		ros2/ros2_tracing \
                 ros2/rmw_implementation \
                 ros2/rclcpp \
                 ros2/rclpy \
