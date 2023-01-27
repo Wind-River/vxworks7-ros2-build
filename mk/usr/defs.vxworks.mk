@@ -33,7 +33,7 @@ endif
 
 ## Add missing variablse from SDK
 export TOOL=llvm
-export TGT_ARCH=$(shell $$CC -print-target-triple -c README.md | cut -d '-' -f 1 | sed -e 's/arm64/aarch64/g')
+export TGT_ARCH=$(shell wr-cc -print-target-triple -c README.md | cut -d '-' -f 1 | sed -e 's/arm64/aarch64/g')
 
 3PP_DIR?=$(WIND_CC_SYSROOT)/usr/3pp
 3PP_DEVELOP_DIR=$(3PP_DIR)/develop
