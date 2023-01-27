@@ -23,7 +23,7 @@ modification history
 
 static void *prout(void *fd , const char *buf, size_t n)
 {
-	return (write(*(int*)fd, buf, n));
+	return ((void *)write(*(int*)fd, buf, n));
 }
 
 int vdprintf(int fd, const char *restrict fmt, va_list ap)
