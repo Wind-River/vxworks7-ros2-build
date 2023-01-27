@@ -20,7 +20,7 @@ jobs:
     steps:
 
       - name: Checks-out a branch ${{ matrix.branch }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ matrix.branch }}
 
@@ -96,7 +96,7 @@ jobs:
           cp /tmp/wrsdk/${{ env.image }} ${{ github.workspace }}
 
       - name: Upload VxWorks and the HDD image
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: HDD image ${{ matrix.sdk }} ${{ matrix.branch }}
           path: |
