@@ -12,6 +12,10 @@ jobs:
       uses: zofrex/mirror-branch@v1
       with:
         target-branch: humble-release-22.03
+    - name: Mirror to "rolling-23.09"
+      uses: zofrex/mirror-branch@v1
+      with:
+        target-branch: rolling-23.09
     - name: Mirror to "dashing-release-SR0640"
       uses: zofrex/mirror-branch@v1
       with:
