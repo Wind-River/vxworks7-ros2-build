@@ -19,7 +19,7 @@
 # 15nov19,rcw  created
 #
 
-# SYNOPSIS        variables for ROS2 packages
+# SYNOPSIS        variables for ROS 2 packages
 
 ROS2_PATCH_DIRS=eProsima/Fast-CDR \
                 eProsima/Fast-RTPS \

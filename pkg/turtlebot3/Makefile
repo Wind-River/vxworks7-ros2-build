@@ -19,7 +19,7 @@
 # 01dec18,akh  created
 #
 
-# SYNOPSIS        automate the build of ROS2
+# SYNOPSIS        automate the build of ROS 2
 include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.crossbuild.mk

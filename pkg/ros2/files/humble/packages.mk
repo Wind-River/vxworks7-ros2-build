@@ -16,10 +16,10 @@
 #
 # modification history
 # --------------------
-# 15nov19,rcw  created
+# 15may22,akh  created
 #
 
-# SYNOPSIS        variables for ROS2 packages
+# SYNOPSIS        variables for ROS 2 packages
 
 ROS2_PATCH_DIRS=eclipse-iceoryx/iceoryx \
 		eclipse-cyclonedds/cyclonedds \

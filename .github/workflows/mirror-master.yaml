@@ -1,4 +1,4 @@
-name: Mirror master to supported ROS2 releases
+name: Mirror master to supported ROS 2 releases
 
 on:
   push:
@@ -8,19 +8,7 @@ jobs:
   mirror-master-to-supported-releases:
     runs-on: ubuntu-latest
     steps:
-    - name: Mirror to "humble-release-22.03"
+    - name: Mirror to "humble-release-22.09"
       uses: zofrex/mirror-branch@v1
       with:
-        target-branch: humble-release-22.03
-    - name: Mirror to "rolling-23.09"
-      uses: zofrex/mirror-branch@v1
-      with:
-        target-branch: rolling-23.09
-    - name: Mirror to "dashing-release-SR0640"
-      uses: zofrex/mirror-branch@v1
-      with:
-        target-branch: dashing-release-SR0640
-    - name: Mirror to "dashing-release-22.03"
-      uses: zofrex/mirror-branch@v1
-      with:
-        target-branch: dashing-release-22.03
+        target-branch: humble-release-22.09
