@@ -1,10 +1,10 @@
-# This is a workflow for the VxWorks ROS2 build.
-# It builds a ROS2 VxWorks port against the VxWorks SDK 
+# This is a workflow for the VxWorks ROS 2 build.
+# It builds a ROS 2 VxWorks port against the VxWorks SDK 
 #
 # The workflow can be started 
 #  - manually
 
-name: 'VxWorks ROS2 build'
+name: 'VxWorks ROS 2 build'
 
 on:
   workflow_dispatch:
@@ -61,7 +61,7 @@ jobs:
           push: false
           tags: vxros2build:humble
 
-      - name: Build ROS2 ${{ matrix.branch }} against VxWorks ${{ matrix.sdk }}
+      - name: Build ROS 2 ${{ matrix.branch }} against VxWorks ${{ matrix.sdk }}
         uses: addnab/docker-run-action@v3
         with:
           image: vxros2build:humble
@@ -71,7 +71,7 @@ jobs:
             useradd -u "`cat /wrsdk/uid`" -m wruser -g wruser
             su wruser -c 'source /wrsdk/sdkenv.sh && make -C /work'
 
-#      - name: Build ROS2 ${{ matrix.branch }} against VxWorks ${{ matrix.sdk }}
+#      - name: Build ROS 2 ${{ matrix.branch }} against VxWorks ${{ matrix.sdk }}
 #        env:
 #          UID: ${{ env.uid }}
 #          GID: ${{ env.gid }}
