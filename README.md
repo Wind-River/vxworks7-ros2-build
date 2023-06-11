@@ -4,16 +4,15 @@
 
 ## VxWorks SDK and ROS 2 support
 
-Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS2 release is `humble` and the latest VxWorks SDK is `22.03`.
+Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS2 release is `humble` and the latest VxWorks SDK is `22.09`.
 
-|           | [22.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [SR0640 SDK](https://labs.windriver.com/downloads/wrsdk_prev.html) |
+|           | [22.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
 |:---------:|:-------------|:-------------|
-|**[humble](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2203/README_qemu.html) | |
-|**[dashing](https://docs.ros.org/en/dashing/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2203/README_qemu.html) |[Intel UP2](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/README-up2.html)<br />[Raspberry Pi4](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/README-raspberrypi4b.html) |
+|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2209/README_qemu.html) | |
 
 ## Prebuilt image
 
-The VxWorks ROS2 humble image is prebuilt and can be tested by downloading it from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml).  
+The VxWorks ROS2 `humble` image is prebuilt and can be tested by downloading it from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml).
 
 ## Overview
 
@@ -63,7 +62,7 @@ Subject to the License, you can proceed to download the VxWorks SDK.
 ## Prerequisite(s)
 
 * Download a VxWorks Software Development Kit from Wind River Labs
-   * [22.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43)
+   * [22.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43)
 
 * The build system will need to download source code from github.com and bitbucket.org.  A
   working Internet connection with access to both sites is required.
@@ -73,8 +72,8 @@ For the standard build you must also have:
 * Supported Linux host for both ROS2 and VxWorks 7
    * ROS 2.0 Target Platforms
       * http://www.ros.org/reps/rep-2000.html
-   * VxWorks 7 22.03
-      * https://docs.windriver.com/bundle/vxworks_release_notes_22_03/page/index-release_notes.html
+   * VxWorks 7 22.09
+      * https://docs.windriver.com/bundle/vxworks_release_notes_22_09/page/index-release_notes.html
    * For ROS2 Humble Hawksbill, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
 * Docker Engine installed on your Linux host
    * https://docs.docker.com/engine/install/ubuntu/
@@ -83,10 +82,8 @@ For the standard build you must also have:
 
 The following branches are active
 
-- [x] `master` - builds [ROS2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `22.03` SDK
-- [x] `humble-release-22.03` - builds [ROS2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `22.03` SDK
-- [x] `dashing-release-22.03` - builds [ROS2 `dashing-release`](https://github.com/ros2/ros2/tree/dashing-release) against VxWorks `22.03` SDK
-- [ ] `dashing-release-SR0640` - builds [ROS2 `dashing-release`](https://github.com/ros2/ros2/tree/dashing-release) against VxWorks `SR0640` SDK
+- [x] `master` - builds [ROS2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `22.09` SDK
+- [x] `humble-release-22.09` - builds [ROS2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `22.09` SDK
 
 ## Directory Structure
 
@@ -149,13 +146,13 @@ cd vxworks7-ros2-build
 A Docker (Ubuntu 22.04) based build is recommended to avoid a necessity of installing build dependencies.
 
 ```bash
-docker build -t vxbuild:22.04 Docker/22.04/vxbuild/.
-docker build -t vxros2build:humble Docker/22.04/vxros2build/.
+docker build --no-cache -t vxbuild:22.04 Docker/22.04/vxbuild/.
+docker build --no-cache -t vxros2build:humble Docker/22.04/vxros2build/.
 ```
 
 ### Download and extract the VxWorks SDK
 
-The 22.03 SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
+The 22.09 SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
 
 ```bash
 cd ~/Downloads 
