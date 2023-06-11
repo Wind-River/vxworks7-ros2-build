@@ -7,7 +7,7 @@
 Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS2 release is `humble` and the latest VxWorks SDK is `22.09`.
 
 |           | [22.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
-|:---------:|:-------------|:-------------|
+|:---------:|:-------------|
 |**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2209/README_qemu.html) | |
 
 ## Prebuilt image
