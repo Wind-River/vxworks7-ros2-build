@@ -1,6 +1,6 @@
 # `unixextra` library
 
-It is an extension of the VxWorks `unix` library. The library is created to enable ROS2 compilation.
+It is an extension of the VxWorks `unix` library. The library is created to enable ROS 2 compilation.
 It can be built natively by
 
 ```bash

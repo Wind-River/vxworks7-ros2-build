@@ -1,7 +1,7 @@
 Building VxWorks with Docker
 ==============================
 
-This Dockerfile will create a container image that is a build environment for VxWorks 7 and ROS2. 
+This Dockerfile will create a container image that is a build environment for VxWorks 7 and ROS 2.
 
 This can be used in the following ways:
 - as an interactive development environment

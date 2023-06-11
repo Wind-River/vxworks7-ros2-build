@@ -12,7 +12,7 @@ RUN echo 'Etc/UTC' > /etc/timezone && \
     ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
     apt-get update && apt-get install -q -y tzdata && rm -rf /var/lib/apt/lists/*
 
-# Install packages needed for ROS2 builds
+# Install packages needed for ROS 2 builds
 RUN apt-get update && apt install -q -y \
     software-properties-common \
     curl \
