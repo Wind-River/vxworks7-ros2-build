@@ -156,9 +156,9 @@ The 22.09 SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.c
 
 ```bash
 cd ~/Downloads 
-wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.10.tar.bz2
+wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.11.tar.bz2
 mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
-tar –jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.10.tar.bz2 --strip 1
+tar –jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.11.tar.bz2 --strip 1
 ```
 
 ### Run Docker image
