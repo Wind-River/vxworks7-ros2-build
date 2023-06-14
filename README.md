@@ -458,8 +458,8 @@ wruser@ros2native:/work/ros2_native$ colcon build --merge-install --packages-up-
 6. Run `my_package`
 
 ```bash
-wruser@ros2native:/work/ros2_native$
-wruser@ros2native:/work/ros2_ws/install$ ros2 run my_package my_package
+wruser@ros2native:/work/ros2_native$ source install/setup.bash
+wruser@ros2native:/work/ros2_native/install$ ros2 run my_package my_package
 Hello World!
 ```
 
