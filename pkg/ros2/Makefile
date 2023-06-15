@@ -116,6 +116,9 @@ ros2.install : ros2.build
 	cp -r $(ROOT_DIR)/lib/* $(DEPLOY_DIR)/lib/.
 	cp -r $(ROOT_DIR)/share $(DEPLOY_DIR)/.
 	cp files/$(ROS_DISTRO)/vxscript $(DEPLOY_DIR)/.
+ifeq ($(WIND_RELEASE_ID),23.03)
+	sed -i "s/ata4/ata0/g" $(DEPLOY_DIR)/vxscript;
+endif
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
