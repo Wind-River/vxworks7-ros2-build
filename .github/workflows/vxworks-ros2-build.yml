@@ -13,8 +13,8 @@ jobs:
   build:
     strategy:
       matrix:
-        branch: [humble-release-22.03]
-        sdk: [wrsdk-vxworks7-qemu-1.10]
+        branch: [humble-release-22.09]
+        sdk: [wrsdk-vxworks7-qemu-1.11]
 
     runs-on: ubuntu-22.04
     steps:
