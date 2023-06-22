@@ -110,12 +110,13 @@ ros2.install : ros2.build
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyyaml
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) empy
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyelftools
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) packaging
 	@$(call echo_action,Installing build artifacts,$*)
 	cp -r $(ROOT_DIR)/bin/* $(DEPLOY_DIR)/bin/.
 	cp -r $(ROOT_DIR)/lib/* $(DEPLOY_DIR)/lib/.
 	cp -r $(ROOT_DIR)/share $(DEPLOY_DIR)/.
 	cp files/$(ROS_DISTRO)/vxscript $(DEPLOY_DIR)/.
 	@$(MAKE_STAMP)
-
+	
 include $(WIND_USR_MK)/rules.packages.mk
 
