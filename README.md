@@ -4,9 +4,9 @@
 
 ## VxWorks SDK and ROS 2 support
 
-Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `humble` and the latest VxWorks SDK is `22.09`.
+Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `humble` and the latest VxWorks SDK is `23.03`.
 
-|           | [22.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
+|           | [23.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
 |:---------:|:-------------|
 |**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2209/README_qemu.html) | |
 
@@ -62,7 +62,7 @@ Subject to the License, you can proceed to download the VxWorks SDK.
 ## Prerequisite(s)
 
 * Download a VxWorks Software Development Kit from Wind River Labs
-   * [22.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43)
+   * [23.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43)
 
 * The build system will need to download source code from github.com and bitbucket.org.  A
   working Internet connection with access to both sites is required.
@@ -72,7 +72,7 @@ For the standard build you must also have:
 * Supported Linux host for both ROS 2 and VxWorks 7
    * ROS 2.0 Target Platforms
       * http://www.ros.org/reps/rep-2000.html
-   * VxWorks 7 22.09
+   * VxWorks 7 23.03
       * https://docs.windriver.com/bundle/vxworks_release_notes_22_09/page/index-release_notes.html
    * For ROS 2 Humble Hawksbill, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
 * Docker Engine installed on your Linux host
@@ -82,8 +82,8 @@ For the standard build you must also have:
 
 The following branches are active
 
-- [x] `master` - builds [ROS 2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `22.09` SDK
-- [x] `humble-release-22.09` - builds [ROS 2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `22.09` SDK
+- [x] `master` - builds [ROS 2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `23.03` SDK
+- [x] `humble-release-23.03` - builds [ROS 2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `23.03` SDK
 
 ## Directory Structure
 
@@ -152,11 +152,11 @@ docker build --no-cache -t vxros2build:humble Docker/22.04/vxros2build/.
 
 ### Download and extract the VxWorks SDK
 
-The 22.09 SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
+The 23.03 SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
 
 ```bash
 cd ~/Downloads 
-wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.11.tar.bz2
+wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.12.tar.bz2
 mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
 tar –jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.11.tar.bz2 --strip 1
 ```
@@ -484,7 +484,11 @@ wruser@690af330acaa:/work$ exit
 3. Create `ros2.img` as described [here](#create-an-hdd-image) and start QEMU
 
 ```bash
+# before VxWorks 23.03
 $ sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+
+# VxWorks 23.03 and further 
+$ sudo qemu-system-x86_64 -machine q35 -cpu Nehalem -m 512M -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0 s=/ata0/vxscript" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
 
 4. Setup environment variables and run `my_package`
