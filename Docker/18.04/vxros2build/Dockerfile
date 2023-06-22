@@ -11,7 +11,7 @@ RUN echo 'Etc/UTC' > /etc/timezone && \
     ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
     apt-get update && apt-get install -q -y tzdata && rm -rf /var/lib/apt/lists/*
 
-# Install packages needed for ROS2 builds
+# Install packages needed for ROS 2 builds
 ## From docker_images/ros2/source/source/Dockerfile
 ## Added curl for vxworks-ros-scripts
 
@@ -55,7 +55,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python packages
-## List comes from ROS2 docker_images Dockerfile
+## List comes from ROS 2 docker_images Dockerfile
 ## Added empy for rcutils
 ##
 ## Some modules may complain that they already exist because
@@ -88,7 +88,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     mercurial \
     && rm -rf /var/lib/apt/lists/*
 
-# For native ROS2 builds
+# For native ROS 2 builds
 RUN apt-get update && apt-get install --no-install-recommends -y \
     libasio-dev \
     libtinyxml2-dev \

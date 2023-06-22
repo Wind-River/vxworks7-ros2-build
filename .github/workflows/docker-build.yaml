@@ -1,5 +1,5 @@
 # This is a workflow for the vxros2build docker build.
-# It builds a docker container for the humble ROS2 VxWorks builds
+# It builds a docker container for the humble ROS 2 VxWorks builds
 #
 # The workflow can be started
 #  - manually

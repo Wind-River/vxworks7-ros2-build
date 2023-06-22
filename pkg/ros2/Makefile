@@ -20,7 +20,7 @@
 # 12mar18,akh  created
 #
 
-# SYNOPSIS        automate the build of ROS2
+# SYNOPSIS        automate the build of ROS 2
 include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.crossbuild.mk
@@ -40,7 +40,7 @@ PKG_COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
 ifeq ($(PKG_COMMIT_ID),master)
 PKG_REPO_COMMIT_ID = $(ROS_DISTRO)-release
 else
-# extract ROS2 release part, <ros2 release>-<vxworks release>
+# extract ROS 2 release part, <ros2 release>-<vxworks release>
 PKG_REPO_COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD | rev | cut -d '-' -f 2- | rev)
 endif
 PKG_REPO_URL = https://raw.githubusercontent.com/ros2/ros2/${PKG_REPO_COMMIT_ID}/${PKG_NAME}.repos
@@ -116,6 +116,9 @@ ros2.install : ros2.build
 	cp -r $(ROOT_DIR)/lib/* $(DEPLOY_DIR)/lib/.
 	cp -r $(ROOT_DIR)/share $(DEPLOY_DIR)/.
 	cp files/$(ROS_DISTRO)/vxscript $(DEPLOY_DIR)/.
+ifeq ($(WIND_RELEASE_ID),23.03)
+	sed -i "s/ata4/ata0/g" $(DEPLOY_DIR)/vxscript;
+endif
 	@$(MAKE_STAMP)
 	
 include $(WIND_USR_MK)/rules.packages.mk
