@@ -373,7 +373,7 @@ $ cd vxworks7-ros2-build
 $ docker run -ti -h ros2native -v $PWD:/work vxros2build:humble
 wruser@ros2native:/work$ mkdir -p ros2_native/src && cd ros2_native
 wruser@ros2native:/work/ros2_native$ vcs import src < /work/build/ros2/ros2_ws/ros2.repos
-wruser@ros2native:/work/ros2_native$ colcon build --merge-install --cmake-force-configure --packages-up-to-regex examples_rcl* ros2action ros2component ros2msg ros2node ros2pkg ros2service ros2topic ros2cli ros2lifecycle ros2multicast ros2param ros2run ros2srv --cmake-args -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_TESTING:BOOL=OFF
+wruser@ros2native:/work/ros2_native$ colcon build --merge-install --cmake-force-configure --packages-up-to-regex examples_rcl* ros2action ros2component ros2node ros2pkg ros2service ros2topic ros2cli ros2lifecycle ros2multicast ros2param ros2run  --cmake-args -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_TESTING:BOOL=OFF
 
 wruser@ros2native:/work/ros2_native/install$ source setup.bash
 wruser@ros2native:/work/ros2_native/install$ ros2 run demo_nodes_py talker
