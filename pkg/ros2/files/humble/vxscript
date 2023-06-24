@@ -1,3 +1,4 @@
+xxx="/usr";iosViewPrune iosViewCurrent(), xxx, strlen(xxx)+1
 symlink "/ata4","/usr"
 shellConfigDefaultValueSet "VXE_PATH", "/usr/bin"
 rtpSpStackSize=0x100000
