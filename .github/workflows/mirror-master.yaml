@@ -8,7 +8,7 @@ jobs:
   mirror-master-to-supported-releases:
     runs-on: ubuntu-latest
     steps:
-    - name: Mirror to "humble-release-22.09"
+    - name: Mirror to "humble-release-23.03"
       uses: zofrex/mirror-branch@v1
       with:
-        target-branch: humble-release-22.09
+        target-branch: humble-release-23.03
