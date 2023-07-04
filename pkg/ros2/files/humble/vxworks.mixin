@@ -11,7 +11,6 @@
                 "-DPython3_EXECUTABLE=/wrsdk/vxsdk/host/x86_64-linux/bin/python3",
                 "-DPYTHON_SOABI=cpython-39-vxworks",
                 "-DBUILD_TESTING:BOOL=OFF",
-                "-DRMW_IMPLEMENTATION=rmw_cyclonedds_cpp",
                 "-DCMAKE_EXE_LINKER_FLAGS=-rpath-link /work/export/root/lib",
                 "-DFORCE_BUILD_VENDOR_PKG=ON"
             ]
