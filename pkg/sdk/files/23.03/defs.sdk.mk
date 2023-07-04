@@ -25,8 +25,10 @@ __sdk_defs = TRUE
 include $(WIND_USR_MK)/defs.packages.mk
 
 define sdk_fix
-	if [ -f $(WIND_CC_SYSROOT)/../bsps/itl_generic_3_0_0_3/vxWorks ]; then \
-		cp files/$(WIND_RELEASE_ID)/vxWorks $(WIND_CC_SYSROOT)/../bsps/itl_generic_3_0_0_3/vxWorks; \
+	if [ -f files/$(WIND_RELEASE_ID)/vxWorks ]; then \
+		if [ -f $(WIND_CC_SYSROOT)/../bsps/itl_generic_3_0_0_3/vxWorks ]; then \
+			cp files/$(WIND_RELEASE_ID)/vxWorks $(WIND_CC_SYSROOT)/../bsps/itl_generic_3_0_0_3/vxWorks; \
+		fi ; \
 	fi ; \
 	if [ ! -f $(WIND_CC_SYSROOT)/mk/defs.autotools.mk ]; then \
 		cp files/defs.autotools.mk $(WIND_CC_SYSROOT)/mk/.; \
