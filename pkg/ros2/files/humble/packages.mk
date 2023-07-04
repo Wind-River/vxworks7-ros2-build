@@ -22,7 +22,10 @@
 # SYNOPSIS        variables for ROS 2 packages
 
 ROS2_PATCH_DIRS=eclipse-iceoryx/iceoryx \
-		eclipse-cyclonedds/cyclonedds \
+                eclipse-cyclonedds/cyclonedds \
+                eProsima/Fast-CDR \
+                eProsima/Fast-DDS \
+                eProsima/foonathan_memory_vendor \
 		ros2/ros2_tracing \
                 ros2/rmw_implementation \
                 ros2/rclcpp \
@@ -40,10 +43,7 @@ ROS_IGNORE_DIRS=ros-visualization \
                 ament/uncrustify_vendor \
 		ros2/mimick_vendor \
 		ros2/performance_test_fixture \
-		eProsima \
-		eclipse-iceoryx \
-		ros2/rosidl_typesupport_fastrtps \
-		ros2/rmw_fastrtps
+		eclipse-iceoryx
 
 # Ignore Python-specific packages
 #ROS_IGNORE_DIRS+= \
