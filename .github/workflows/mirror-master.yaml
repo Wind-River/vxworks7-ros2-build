@@ -12,3 +12,7 @@ jobs:
       uses: zofrex/mirror-branch@v1
       with:
         target-branch: humble-release-23.03
+    - name: Mirror to "iron-release-23.03"
+      uses: zofrex/mirror-branch@v1
+      with:
+        target-branch: iron-release-23.03
