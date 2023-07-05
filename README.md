@@ -4,15 +4,16 @@
 
 ## VxWorks SDK and ROS 2 support
 
-Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `humble` and the latest VxWorks SDK is `23.03`.
+Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `iron` and the latest VxWorks SDK is `23.03`.
 
 |           | [23.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
 |:---------:|:-------------|
-|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2209/README_qemu.html) | |
+|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2303/README_qemu.html) | |
+|**[`iron`](https://docs.ros.org/en/iron/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2303/README_qemu.html) | |
 
 ## Prebuilt image
 
-The VxWorks ROS 2 `humble` image is prebuilt and can be tested by downloading it from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml).
+The VxWorks ROS 2 `iron` and `humble` images are prebuilt and can be tested by downloading them from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml).
 
 ## Overview
 
@@ -44,7 +45,7 @@ to arrange for consulting services.
 
 ## Project License
 
-The source code for this project is provided under the Apache 2.0 license license.
+The source code for this project is provided under the Apache 2.0 license.
 Text for the ROS 2 dependencies and other applicable license notices can be found in
 the LICENSE file in the project top level directory. Different
 files may be under different licenses. Each source file should include a
@@ -73,8 +74,9 @@ For the standard build you must also have:
    * ROS 2.0 Target Platforms
       * http://www.ros.org/reps/rep-2000.html
    * VxWorks 7 23.03
-      * https://docs.windriver.com/bundle/vxworks_release_notes_22_09/page/index-release_notes.html
+      * https://docs.windriver.com/bundle/vxworks_release_notes_23_03/page/index-release_notes.html
    * For ROS 2 Humble Hawksbill, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
+   * For ROS 2 Iron Irwini, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
 * Docker Engine installed on your Linux host
    * https://docs.docker.com/engine/install/ubuntu/
 
@@ -82,12 +84,13 @@ For the standard build you must also have:
 
 The following branches are active
 
-- [x] `master` - builds [ROS 2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `23.03` SDK
+- [x] `iron-release-23.03` - builds [ROS 2 `iron-release`](https://github.com/ros2/ros2/tree/iron-release) against VxWorks `23.03` SDK
 - [x] `humble-release-23.03` - builds [ROS 2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `23.03` SDK
+- [x] `master` - builds ROS 2 `iron-release` or `humble-release` against VxWorks `23.03` SDK
 
 ## Directory Structure
 
-The project uses Makefile to invoke a ros2 and turtlebot3 colcon based build, and also builds some dependencies.
+The project uses Makefile to invoke a ros2 and turtlebot3 `colcon`-based build, and also builds some dependencies.
 
 ```bash
 ├── Docker          - Dockefiles used to build ROS 2
@@ -102,7 +105,7 @@ The project uses Makefile to invoke a ros2 and turtlebot3 colcon based build, an
 │   └── unixextra   - extra Unix functions necessary to build ROS 2
 ```
 
-After the build following artifacs will be created:
+After the build following artifacts will be created:
 
 ```bash
 ├── build      - pkg build artifacts
@@ -116,12 +119,12 @@ After the build following artifacs will be created:
 ├── downloads  - download artifacts
 ├── export
     ├── deploy - a ready-to-deploy filesystem with ROS 2 libraries and binaries
-    └── root   - a development artifacts with ROS 2 libraries and headers
+    └── root   - development artifacts with ROS 2 libraries and headers
 ``` 
 
 ## ROS 2 VxWorks patches
 
-Patches are necessary to build ROS 2 for VxWorks, and located in the separate [`layer` repository](https://github.com/Wind-River/vxworks7-layer-for-ros2)
+Patches are necessary to build ROS 2 for VxWorks, and are located in the separate [`layer` repository](https://github.com/Wind-River/vxworks7-layer-for-ros2)
 The repository is cloned during the build to the *patches* dir.
 
 ```bash
@@ -143,11 +146,12 @@ cd vxworks7-ros2-build
 
 ### Build Docker image
 
-A Docker (Ubuntu 22.04) based build is recommended to avoid a necessity of installing build dependencies.
+A Docker (Ubuntu 22.04) based build is recommended to avoid the necessity of installing build dependencies.
 
 ```bash
 docker build --no-cache -t vxbuild:22.04 Docker/22.04/vxbuild/.
 docker build --no-cache -t vxros2build:humble Docker/22.04/vxros2build/.
+docker build --no-cache --build-arg ROS_DISTRO=iron -t vxros2build:iron Docker/22.04/vxros2build/.
 ```
 
 ### Download and extract the VxWorks SDK
@@ -178,7 +182,7 @@ See [Dockerfile](Docker/vxbuild/Dockerfile) for the complete list of environment
 
 ### Start build
 
-Inside Docker container: check `ROS_DISTRO` version, source the development environment and start build
+Inside the Docker container: check the `ROS_DISTRO` version, source the development environment and start build
 
 ```bash
 wruser@d19165730517:/work echo $ROS_DISTRO
@@ -205,7 +209,7 @@ wruser@d19165730517:/work exit
 ```
 
 It could be that the build fails if it runs behind the firewall, see [#22](https://github.com/Wind-River/vxworks7-ros2-build/issues/22).
-In this case rerun it without a certificate check as
+In this case, rerun it without a certificate check as
 
 ```bash
 wruser@d19165730517:/work WGET_OPT="--no-check-certificate -O" CURL="" make
@@ -229,15 +233,15 @@ QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.2)
 Copyright (c) 2003-2021 Fabrice Bellard and the QEMU Project developers
 ```
 
-Filesystem with ROS 2 artifacts needs to be prepared to boot with VxWorks.
+A filesystem with ROS 2 artifacts needs to be prepared to boot with VxWorks.
 
 ### Create an HDD image
 
 Run QEMU with a prebuilt VxWorks kernel and a created HDD image.
 
 ```bash
-# create a disk 800MB
-$ dd if=/dev/zero of=ros2.img count=800 bs=1M
+# create a disk 1024MB
+$ dd if=/dev/zero of=ros2.img count=1024 bs=1M
 # format it as a FAT32
 $ mkfs.vfat -F 32 ./ros2.img
 
@@ -252,7 +256,7 @@ $ sudo umount ~/tmp/mount
 sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
 
-The HDD image will be mounted inside VxWorks under `/usr` directory
+The HDD image will be mounted inside VxWorks under the `/usr` directory
 
 ```bash
 -> ls "/usr"
@@ -294,7 +298,7 @@ Process 'python3' (process Id = 0xffff800008268ac0) launched.
 
 ### Run ROS 2 Python examples
 
-It is possible to run examples by directly invoking python scripts. First figure out the full path.
+It is possible to run examples by directly invoking Python scripts. First, figure out the full path.
 
 ```bash
 [vxWorks *]# python3 ros2 pkg executables --full-path demo_nodes_py
@@ -310,7 +314,7 @@ It is possible to run examples by directly invoking python scripts. First figure
 /usr/lib/demo_nodes_py/talker_qos
 ```
 
-Then Invoke Python interpreter and pass the script as a parameter
+Then invoke the Python interpreter and pass the script as a parameter
 
 ```bash
 [vxWorks *]# python3 /usr/lib/demo_nodes_py/talker
@@ -329,7 +333,7 @@ Process 'python3' (process Id = 0xffff800008269c00) launched.
 [INFO] [talker]: Publishing: "Hello World: 1"
 ```
 
-## Build a simple CMake based OSS project
+## Build a simple CMake-based OSS project
 
 ```
 $ cd vxworks7-ros2-build
@@ -366,7 +370,7 @@ Scanning dependencies of target hello_cmake
 
 ## Native ROS 2 compilation
 
-Native ROS 2 is used mostly for the fast prototyping during the ROS 2 development. Use the same docker image for that.
+Native ROS 2 is used mostly for fast prototyping during ROS 2 development. Use the same docker image for that.
 
 ```bash
 $ cd vxworks7-ros2-build
@@ -383,9 +387,9 @@ wruser@ros2native:/work/ros2_native/install$ ros2 run demo_nodes_py talker
 
 ## VxWorks ROS 2 development
 
-The following example shows how to develop and run ROS 2 package called `my_package` under VxWorks. It is recommended to prototype it first under the native ROS 2 build environment that contains the same ROS 2 version as a VxWorks one. After package is developed and tested, it can be copied and compiled under VxWorks ROS 2 build environment.
+The following example shows how to develop and run ROS 2 package called `my_package` under VxWorks. It is recommended to prototype it first under the native ROS 2 build environment that contains the same ROS 2 version as a VxWorks one. After the package is developed and tested, it can be copied and compiled under VxWorks ROS 2 build environment.
 
-### Step 1: create and test new ROS 2 package under native ROS 2 build environment
+### Step 1: create and test a new ROS 2 package under the native ROS 2 build environment
 
 1. Follow [the procedure](#native-ros2-compilation) of how to prepare native ROS 2 build environment.
 2. Create a new ROS 2 package
@@ -463,7 +467,7 @@ wruser@ros2native:/work/ros2_native/install$ ros2 run my_package my_package
 Hello World!
 ```
 
-### Step 2: Build and run new ROS 2 package under VxWorks ROS 2 build environment
+### Step 2: Build and run a new ROS 2 package under VxWorks ROS 2 build environment
 
 1. Start docker and copy `my_package` to the VxWorks `ros2_ws` workspace
 
