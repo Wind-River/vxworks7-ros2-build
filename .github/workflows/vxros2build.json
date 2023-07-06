@@ -1,9 +1,9 @@
 {
   "vxros2build": [
     {
-      "sdk": "wrsdk-vxworks7-qemu-1.11",
-      "url": "https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.11.tar.bz2",
-      "branch": "humble-release-22.09",
+      "sdk": "wrsdk-vxworks7-qemu-1.12",
+      "url": "https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.12.tar.bz2",
+      "branch": "humble-release-23.03",
       "script": "./sdkenv.sh",
       "image": "./vxsdk/bsps/*/vxWorks"
     }

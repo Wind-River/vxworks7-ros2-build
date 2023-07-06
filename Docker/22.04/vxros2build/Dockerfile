@@ -34,5 +34,6 @@ RUN apt-get update && apt -y upgrade \
     && apt install --no-install-recommends -y \
     ros-${ROS_DISTRO}-ros-base \
     ros-dev-tools \
+    autoconf automake libtool libltdl-dev mercurial \
     && rm -rf /var/lib/apt/lists/*
 

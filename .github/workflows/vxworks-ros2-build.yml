@@ -13,8 +13,8 @@ jobs:
   build:
     strategy:
       matrix:
-        branch: [humble-release-22.09]
-        sdk: [wrsdk-vxworks7-qemu-1.11]
+        branch: [humble-release-23.03]
+        sdk: [wrsdk-vxworks7-qemu-1.12]
 
     runs-on: ubuntu-22.04
     steps:
@@ -29,6 +29,7 @@ jobs:
           echo "url=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {url} | .url][0]' ./.github/workflows/vxros2build.json`" >> $GITHUB_ENV
           echo "script=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {script} | .script][0]' ./.github/workflows/vxros2build.json`" >> $GITHUB_ENV
           echo "image=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {image} | .image][0]' ./.github/workflows/vxros2build.json`" >> $GITHUB_ENV
+          echo "ros_distro=`echo ${{ matrix.branch }} | cut -d '-' -f1`" >> $GITHUB_ENV
 
       - name: Download the ${{ matrix.sdk }} SDK
         uses: carlosperate/download-file-action@v1
@@ -59,12 +60,12 @@ jobs:
         with:
           context: Docker/22.04/vxros2build/.
           push: false
-          tags: vxros2build:humble
+          tags: vxros2build:${{ env.ros_distro }}
 
       - name: Build ROS 2 ${{ matrix.branch }} against VxWorks ${{ matrix.sdk }}
         uses: addnab/docker-run-action@v3
         with:
-          image: vxros2build:humble
+          image: vxros2build:${{ env.ros_distro }}
           options: -v ${{ github.workspace }}:/work -v /tmp/wrsdk:/wrsdk
           run:  |
             groupadd -g "`cat /wrsdk/gid`" wruser
@@ -75,7 +76,7 @@ jobs:
 #        env:
 #          UID: ${{ env.uid }}
 #          GID: ${{ env.gid }}
-#        uses: docker://razr/vxros2build:humble
+#        uses: docker://razr/vxros2build:${{ env.ros_distro }}
 #        with:
 #          args: source /github/home/wrsdk/${{ env.script }} && make -C /github/workspace
 
@@ -84,7 +85,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y dosfstools
           cd ${{ github.workspace }}
-          dd if=/dev/zero of=ros2.img count=800 bs=1M
+          dd if=/dev/zero of=ros2.img count=1024 bs=1M
           mkfs.vfat -F 32 ./ros2.img
           mkdir -p /tmp/mount
           sudo mount -o loop -t vfat ./ros2.img /tmp/mount
