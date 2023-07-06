@@ -1,5 +1,5 @@
 # This is a workflow for the vxros2build docker build.
-# It builds a docker container for the humble ROS 2 VxWorks builds
+# It builds docker containers for the ROS 2 VxWorks builds
 #
 # The workflow can be started
 #  - manually
@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         ubuntu: [22.04]
-        ros2: [humble]
+        ros_distro: [humble, iron]
 
     runs-on: ubuntu-22.04
     steps:
@@ -31,20 +31,21 @@ jobs:
           push: false
           tags: vxbuild:${{ matrix.ubuntu }}
 
-      - name: Build vxros2build:${{ matrix.ros2 }} docker image
+      - name: Build vxros2build:${{ matrix.ros_distro }} docker image
         uses: docker/build-push-action@v3
         with:
           context: Docker/${{ matrix.ubuntu }}/vxros2build/.
           push: false
-          tags: vxros2build:${{ matrix.ros2 }}
+          build-args: ROS_DISTRO=${{ matrix.ros_distro }}
+          tags: vxros2build:${{ matrix.ros_distro }}
 
-      - name: Save vxros2build:${{ matrix.ros2 }} Docker Image
+      - name: Save vxros2build:${{ matrix.ros_distro }} Docker Image
         run: |
-          docker save vxros2build:${{ matrix.ros2 }} | gzip > ${{ github.workspace }}/vxros2build.${{ matrix.ros2 }}.tar.gz
+          docker save vxros2build:${{ matrix.ros_distro }} | gzip > ${{ github.workspace }}/vxros2build.${{ matrix.ros2 }}.tar.gz
 
-      - name: Upload vxros2build:${{ matrix.ros2 }} Docker Image
+      - name: Upload vxros2build:${{ matrix.ros_distro }} Docker Image
         uses: actions/upload-artifact@v2
         with:
-          name: Docker Image vxros2build ${{ matrix.ros2 }}
+          name: Docker Image vxros2build ${{ matrix.ros_distro }}
           path: |
-            ${{ github.workspace }}/vxros2build.${{ matrix.ros2 }}.tar.gz
+            ${{ github.workspace }}/vxros2build.${{ matrix.ros_distro }}.tar.gz
