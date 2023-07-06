@@ -21,7 +21,8 @@
 
 # SYNOPSIS        variables for ROS 2 packages
 
-ROS2_PATCH_DIRS=eclipse-iceoryx/iceoryx \
+ROS2_PATCH_DIRS=ament/ament_cmake \
+		eclipse-iceoryx/iceoryx \
                 eclipse-cyclonedds/cyclonedds \
                 eProsima/Fast-DDS \
                 eProsima/foonathan_memory_vendor \
