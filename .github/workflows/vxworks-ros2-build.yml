@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        branch: [humble-release-23.03]
+        branch: [humble-release-23.03, iron-release-23.03]
         sdk: [wrsdk-vxworks7-qemu-1.12]
 
     runs-on: ubuntu-22.04
@@ -60,6 +60,7 @@ jobs:
         with:
           context: Docker/22.04/vxros2build/.
           push: false
+          build-args: ROS_DISTRO=${{ env.ros_distro }}
           tags: vxros2build:${{ env.ros_distro }}
 
       - name: Build ROS 2 ${{ matrix.branch }} against VxWorks ${{ matrix.sdk }}
