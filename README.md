@@ -10,6 +10,7 @@ Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, se
 |:---------:|:-------------|
 |**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2303/README_qemu.html) | |
 |**[`iron`](https://docs.ros.org/en/iron/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2303/README_qemu.html) | |
+|**[`rolling`](https://docs.ros.org/en/rolling/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2303/README_qemu.html) | |
 
 ## Prebuilt image
 
@@ -33,7 +34,7 @@ These new use cases include:
 * Design patterns for building and structuring systems
 
 The default configuration build configuration will build a minimal set of
-ROS 2 packages necessary for running the Turtlebot 3 and example Python and C++ applications.
+ROS 2 packages are necessary for running the Turtlebot 3 and example Python and C++ applications.
 
 This configuration is suited for prototyping and personal
 use.  Please refer to the details of each individual ROS 2 package for details
@@ -77,6 +78,7 @@ For the standard build you must also have:
       * https://docs.windriver.com/bundle/vxworks_release_notes_23_03/page/index-release_notes.html
    * For ROS 2 Humble Hawksbill, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
    * For ROS 2 Iron Irwini, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
+   * For ROS 2 Rolling Ridley, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
 * Docker Engine installed on your Linux host
    * https://docs.docker.com/engine/install/ubuntu/
 
@@ -84,9 +86,10 @@ For the standard build you must also have:
 
 The following branches are active
 
+- [x] `rolling-23.03` - builds [ROS 2 `rolling`](https://github.com/ros2/ros2/tree/rolling) against VxWorks `23.03` SDK
 - [x] `iron-release-23.03` - builds [ROS 2 `iron-release`](https://github.com/ros2/ros2/tree/iron-release) against VxWorks `23.03` SDK
 - [x] `humble-release-23.03` - builds [ROS 2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `23.03` SDK
-- [x] `master` - builds ROS 2 `iron-release` or `humble-release` against VxWorks `23.03` SDK
+- [x] `master` - can build all other branches against VxWorks `23.03` SDK depending on what VxWorks SDK and what Docker image are used
 
 ## Directory Structure
 
@@ -151,7 +154,9 @@ A Docker (Ubuntu 22.04) based build is recommended to avoid the necessity of ins
 ```bash
 docker build --no-cache -t vxbuild:22.04 Docker/22.04/vxbuild/.
 docker build --no-cache -t vxros2build:humble Docker/22.04/vxros2build/.
+
 docker build --no-cache --build-arg ROS_DISTRO=iron -t vxros2build:iron Docker/22.04/vxros2build/.
+docker build --no-cache --build-arg ROS_DISTRO=rolling -t vxros2build:iron Docker/22.04/vxros2build/.
 ```
 
 ### Download and extract the VxWorks SDK
