@@ -33,6 +33,7 @@ ENV LC_ALL C.UTF-8
 RUN apt-get update && apt -y upgrade \
     && apt install --no-install-recommends -y \
     ros-${ROS_DISTRO}-ros-base \
-    ros-dev-tools autoconf \
+    ros-dev-tools \
+    autoconf automake libtool libltdl-dev mercurial \
     && rm -rf /var/lib/apt/lists/*
 
