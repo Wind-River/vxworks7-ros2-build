@@ -6,6 +6,13 @@
       "branch": "humble-release-23.03",
       "script": "./sdkenv.sh",
       "image": "./vxsdk/bsps/*/vxWorks"
+    },
+    {
+      "sdk": "wrsdk-vxworks7-qemu-1.12",
+      "url": "https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.12.tar.bz2",
+      "branch": "iron-release-23.03",
+      "script": "./sdkenv.sh",
+      "image": "./vxsdk/bsps/*/vxWorks"
     }
   ]
 }
