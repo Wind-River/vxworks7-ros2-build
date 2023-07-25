@@ -36,7 +36,7 @@ sudo buildah tag my_package <registry-username>/my_package:vxworks7
 sudo buildah push my_package oci:my_package.oci
 
 # This command pushes the my_package image to the specified registry
-sudo buildah push --creds <registry-username>:<password> my_package docker://<registry-username>/my_package.oci:vxworks
+sudo buildah push --creds <registry-username>:<password> my_package docker://<registry-username>/my_package.oci:vxworks7
 ```
 
 ## Pull, unpack and run my_package.oci VxWorks container image
