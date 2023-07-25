@@ -506,6 +506,10 @@ Process 'python3' (process Id = 0xffff80000036cb10) launched.
 Hello World!
 ```
 
+5. Create `my_package` VxWorks 7 OCI container image
+
+Follow the instructions [here](/Docker/VxWorks7/my_package/README.md)
+
 ## Legal Notices
 
 All product names, logos, and brands are property of their respective owners. All company,
