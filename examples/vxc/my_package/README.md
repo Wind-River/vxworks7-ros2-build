@@ -24,7 +24,7 @@ Execute the following commands to build the container image:
 
 ```bash
 # This script creates the my_package container
-sudo ./scripts/create_vxc_container_payload.sh <path-to-wrsdk> my_package.build amd64 llvm
+./scripts/create_vxc_container_payload.sh 
 
 # This command builds the my_package Docker image
 sudo buildah bud -f examples/vxc/my_package/Dockerfile -t my_package --platform vxworks/amd64 my_package.build

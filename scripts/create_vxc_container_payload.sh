@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -e
-
 # Copyright (c) 2023 Wind River Systems, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,50 +14,44 @@ set -e
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 # Validate number of arguments
-if [ $# -lt 4 ] || [ $# -gt 5 ]; then
-    echo "Usage: $0 <SDK_DIR> <OCI_IMG_DIR> <VXC_ARCH> <TOOL> [PACKAGE_PATH]"
-    echo "   eg. $0 /opt/wrsdk/wrsdk-vxworks7-raspberrypi4b-1.2 helloworld.build arm64 llvm"
+if [ $# -gt 3 ]; then
+    echo "Usage: $0 <SDK_DIR> <OCI_IMG_DIR> [PACKAGE_BIN]"
+    echo "   eg. $0 /opt/wrsdk/wrsdk-vxworks7-raspberrypi4b-1.2 helloworld.build"
     exit 1
 fi
 
-SDK_DIR=$1
-OCI_IMG_DIR=$2
-VXC_ARCH=$3
-TOOL=$4
-PACKAGE_PATH=${5:-"build/ros2/ros2_ws/build/my_package/my_package"}
+SDK_DIR=${1:-"/home/$USER/Downloads/wrsdk"}
+OCI_IMG_DIR=${2:-"./my_package.build"}
+PACKAGE_BIN=${3:-"build/ros2/ros2_ws/build/my_package/my_package"}
 
-# Validate SDK_DIR
-if [ ! -d "$SDK_DIR" ]; then
-    echo "SDK_DIR doesn't exist: $SDK_DIR"
+# Make sure the package directory exists
+if [ ! -f "$PACKAGE_BIN" ]; then
+    echo "File not found: $PACKAGE_BIN"
     exit 1
 fi
 
-# Determine file extension based on OS
-EXTENSION=""
-if [ "$(uname)" != "Linux" ]; then
-    EXTENSION=".exe"
+DEPLOY_DIR="$SDK_DIR/vxsdk/sysroot/usr/3pp/deploy"
+
+# Make sure the deploy directory exists
+if [ ! -d "$DEPLOY_DIR" ]; then
+    echo "Directory not found: $DEPLOY_DIR"
+    exit 1
 fi
 
-DEPLOY="$SDK_DIR/vxsdk/sysroot/usr/3pp/deploy"
+echo "building $OCI_IMG_DIR in $SDK_DIR"
 
-echo "building $OCI_IMG_DIR for $VXC_ARCH in $SDK_DIR"
-
-# Make sure the target directory exists
+# Create and check if the target directory exists
 mkdir -p "$OCI_IMG_DIR/rootfs"
+if [ ! -d "$OCI_IMG_DIR/rootfs" ]; then
+    echo "Failed to create directory: $OCI_IMG_DIR/rootfs"
+    exit 1
+fi
 
 # Copy the deploy directory
-if [ ! -d "$DEPLOY" ]; then
-    echo "Directory not found: $DEPLOY"
-    exit 1
-fi
+cp -av "$DEPLOY_DIR/"* "$OCI_IMG_DIR/rootfs/"
 
-cp -av "$DEPLOY/"* "$OCI_IMG_DIR/rootfs/"
-
-# Copy the package
-if [ ! -f "$PACKAGE_PATH" ]; then
-    echo "File not found: $PACKAGE_PATH"
-    exit 1
-fi
-
-cp "$PACKAGE_PATH" "$OCI_IMG_DIR/rootfs/usr/bin"
+# Copy the package binary
+cp "$PACKAGE_BIN" "$OCI_IMG_DIR/rootfs/usr/bin"

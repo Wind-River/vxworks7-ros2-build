@@ -508,7 +508,7 @@ Hello World!
 
 5. Create `my_package` VxWorks 7 OCI container image
 
-Follow the instructions [here](/Docker/VxWorks7/my_package/README.md)
+Follow the instructions [here](/examples/vxc/my_package/README.md)
 
 ## Legal Notices
 
