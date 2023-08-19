@@ -86,10 +86,7 @@ For the standard build you must also have:
 
 The following branches are active
 
-- [x] `rolling-23.03` - builds [ROS 2 `rolling`](https://github.com/ros2/ros2/tree/rolling) against VxWorks `23.03` SDK
-- [x] `iron-release-23.03` - builds [ROS 2 `iron-release`](https://github.com/ros2/ros2/tree/iron-release) against VxWorks `23.03` SDK
-- [x] `humble-release-23.03` - builds [ROS 2 `humble-release`](https://github.com/ros2/ros2/tree/humble-release) against VxWorks `23.03` SDK
-- [x] `master` - can build all other branches against VxWorks `23.03` SDK depending on what VxWorks SDK and what Docker image are used
+- [x] `master` - builds ROS2 `humble`, `iron`, and `rolling` against VxWorks `23.03` SDK depending on what VxWorks SDK and what Docker image are used
 
 ## Directory Structure
 
@@ -180,7 +177,7 @@ docker run -ti -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
 By default it runs as a user ```wruser``` with ```uid=1000(wruser) gid=1000(wruser)```, if you have different ids, run it as
 
 ```bash
-$ docker run -ti -e UID=`id -u` -e GID=`id -g` -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
+$ docker run -ti -h vxros2 -e UID=`id -u` -e GID=`id -g` -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
 ```
 
 See [Dockerfile](Docker/vxbuild/Dockerfile) for the complete list of environment variables
@@ -190,34 +187,51 @@ See [Dockerfile](Docker/vxbuild/Dockerfile) for the complete list of environment
 Inside the Docker container: check the `ROS_DISTRO` version, source the development environment and start build
 
 ```bash
-wruser@d19165730517:/work echo $ROS_DISTRO
-humble
+wruser@vxros2:/work source /wrsdk/sdkenv.sh
 
-wruser@d19165730517:/work source /wrsdk/sdkenv.sh
-wruser@d19165730517:/work make
-wruser@d19165730517:/work exit
+# check environment
+wruser@vxros2:/work$ make info
+DEFAULT_BUILD:      sdk unixextra asio tinyxml2 colcon ros2
+WIND RELEASE:       23.03
+ROS DISTRO:         humble
+TARGET ARCH:        x86_64
+TARGET PYTHON:      Python3.9
+CURDIR:             /work
+DOWNLOADS_DIR:      /work/downloads
+PACKAGE_DIR:        /work/pkg
+BUILD_DIR:          /work/build
+EXPORT_DIR:         /work/export
+ROOT_DIR:           /work/export/root
+DEPLOY_DIR:         /work/export/deploy
+WIND_CC_SYSROOT:    /wrsdk/vxsdk/sysroot
+WIND_SDK_HOST_TOOLS:/wrsdk/vxsdk/host
+3PP_DEPLOY_DIR:     /wrsdk/vxsdk/sysroot/usr/3pp/deploy
+3PP_DEVELOP_DIR:    /wrsdk/vxsdk/sysroot/usr/3pp/develop
+
+wruser@vxros2:/work make
+wruser@vxros2:/work exit
 ```
 
 Build artifacts are in the `export` directory
 
 ```bash
-wruser@d19165730517:/work ls export/deploy/
+wruser@vxros2:/work ls export/deploy/
 bin  lib
 ```
 
 Rebuild from scratch
 
-```bahs
-wruser@d19165730517:/work make distclean
-wruser@d19165730517:/work make
-wruser@d19165730517:/work exit
+```bash
+wruser@vxros2:/work make distclean
+wruser@vxros2:/work make
+wruser@vxros2:/work exit
 ```
 
 It could be that the build fails if it runs behind the firewall, see [#22](https://github.com/Wind-River/vxworks7-ros2-build/issues/22).
 In this case, rerun it without a certificate check as
 
 ```bash
-wruser@d19165730517:/work WGET_OPT="--no-check-certificate -O" CURL="" make
+wruser@vxros2:/work WGET_OPT="--no-check-certificate -O" CURL="" make
 ```
 
 ## Run ROS 2 examples
@@ -340,14 +354,14 @@ Process 'python3' (process Id = 0xffff800008269c00) launched.
 
 ## Build a simple CMake-based OSS project
 
-```
+```bash
 $ cd vxworks7-ros2-build
-$ docker run -ti -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
-wruser@690af330acaa:/work$ source /wrsdk/sdkenv.sh
+$ docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
+wruser@vxros2:/work$ source /wrsdk/sdkenv.sh
 
-wruser@690af330acaa:/work$ git clone https://github.com/ttroy50/cmake-examples.git
-wruser@690af330acaa:/work$ cd cmake-examples/01-basic/A-hello-cmake; mkdir vxworks-build; cd vxworks-build
-wruser@690af330acaa:/work/cmake-examples/01-basic/A-hello-cmake/vxworks-build$ cmake .. -DCMAKE_TOOLCHAIN_FILE=/work/buildspecs/cmake/toolchain.cmake
+wruser@vxros2:/work$ git clone https://github.com/ttroy50/cmake-examples.git
+wruser@vxros2:/work$ cd cmake-examples/01-basic/A-hello-cmake; mkdir vxworks-build; cd vxworks-build
+wruser@vxros2:/work/cmake-examples/01-basic/A-hello-cmake/vxworks-build$ cmake .. -DCMAKE_TOOLCHAIN_FILE=/work/buildspecs/cmake/toolchain.cmake
 -- The C compiler identification is Clang 9.0.1
 -- The CXX compiler identification is Clang 9.0.1
 -- Check for working C compiler: /wrsdk/toolkit/host_tools/x86_64-linux/bin/wr-cc
@@ -366,7 +380,7 @@ wruser@690af330acaa:/work/cmake-examples/01-basic/A-hello-cmake/vxworks-build$ c
 -- Generating done
 -- Build files have been written to: /work/cmake-examples/01-basic/A-hello-cmake/vxworks-build
 
-wruser@690af330acaa:/work/cmake-examples/01-basic/A-hello-cmake/vxworks-build$ make
+wruser@vxros2:/work/cmake-examples/01-basic/A-hello-cmake/vxworks-build$ make
 Scanning dependencies of target hello_cmake
 [ 50%] Building CXX object CMakeFiles/hello_cmake.dir/main.cpp.o
 [100%] Linking CXX executable hello_cmake
@@ -477,17 +491,17 @@ Hello World!
 1. Start docker and copy `my_package` to the VxWorks `ros2_ws` workspace
 
 ```bash
-$ docker run -ti -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
-wruser@690af330acaa:/work$ cp -r ros2_native/src/my_package build/ros2/ros2_ws/src/.
+$ docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
+wruser@vxros2:/work$ cp -r ros2_native/src/my_package build/ros2/ros2_ws/src/.
 ```
 
 2. Rebuild ROS 2 with `my_package`
 
 ```bash
-wruser@690af330acaa:/work$ source /wrsdk/sdkenv.sh
-wruser@690af330acaa:/work$ rm /work/build/.stamp/ros2.build
-wruser@690af330acaa:/work$ PKG_PKGS_UP_TO=my_package DEFAULT_BUILD=ros2 make
-wruser@690af330acaa:/work$ exit
+wruser@vxros2:/work$ source /wrsdk/sdkenv.sh
+wruser@vxros2:/work$ rm /work/build/.stamp/ros2.build
+wruser@vxros2:/work$ PKG_PKGS_UP_TO=my_package DEFAULT_BUILD=ros2 make
+wruser@vxros2:/work$ exit
 ```
 
 3. Create `ros2.img` as described [here](#create-an-hdd-image) and start QEMU
