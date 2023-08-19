@@ -30,22 +30,17 @@ PACKAGES += ros2
 PKG_NAME = ros2
 PKG_VER = $(ROS_DISTRO)
 
-# use the same branch for the patches
 PKG_URL = https://github.com/Wind-River/vxworks7-layer-for-ros2.git
+# layer branch is calculated as $(ROS_DISTRO)-release-$(WIND_RELEASE_ID)
+ifeq ($(ROS_DISTRO),rolling)
+PKG_COMMIT_ID = $(ROS_DISTRO)-$(WIND_RELEASE_ID)
+PKG_REPO_COMMIT_ID = $(ROS_DISTRO)
+else
+PKG_COMMIT_ID = $(ROS_DISTRO)-release-$(WIND_RELEASE_ID)
+PKG_REPO_COMMIT_ID = $(ROS_DISTRO)-release
+endif
 PKG_TYPE = git
 
-# a layer branch is always aligned with the current build branch
-PKG_COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
-
-ifeq ($(PKG_COMMIT_ID),master)
-PKG_REPO_COMMIT_ID = $(ROS_DISTRO)-release
-else
-# extract ROS 2 release part, <ros2 release>-<vxworks release>-<add-on>,
-# where <ros-release> - humble-release, or rolling
-# <vxworks release> - 23.03
-# <add-on> - next
-PKG_REPO_COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD | grep -o '^[^[:digit:]]*' | head -c-2)
-endif
 PKG_REPO_URL = https://raw.githubusercontent.com/ros2/ros2/${PKG_REPO_COMMIT_ID}/${PKG_NAME}.repos
 
 PKG_LICENSE = BSD

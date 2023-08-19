@@ -19,10 +19,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
 
-      - name: Checks-out a branch ${{ matrix.branch }}
+      - name: Checks-out a branch ${{ github.ref }}
         uses: actions/checkout@v3
         with:
-          ref: ${{ matrix.branch }}
+          ref: ${{ github.ref }}
 
       - name: Setup environment
         run: |
