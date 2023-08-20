@@ -105,7 +105,6 @@ ros2.install : ros2.build
 	@$(call echo_action,Installing runtime dependencies,$*)
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) setuptools
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) catkin_pkg
-	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyyaml
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) empy
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyelftools
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) packaging

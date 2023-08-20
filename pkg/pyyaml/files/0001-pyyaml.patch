@@ -1,0 +1,29 @@
+diff --git a/Makefile b/Makefile
+index 34a1d40..b745d73 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,7 +1,7 @@
+ 
+ .PHONY: build dist
+ 
+-PYTHON=/usr/bin/python3
++PYTHON?=python3.9
+ TEST=
+ PARAMETERS=
+ 
+diff --git a/setup.py b/setup.py
+index 944e7fa..03d3116 100644
+--- a/setup.py
++++ b/setup.py
+@@ -75,6 +75,11 @@ from setuptools.command.build_ext import build_ext as _build_ext
+ # NB: distutils imports must remain below setuptools to ensure we use the embedded version
+ from distutils import log
+ from distutils.errors import DistutilsError, CompileError, LinkError, DistutilsPlatformError
++from distutils import sysconfig
++
++sysconfig._config_vars['EXT_SUFFIX'] = '.cpython-39-vxworks.so'
++sysconfig._config_vars['SOABI'] = 'cpython-39-vxworks'
++sysconfig._config_vars['SO'] = '.cpython-39-vxworks.so'
+ 
+ with_cython = False
+ if 'sdist' in sys.argv or os.environ.get('PYYAML_FORCE_CYTHON') == '1':
