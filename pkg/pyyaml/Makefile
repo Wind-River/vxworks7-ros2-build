@@ -37,9 +37,14 @@ PKG_MAKE_BUILD_VAR = PYTHON=python3.$(TGT_PYTHON_MINOR) \
 		     CC=wr-cc \
 		     CFLAGS="-I $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/include/python3.$(TGT_PYTHON_MINOR) -I $(ROOT_DIR)/include/libyaml_vendor" \
 		     LDSHARED="wr-cc -shared" \
-		     LDFLAGS="-L $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib -lpython3 -L $(ROOT_DIR)/lib -lyaml"
-PKG_MAKE_INSTALL_OPT = install PARAMETERS=--prefix=$(ROOT_DIR) \
-		       && rm -rf $(ROOT_DIR)/lib/python3.$(TGT_PYTHON_MINOR)/site-packages/PyYAML-$(PKG_VER)-py3.$(TGT_PYTHON_MINOR).egg-info \
-		       && mv -f $(ROOT_DIR)/lib/python3.$(TGT_PYTHON_MINOR)/site-packages/PyYAML-$(PKG_VER)-py3.$(TGT_PYTHON_MINOR)-linux-x86_64.egg/ $(ROOT_DIR)/lib/python3.$(TGT_PYTHON_MINOR)/site-packages/PyYAML-$(PKG_VER)-py3.$(TGT_PYTHON_MINOR).egg-info \
-		       && cp -r $(ROOT_DIR)/lib/python3.$(TGT_PYTHON_MINOR)/site-packages/PyYAML-$(PKG_VER)-py3.$(TGT_PYTHON_MINOR).egg-info $(DEPLOY_DIR)/lib/python3.$(TGT_PYTHON_MINOR)/site-packages/. 
+		     LDFLAGS="-L $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib -lpython3 -L $(ROOT_DIR)/lib -lyaml" \
+		     _PYTHON_HOST_PLATFORM=vxworks-x86_64 \
+		     _PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__vxworks_vxworks \
+		     PYTHONPATH=$(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/python3.9/:$(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/python3.9/site-packages
+
+PKG_MAKE_OPT = bdist
+
+PKG_MAKE_INSTALL_OPT = --help 1> /dev/null \
+		       && cp -r $(BUILD_DIR)/$(PKG_NAME)/${PKG_BUILD_DIR}/lib/* $(ROOT_DIR)/lib/python3.$(TGT_PYTHON_MINOR)/site-packages/. \
+		       && cp -r $(BUILD_DIR)/$(PKG_NAME)/${PKG_BUILD_DIR}/lib/* $(DEPLOY_DIR)/lib/python3.$(TGT_PYTHON_MINOR)/site-packages/.
 include $(WIND_USR_MK)/rules.packages.mk
