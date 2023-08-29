@@ -272,7 +272,10 @@ $ sudo umount ~/tmp/mount
 ```
 
 ```bash
-sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
+-net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio \
+-append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" \
+-device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
 
 The HDD image will be mounted inside VxWorks under the `/usr` directory
@@ -507,7 +510,10 @@ wruser@vxros2:/work$ exit
 3. Create `ros2.img` as described [here](#create-an-hdd-image) and start QEMU
 
 ```bash
-$ sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" -device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+$ sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
+-net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio \
+-append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" \
+-device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
 
 4. Setup environment variables and run `my_package`
