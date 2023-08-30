@@ -162,7 +162,7 @@ The 23.03 SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.c
 
 ```bash
 cd ~/Downloads 
-wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.12.tar.bz2
+wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.12.1.tar.bz2
 mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
 tar -jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.12.tar.bz2 --strip 1
 ```
