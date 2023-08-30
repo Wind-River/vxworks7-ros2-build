@@ -164,14 +164,14 @@ The 23.03 SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.c
 cd ~/Downloads 
 wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.12.tar.bz2
 mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
-tar –jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.12.tar.bz2 --strip 1
+tar -jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.12.tar.bz2 --strip 1
 ```
 
 ### Run Docker image
 
 ```bash
 cd vxworks7-ros2-build
-docker run -ti -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
+docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
 ```
 
 By default it runs as a user ```wruser``` with ```uid=1000(wruser) gid=1000(wruser)```, if you have different ids, run it as
@@ -247,6 +247,7 @@ sudo ifconfig tap0 192.168.200.254 up
 VxWorks is tested with
 
 ```bash
+$ sudo apt-get install qemu-system
 $ qemu-system-x86_64 --version
 QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.2)
 Copyright (c) 2003-2021 Fabrice Bellard and the QEMU Project developers
