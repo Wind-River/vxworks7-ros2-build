@@ -37,3 +37,9 @@ RUN apt-get update && apt -y upgrade \
     autoconf automake libtool libltdl-dev mercurial \
     && rm -rf /var/lib/apt/lists/*
 
+# Missing tools for the native ROS 2 build
+RUN apt-get update \
+    && apt install --no-install-recommends -y \
+    libacl1-dev libasio-dev liblttng-ust-dev \
+    && rm -rf /var/lib/apt/lists/*
+

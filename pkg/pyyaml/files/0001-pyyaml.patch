@@ -1,0 +1,23 @@
+diff --git a/Makefile b/Makefile
+index 34a1d40..466ec1b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,7 +1,7 @@
+ 
+ .PHONY: build dist
+ 
+-PYTHON=/usr/bin/python3
++PYTHON=python3.9
+ TEST=
+ PARAMETERS=
+ 
+@@ -37,6 +37,9 @@ dist:
+ 	@# ${PYTHON} setup.py --with-libyaml sdist --formats=zip,gztar
+ 	${PYTHON} setup.py --with-libyaml sdist --formats=gztar
+ 
++bdist:
++	${PYTHON} setup.py bdist
++
+ windist:
+ 	${PYTHON} setup.py --with-libyaml bdist_wininst
+ 
