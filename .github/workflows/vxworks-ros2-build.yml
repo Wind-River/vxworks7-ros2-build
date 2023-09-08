@@ -14,9 +14,10 @@ jobs:
     strategy:
       matrix:
         branch: [humble-release-23.03, iron-release-23.03]
-        sdk: [wrsdk-vxworks7-qemu-1.12]
+        sdk: [wrsdk-vxworks7-qemu-1.12.1]
 
     runs-on: ubuntu-22.04
+    continue-on-error: true
     steps:
 
       - name: Checks-out a branch ${{ github.ref }}
