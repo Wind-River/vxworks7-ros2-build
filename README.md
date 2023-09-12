@@ -260,8 +260,8 @@ A filesystem with ROS 2 artifacts needs to be prepared to boot with VxWorks.
 Run QEMU with a prebuilt VxWorks kernel and a created HDD image.
 
 ```bash
-# create a disk 1024MB
-$ dd if=/dev/zero of=ros2.img count=1024 bs=1M
+# create a disk 2048MB
+$ dd if=/dev/zero of=ros2.img count=2048 bs=1M
 # format it as a FAT32
 $ mkfs.vfat -F 32 ./ros2.img
 
