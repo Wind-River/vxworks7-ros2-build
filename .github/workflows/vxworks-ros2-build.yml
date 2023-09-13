@@ -87,11 +87,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y dosfstools
           cd ${{ github.workspace }}
-          dd if=/dev/zero of=ros2.img count=1024 bs=1M
+          dd if=/dev/zero of=ros2.img count=2048 bs=1M
           mkfs.vfat -F 32 ./ros2.img
           mkdir -p /tmp/mount
           sudo mount -o loop -t vfat ./ros2.img /tmp/mount
           sudo cp -r -L ./export/deploy/* /tmp/mount/.
+          df -h /tmp/mount/
           sudo umount /tmp/mount
 
       - name: Prepare artifacts
