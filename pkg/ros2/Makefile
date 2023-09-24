@@ -87,6 +87,7 @@ ros2.configure: ros2.patch
 	done;
 	pip3 install numpy;
 	pip3 install lark-parser;
+	pip3 install vcstool;
 	pip3 install colcon-common-extensions;
 	pip3 install colcon-mixin;
 	pip3 install certifi;
