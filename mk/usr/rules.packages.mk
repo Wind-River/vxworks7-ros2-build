@@ -58,10 +58,6 @@ endef
 
 define pkg_configure
 	mkdir -p $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
-	if [ -n "$(VXWORKS_ENV_SH)" ] && \
-	   [ -f $(VXWORKS_ENV_SH) ]; then \
-		. ./$(VXWORKS_ENV_SH); \
-	fi ; \
 	cd $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) && \
 	if [ -f $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR)/CMakeLists.txt ]; then \
 		cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
