@@ -65,5 +65,6 @@ unixextra.install : unixextra.build
 	cp $(WIND_CC_SYSROOT)/usr/lib/common/libunixextra.so.* $(DEPLOY_DIR)/lib/.
 	@$(MAKE_STAMP)
 
+include $(WIND_USR_MK)/defs.make.mk
 include $(WIND_USR_MK)/rules.packages.mk
 
