@@ -93,15 +93,6 @@ define pkg_patch
 	fi
 endef
 
-define pkg_buildsys
-	mkdir -p $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) && \
-	for FILE in $(BUILD_SYS_FILES) $(PKG_EXTRA_SRC); do \
-		if [ -f $$FILE ] ; then \
-			cp $$FILE $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
-		fi  ; \
-	done
-endef
-
 define fetch_svn
 	$(ECHO) "fetch_svn - not yet implemented" ; \
 	exit 1
@@ -300,14 +291,9 @@ endef
 	$(call pkg_configure,$*)
 	@$(MAKE_STAMP)
 
-%.patch : %.buildsys
+%.patch : %.unpack
 	@$(call echo_action,Patching,$*)
 	$(call pkg_patch,$*)
-	@$(MAKE_STAMP)
-
-%.buildsys: %.unpack
-	@$(call echo_action,Adding build system files,$*)
-	$(call pkg_buildsys,$*)
 	@$(MAKE_STAMP)
 
 %.unpack : %.check
