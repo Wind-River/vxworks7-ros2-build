@@ -1,5 +1,7 @@
-export TOP_BUILDDIR=$(CURDIR)
-export WIND_USR_MK=$(TOP_BUILDDIR)/mk/usr
+export TOP_BUILDDIR?=$(CURDIR)/output
+export WIND_USR_MK=$(CURDIR)/mk/usr
+export PACKAGE_DIR=$(CURDIR)/pkg
+export BUILDSPECS_DIR=$(CURDIR)/buildspecs
 
 include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk

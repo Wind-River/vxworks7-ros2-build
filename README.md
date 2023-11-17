@@ -4,13 +4,13 @@
 
 ## VxWorks SDK and ROS 2 support
 
-Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `iron` and the latest VxWorks SDK is `23.03`.
+Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `iron` and the latest VxWorks SDK is `23.09`.
 
-|           | [23.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
+|           | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
 |:---------:|:-------------|
-|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2303/README_qemu.html) | |
-|**[`iron`](https://docs.ros.org/en/iron/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2303/README_qemu.html) | |
-|**[`rolling`](https://docs.ros.org/en/rolling/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2303/README_qemu.html) | |
+|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | |
+|**[`iron`](https://docs.ros.org/en/iron/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | |
+|**[`rolling`](https://docs.ros.org/en/rolling/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | |
 
 ## Prebuilt image
 
@@ -64,7 +64,7 @@ Subject to the License, you can proceed to download the VxWorks SDK.
 ## Prerequisite(s)
 
 * Download a VxWorks Software Development Kit from Wind River Labs
-   * [23.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43)
+   * [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43)
 
 * The build system will need to download source code from github.com and bitbucket.org.  A
   working Internet connection with access to both sites is required.
@@ -74,8 +74,8 @@ For the standard build you must also have:
 * Supported Linux host for both ROS 2 and VxWorks 7
    * ROS 2.0 Target Platforms
       * http://www.ros.org/reps/rep-2000.html
-   * VxWorks 7 23.03
-      * https://docs.windriver.com/bundle/vxworks_release_notes_23_03/page/index-release_notes.html
+   * VxWorks 7 23.09
+      * https://docs.windriver.com/bundle/vxworks_release_notes_23_09/page/index-release_notes.html
    * For ROS 2 Humble Hawksbill, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
    * For ROS 2 Iron Irwini, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
    * For ROS 2 Rolling Ridley, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
@@ -86,7 +86,7 @@ For the standard build you must also have:
 
 The following branches are active
 
-- [x] `master` - builds ROS2 `humble`, `iron`, and `rolling` against VxWorks `23.03` SDK depending on what VxWorks SDK and what Docker image are used
+- [x] `master` - builds ROS2 `humble`, `iron`, and `rolling` against VxWorks `23.09` SDK depending on what VxWorks SDK and what Docker image are used
 
 ## Directory Structure
 
@@ -96,30 +96,32 @@ The project uses Makefile to invoke a ros2 and turtlebot3 `colcon`-based build, 
 ├── Docker          - Dockefiles used to build ROS 2
 ├── Makefile
 ├── pkg
-│   ├── asio        - Fast-RTPS dependency
-│   ├── colcon      - host tool to build ROS 2
-│   ├── ros2        - ROS 2 middleware
-│   ├── sdk         - various SDK improvements necessary to build ROS 2
-│   ├── tinyxml2    - Fast-RTPS dependency
-│   ├── turtlebot3  - Turtlebot3 packages
-│   └── unixextra   - extra Unix functions necessary to build ROS 2
+│   ├── asio        - Fast-RTPS dependency
+│   ├── eigen       - Eigen library
+│   ├── ros2        - ROS 2 middleware
+│   ├── sdk         - various SDK improvements necessary to build ROS 2
+│   ├── tinyxml2    - Fast-RTPS dependency
+│   ├── turtlebot3  - Turtlebot3 packages
+│   └── unixextra   - extra Unix functions necessary to build ROS 2
 ```
 
-After the build following artifacts will be created:
+After the build following artifacts will be created under `output` directory:
 
 ```bash
-├── build      - pkg build artifacts
-    ├── asio
-    ├── colcon
-    ├── ros2
-        ├── patches
-        └── ros2_ws - ROS 2 workspace
-    ├── tinyxml2
-    └── unixextra
-├── downloads  - download artifacts
-├── export
-    ├── deploy - a ready-to-deploy filesystem with ROS 2 libraries and binaries
-    └── root   - development artifacts with ROS 2 libraries and headers
+output
+├── build
+│   ├── asio        - pkg build artifacts
+│   ├── eigen
+│   ├── pyyaml
+│   ├── ros2
+│   │   ├── patches
+│   │   └── ros2_ws - ROS 2 workspace
+│   ├── tinyxml2
+│   └── unixextra
+├── downloads
+└── export
+    ├── deploy      - a ready-to-deploy filesystem with ROS 2 libraries and binaries
+    └── root        - development artifacts with ROS 2 libraries and headers
 ``` 
 
 ## ROS 2 VxWorks patches
@@ -128,12 +130,13 @@ Patches are necessary to build ROS 2 for VxWorks, and are located in the separat
 The repository is cloned during the build to the *patches* dir.
 
 ```bash
+output
 ├── build
-│   ├── ros2
-│   │   ├── patches
+│   ├── ros2
+│   │   ├── patches
 ```
 
-The branch name of the `layer` repository is the same as the name of the `build` repository.
+A corresponding branch is selected automatically based on the VxWorks and ROS 2 releases.
 
 ## Build ROS 2 and its dependencies
 
@@ -153,18 +156,18 @@ docker build --no-cache -t vxbuild:22.04 Docker/22.04/vxbuild/.
 docker build --no-cache -t vxros2build:humble Docker/22.04/vxros2build/.
 
 docker build --no-cache --build-arg ROS_DISTRO=iron -t vxros2build:iron Docker/22.04/vxros2build/.
-docker build --no-cache --build-arg ROS_DISTRO=rolling -t vxros2build:iron Docker/22.04/vxros2build/.
+docker build --no-cache --build-arg ROS_DISTRO=rolling -t vxros2build:rolling Docker/22.04/vxros2build/.
 ```
 
 ### Download and extract the VxWorks SDK
 
-The 23.03 SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
+The 23.09 SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
 
 ```bash
 cd ~/Downloads 
-wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.12.1.tar.bz2
+wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.13.2.tar.bz2
 mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
-tar -jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.12.1.tar.bz2 --strip 1
+tar -jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.13.2.tar.bz2 --strip 1
 ```
 
 ### Run Docker image
@@ -191,18 +194,18 @@ wruser@vxros2:/work source /wrsdk/sdkenv.sh
 
 # check environment
 wruser@vxros2:/work$ make info
-DEFAULT_BUILD:      sdk unixextra asio tinyxml2 colcon ros2
-WIND RELEASE:       23.03
+DEFAULT_BUILD:      sdk unixextra asio tinyxml2 eigen ros2 pyyaml
+WIND RELEASE:       23.09
 ROS DISTRO:         humble
 TARGET ARCH:        x86_64
 TARGET PYTHON:      Python3.9
 CURDIR:             /work
-DOWNLOADS_DIR:      /work/downloads
+DOWNLOADS_DIR:      /work/output/downloads
 PACKAGE_DIR:        /work/pkg
-BUILD_DIR:          /work/build
-EXPORT_DIR:         /work/export
-ROOT_DIR:           /work/export/root
-DEPLOY_DIR:         /work/export/deploy
+BUILD_DIR:          /work/output/build
+EXPORT_DIR:         /work/output/export
+ROOT_DIR:           /work/output/export/root
+DEPLOY_DIR:         /work/output/export/deploy
 WIND_CC_SYSROOT:    /wrsdk/vxsdk/sysroot
 WIND_SDK_HOST_TOOLS:/wrsdk/vxsdk/host
 3PP_DEPLOY_DIR:     /wrsdk/vxsdk/sysroot/usr/3pp/deploy
@@ -215,8 +218,8 @@ wruser@vxros2:/work exit
 Build artifacts are in the `export` directory
 
 ```bash
-wruser@vxros2:/work ls export/deploy/
-bin  lib
+wruser@vxros2:/work ls output/export/deploy/
+bin  lib  share  vxscript
 ```
 
 Rebuild from scratch
@@ -261,22 +264,22 @@ Run QEMU with a prebuilt VxWorks kernel and a created HDD image.
 
 ```bash
 # create a disk 2048MB
-$ dd if=/dev/zero of=ros2.img count=2048 bs=1M
+$ dd if=/dev/zero of=./output/ros2.img count=2048 bs=1M
 # format it as a FAT32
-$ mkfs.vfat -F 32 ./ros2.img
+$ mkfs.vfat -F 32 ./output/ros2.img
 
 # mount, copy, unmount, you need to be `sudo`
 $ mkdir -p ~/tmp/mount
-$ sudo mount -o loop -t vfat ./ros2.img ~/tmp/mount
-$ sudo cp -r -L ./export/deploy/* ~/tmp/mount/.
+$ sudo mount -o loop -t vfat ./output/ros2.img ~/tmp/mount
+$ sudo cp -r -L ./output/export/deploy/* ~/tmp/mount/.
 $ sudo umount ~/tmp/mount
 ```
 
 ```bash
-sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
+sudo qemu-system-x86_64 -m 2G -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
 -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio \
 -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" \
--device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+-device ich9-ahci,id=ahci -drive file=./output/ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
 
 The HDD image will be mounted inside VxWorks under the `/usr` directory
@@ -511,10 +514,10 @@ wruser@vxros2:/work$ exit
 3. Create `ros2.img` as described [here](#create-an-hdd-image) and start QEMU
 
 ```bash
-$ sudo qemu-system-x86_64 -m 512M -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
+$ sudo qemu-system-x86_64 -m 2G -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
 -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio \
 -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" \
--device ich9-ahci,id=ahci -drive file=./ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+-device ich9-ahci,id=ahci -drive file=./output/ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
 
 4. Setup environment variables and run `my_package`

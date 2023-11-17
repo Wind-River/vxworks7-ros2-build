@@ -2,7 +2,7 @@
     "build": {
         "vxworks": {
             "merge-install": true,
-            "install-base": "/work/export/root",
+            "install-base": "/work/output/export/root",
             "cmake-force-configure": true,
             "cmake-args": [
                 "-DCMAKE_BUILD_TYPE:STRING=Debug",
@@ -12,7 +12,7 @@
                 "-DPython3_EXECUTABLE=/wrsdk/vxsdk/host/x86_64-linux/bin/python3",
                 "-DPYTHON_SOABI=cpython-39-vxworks",
                 "-DBUILD_TESTING:BOOL=OFF",
-                "-DCMAKE_EXE_LINKER_FLAGS=-rpath-link /work/export/root/lib",
+                "-DCMAKE_EXE_LINKER_FLAGS=-rpath-link /work/output/export/root/lib",
                 "-DFORCE_BUILD_VENDOR_PKG=ON"
             ]
         }
