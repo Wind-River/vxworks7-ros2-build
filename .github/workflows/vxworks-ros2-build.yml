@@ -13,8 +13,8 @@ jobs:
   build:
     strategy:
       matrix:
-        branch: [humble-release-23.03, iron-release-23.03]
-        sdk: [wrsdk-vxworks7-qemu-1.12.1]
+        branch: [humble-release-23.09, iron-release-23.09, rolling-23.09]
+        sdk: [wrsdk-vxworks7-qemu-1.13.2]
 
     runs-on: ubuntu-22.04
     continue-on-error: true
@@ -91,7 +91,7 @@ jobs:
           mkfs.vfat -F 32 ./ros2.img
           mkdir -p /tmp/mount
           sudo mount -o loop -t vfat ./ros2.img /tmp/mount
-          sudo cp -r -L ./export/deploy/* /tmp/mount/.
+          sudo cp -r -L ./output/export/deploy/* /tmp/mount/.
           df -h /tmp/mount/
           sudo umount /tmp/mount
 

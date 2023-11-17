@@ -23,7 +23,6 @@
 ifeq ($(__common_defs),)
 __common_defs = TRUE
 
-PACKAGE_DIR=$(TOP_BUILDDIR)/pkg
 BUILD_DIR=$(TOP_BUILDDIR)/build
 DOWNLOADS_DIR=$(TOP_BUILDDIR)/downloads
 EXPORT_DIR=$(TOP_BUILDDIR)/export
