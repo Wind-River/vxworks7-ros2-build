@@ -13,7 +13,7 @@
       "branch": "iron-release-23.09",
       "script": "./sdkenv.sh",
       "image": "./vxsdk/bsps/*/vxWorks"
-    }
+    },
     {
       "sdk": "wrsdk-vxworks7-qemu-1.13.2",
       "url": "https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.13.2.tar.bz2",
