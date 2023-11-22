@@ -8,7 +8,11 @@ name: 'VxWorks ROS 2 build'
 
 on:
   workflow_dispatch:
-
+    inputs:
+      json_file_name:
+        description: 'Name of the JSON file'
+        required: true
+        default: 'vxros2build.json'
 jobs:
   build:
     strategy:
@@ -17,6 +21,8 @@ jobs:
         sdk: [wrsdk-vxworks7-qemu-1.13.2]
 
     runs-on: ubuntu-22.04
+    env:
+      JSON_FILE: ${{ github.event.inputs.json_file_name }}
     continue-on-error: true
     steps:
 
@@ -27,9 +33,9 @@ jobs:
 
       - name: Setup environment
         run: |
-          echo "url=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {url} | .url][0]' ./.github/workflows/vxros2build.json`" >> $GITHUB_ENV
-          echo "script=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {script} | .script][0]' ./.github/workflows/vxros2build.json`" >> $GITHUB_ENV
-          echo "image=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {image} | .image][0]' ./.github/workflows/vxros2build.json`" >> $GITHUB_ENV
+          echo "url=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {url} | .url][0]' ./.github/workflows/${{ env.JSON_FILE }}`" >> $GITHUB_ENV
+          echo "script=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {script} | .script][0]' ./.github/workflows/${{ env.JSON_FILE }}`" >> $GITHUB_ENV
+          echo "image=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {image} | .image][0]' ./.github/workflows/${{ env.JSON_FILE }}`" >> $GITHUB_ENV
           echo "ros_distro=`echo ${{ matrix.branch }} | cut -d '-' -f1`" >> $GITHUB_ENV
 
       - name: Download the ${{ matrix.sdk }} SDK
