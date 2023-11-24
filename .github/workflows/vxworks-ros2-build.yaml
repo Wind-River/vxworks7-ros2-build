@@ -6,10 +6,10 @@
 name: 'VxWorks ROS 2 build'
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       json_file_name:
-        description: 'Config JSON file'
+        description: 'Build Config JSON File'
         required: true
         type: string
         default: 'vxros2build-qemu.json'
