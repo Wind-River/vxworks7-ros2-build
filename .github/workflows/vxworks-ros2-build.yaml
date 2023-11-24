@@ -47,7 +47,7 @@ jobs:
           file-url: '${{ env.url }}'
           location: '/tmp'
 
-      - name: Extract the ${{ env.sdk }}} SDK
+      - name: Extract the ${{ env.sdk }} SDK
         run: |
           mkdir -p /tmp/wrsdk
           cd /tmp/wrsdk
