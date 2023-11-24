@@ -18,7 +18,17 @@ jobs:
 
     steps:
       - name: Trigger VxWorks ROS 2 ${{ github.event.inputs.ros_distro }} build
-        uses: ./.github/workflows/vxworks-ros2-build.yaml
+        uses: actions/github-script@v4
         with:
-          json_file_name: ${{ github.event.inputs.json_file_name }}
-          ros_distro: ${{ github.event.inputs.ros_distro }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const response = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '77241288',
+              ref: ''${{ github.ref }}'',
+              inputs: {
+                json_file_name: '${{ github.event.inputs.json_file_name }}',
+                ros_distro: '${{ github.event.inputs.ros_distro }}'
+              }
+            });
