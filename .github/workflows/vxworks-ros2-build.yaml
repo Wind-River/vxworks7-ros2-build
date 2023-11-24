@@ -9,12 +9,10 @@ on:
       json_file_name:
         description: 'Build Config JSON File'
         required: true
-        type: string
         default: 'vxros2build-qemu.json'
       sdk:
         description: 'SDK Name'
         required: true
-        type: string
         default: 'wrsdk-vxworks7-qemu-1.13.2'
 jobs:
   build:
