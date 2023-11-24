@@ -18,8 +18,8 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     env:
-      sdk: ${{ github.event.inputs.sdk }}
       ros_distro: ${{ github.event.inputs.ros_distro }}
+      sdk: ${{ github.event.inputs.sdk }}
     steps:
 
       - name: Checks-out a branch ${{ github.ref }}
