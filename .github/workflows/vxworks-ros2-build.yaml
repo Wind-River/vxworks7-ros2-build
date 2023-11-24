@@ -1,7 +1,5 @@
 # This is a workflow for the VxWorks ROS 2 build.
 # It builds a ROS 2 VxWorks port against the VxWorks SDK 
-#
-# The workflow is callable
 
 name: 'VxWorks ROS 2 build'
 
@@ -13,16 +11,16 @@ on:
         required: true
         type: string
         default: 'vxros2build-qemu.json'
-      ros_distro:
-        description: 'ROS distribution'
+      sdk:
+        description: 'SDK Name'
         required: true
         type: string
-        default: 'humble'
+        default: 'wrsdk-vxworks7-qemu-1.13.2'
 jobs:
   build:
     runs-on: ubuntu-22.04
     env:
-      json_file: ${{ github.event.inputs.json_file_name }}
+      sdk: ${{ github.event.inputs.sdk }}
       ros_distro: ${{ github.event.inputs.ros_distro }}
     steps:
 
@@ -31,26 +29,16 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
-      - name: Fetch SDK name from ${{ env.json_file }}
-        run: |
-          sdk=$(jq -r --arg distro "${{ env.ros_distro }}" '.vxros2build[] | select(.ros_distro == $distro) | .sdk' .github/workflows/${{ env.json_file }})
-          if [ -z "$sdk" ]; then
-            echo "SDK not found for ${{ env.ros_distro }}. Stopping workflow."
-            echo "::error::SDK not found for ${{ env.ros_distro }}"
-            exit 1
-          fi
-          echo "sdk=$sdk" >> $GITHUB_ENV
-
       - name: Fetch SDK details for ${{ env.sdk }}
         run: |
-          url=$(jq -r --arg sdk "$sdk" '.sdks[] | select(.name == $sdk) | .url' .github/workflows/sdks.json)
+          url=$(jq -r --arg sdk "${{ env.sdk }}" '.sdks[] | select(.name == ${{ env.sdk }}) | .url' .github/workflows/sdks.json)
           if [ -z "$url" ]; then
-            echo "URL not found for $sdk. Stopping workflow."
-            echo "::error::URL not found for $sdk"
+            echo "URL not found for ${{ env.sdk }}. Stopping workflow."
+            echo "::error::URL not found for ${{ env.sdk }}"
             exit 1
           fi
-          script=$(jq -r --arg sdk "$sdk" '.sdks[] | select(.name == $sdk) | .script' .github/workflows/sdks.json)
-          image=$(jq -r --arg sdk "$sdk" '.sdks[] | select(.name == $sdk) | .image' .github/workflows/sdks.json)
+          script=$(jq -r --arg sdk "${{ env.sdk }}" '.sdks[] | select(.name == ${{ env.sdk }}) | .script' .github/workflows/sdks.json)
+          image=$(jq -r --arg sdk "${{ env.sdk }}" '.sdks[] | select(.name == ${{ env.sdk }}) | .image' .github/workflows/sdks.json)
           echo "url=$url" >> $GITHUB_ENV
           echo "script=$script" >> $GITHUB_ENV
           echo "image=$image" >> $GITHUB_ENV
