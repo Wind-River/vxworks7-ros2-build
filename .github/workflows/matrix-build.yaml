@@ -31,6 +31,19 @@ jobs:
           fi
           echo "sdk=$sdk" >> $GITHUB_ENV
 
+      - name: Fetch workflows using GitHub API
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const response = await github.request('GET /repos/razr/vxworks7-ros2-build/actions/workflows', {
+              headers: {
+                Accept: 'application/vnd.github.v3+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+              }
+            });
+            console.log(response.data);
+
       - name: Trigger VxWorks ROS 2 ${{ matrix.ros_distro }} build
         uses: actions/github-script@v4
         with:
