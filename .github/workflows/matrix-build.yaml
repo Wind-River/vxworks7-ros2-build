@@ -16,8 +16,34 @@ jobs:
         ros_distro: [humble, iron, rolling]
 
     steps:
-      - name: Trigger VxWorks ROS 2 ${{ matrix.ros_distro }} build
-        uses: ./.github/workflows/vxworks-ros2-build.yaml
+      - name: Checks-out a branch ${{ github.ref }}
+        uses: actions/checkout@v3
         with:
-          json_file_name: ${{ github.event.inputs.json_file_name }}
-          ros_distro: ${{ matrix.ros_distro }}
+          ref: ${{ github.ref }}
+
+      - name: Fetch SDK name from ${{ env.json_file }}
+        run: |
+          sdk=$(jq -r --arg distro "${{ matrix.ros_distro }}" '.vxros2build[] | select(.ros_distro == $distro) | .sdk' .github/workflows/${{ github.event.inputs.json_file_name }})
+          if [ -z "$sdk" ]; then
+            echo "SDK not found for ${{ matrix.ros_distro }}. Stopping workflow."
+            echo "::error::SDK not found for ${{ matrix.ros_distro }}"
+            exit 1
+          fi
+          echo "sdk=$sdk" >> $GITHUB_ENV
+          
+      - name: Trigger VxWorks ROS 2 ${{ matrix.ros_distro }} build
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const response = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '77241288',
+              ref: 'refs/heads/two-workflows',
+              inputs: {
+                sdk: ${{ env.sdk }},
+                ros_distro: ${{ matrix.ros_distro }}
+              }
+            });
+ 
