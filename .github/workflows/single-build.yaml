@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Trigger VxWorks ROS 2 ${{ github.event.inputs.ros_distro }} build
-        uses: ./.github/workflows/vxworks-ros2-build.yml
+        uses: ./.github/workflows/vxworks-ros2-build.yaml
         with:
           json_file_name: ${{ github.event.inputs.json_file_name }}
           ros_distro: ${{ github.event.inputs.ros_distro }}
