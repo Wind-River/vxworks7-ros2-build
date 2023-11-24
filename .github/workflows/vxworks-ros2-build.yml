@@ -7,22 +7,24 @@
 name: 'VxWorks ROS 2 build'
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       json_file_name:
-        description: 'Name of the JSON file'
+        description: 'Config JSON file'
         required: true
+        type: string
         default: 'vxros2build-qemu.json'
+      ros_distro:
+        description: 'ROS distribution'
+        required: true
+        type: string
+        default: 'humble'
 jobs:
   build:
-    strategy:
-      matrix:
-        ros_distro: [humble, iron, rolling]
-
     runs-on: ubuntu-22.04
     env:
-      JSON_FILE: ${{ github.event.inputs.json_file_name }}
-    continue-on-error: true
+      json_file: ${{ github.event.inputs.json_file_name }}
+      ros_distro: ${{ github.event.inputs.ros_distro }}
     steps:
 
       - name: Checks-out a branch ${{ github.ref }}
@@ -30,12 +32,12 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
-      - name: Fetch SDK name from ${{ env.JSON_FILE }}
+      - name: Fetch SDK name from ${{ env.json_file }}
         run: |
-          sdk=$(jq -r --arg distro "${{ matrix.ros_distro }}" '.vxros2build[] | select(.ros_distro == $distro) | .sdk' .github/workflows/${{ env.JSON_FILE }})
+          sdk=$(jq -r --arg distro "${{ env.ros_distro }}" '.vxros2build[] | select(.ros_distro == $distro) | .sdk' .github/workflows/${{ env.json_file }})
           if [ -z "$sdk" ]; then
-            echo "SDK not found for ${{ matrix.ros_distro }}. Stopping workflow."
-            echo "::error::SDK not found for ${{ matrix.ros_distro }}"
+            echo "SDK not found for ${{ env.ros_distro }}. Stopping workflow."
+            echo "::error::SDK not found for ${{ env.ros_distro }}"
             exit 1
           fi
           echo "sdk=$sdk" >> $GITHUB_ENV
@@ -53,7 +55,6 @@ jobs:
           echo "url=$url" >> $GITHUB_ENV
           echo "script=$script" >> $GITHUB_ENV
           echo "image=$image" >> $GITHUB_ENV
-          echo "ros_distro=${{ matrix.ros_distro }}" >> $GITHUB_ENV
 
       - name: Download the ${{ env.sdk }} SDK
         uses: carlosperate/download-file-action@v1
