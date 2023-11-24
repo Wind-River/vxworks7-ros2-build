@@ -1,4 +1,4 @@
-name: "A Single VxWorks ROS 2 Build"
+name: A Single VxWorks ROS 2 Build
 
 on:
   workflow_dispatch:
@@ -15,9 +15,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ros_distro: [humble, iron, rolling]
 
     steps:
       - name: Trigger VxWorks ROS 2 ${{ github.event.inputs.ros_distro }} build
