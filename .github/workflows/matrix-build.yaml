@@ -1,0 +1,23 @@
+name: Matrix ROS 2 VxWorks Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      json_file_name:
+        description: 'Build Config JSON File'
+        required: true
+        default: 'vxros2build-qemu.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ros_distro: [humble, iron, rolling]
+
+    steps:
+      - name: Trigger VxWorks ROS 2 ${{ matrix.ros_distro }} build
+        uses: ./.github/workflows/vxworks-ros2-build.yml
+        with:
+          json_file_name: ${{ github.event.inputs.json_file_name }}
+          ros_distro: ${{ matrix.ros_distro }}
