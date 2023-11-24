@@ -26,9 +26,9 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: '77241288',
-              ref: ''${{ github.ref }}'',
+              ref: 'refs/heads/two-workflows', // Corrected quote usage here
               inputs: {
-                json_file_name: '${{ github.event.inputs.json_file_name }}',
-                ros_distro: '${{ github.event.inputs.ros_distro }}'
+                json_file_name: 'vxros2build-qemu.json',
+                ros_distro: 'humble'
               }
             });
