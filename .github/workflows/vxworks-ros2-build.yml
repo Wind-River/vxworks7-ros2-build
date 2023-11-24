@@ -12,13 +12,12 @@ on:
       json_file_name:
         description: 'Name of the JSON file'
         required: true
-        default: 'vxros2build.json'
+        default: 'vxros2build-qemu.json'
 jobs:
   build:
     strategy:
       matrix:
-        branch: [humble-release-23.09, iron-release-23.09, rolling-23.09]
-        sdk: [wrsdk-vxworks7-qemu-1.13.2]
+        ros_distro: [humble, iron, rolling]
 
     runs-on: ubuntu-22.04
     env:
@@ -31,24 +30,42 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
-      - name: Setup environment
+      - name: Fetch SDK name from ${{ env.JSON_FILE }}
         run: |
-          echo "url=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {url} | .url][0]' ./.github/workflows/${{ env.JSON_FILE }}`" >> $GITHUB_ENV
-          echo "script=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {script} | .script][0]' ./.github/workflows/${{ env.JSON_FILE }}`" >> $GITHUB_ENV
-          echo "image=`jq -r '[.vxros2build[] | select(.sdk == \"${{ matrix.sdk }}\") | {image} | .image][0]' ./.github/workflows/${{ env.JSON_FILE }}`" >> $GITHUB_ENV
-          echo "ros_distro=`echo ${{ matrix.branch }} | cut -d '-' -f1`" >> $GITHUB_ENV
+          sdk=$(jq -r --arg distro "${{ matrix.ros_distro }}" '.vxros2build[] | select(.ros_distro == $distro) | .sdk' .github/workflows/${{ env.JSON_FILE }})
+          if [ -z "$sdk" ]; then
+            echo "SDK not found for ${{ matrix.ros_distro }}. Stopping workflow."
+            echo "::error::SDK not found for ${{ matrix.ros_distro }}"
+            exit 1
+          fi
+          echo "sdk=$sdk" >> $GITHUB_ENV
 
-      - name: Download the ${{ matrix.sdk }} SDK
+      - name: Fetch SDK details for ${{ env.sdk }}
+        run: |
+          url=$(jq -r --arg sdk "$sdk" '.sdks[] | select(.name == $sdk) | .url' .github/workflows/sdks.json)
+          if [ -z "$url" ]; then
+            echo "URL not found for $sdk. Stopping workflow."
+            echo "::error::URL not found for $sdk"
+            exit 1
+          fi
+          script=$(jq -r --arg sdk "$sdk" '.sdks[] | select(.name == $sdk) | .script' .github/workflows/sdks.json)
+          image=$(jq -r --arg sdk "$sdk" '.sdks[] | select(.name == $sdk) | .image' .github/workflows/sdks.json)
+          echo "url=$url" >> $GITHUB_ENV
+          echo "script=$script" >> $GITHUB_ENV
+          echo "image=$image" >> $GITHUB_ENV
+          echo "ros_distro=${{ matrix.ros_distro }}" >> $GITHUB_ENV
+
+      - name: Download the ${{ env.sdk }} SDK
         uses: carlosperate/download-file-action@v1
         with:
           file-url: '${{ env.url }}'
           location: '/tmp'
 
-      - name: Extract the ${{ matrix.sdk }} SDK
+      - name: Extract the ${{ env.sdk }}} SDK
         run: |
           mkdir -p /tmp/wrsdk
           cd /tmp/wrsdk
-          tar xvfj /tmp/${{ matrix.sdk }}.tar.bz2 --strip 1
+          tar xvfj /tmp/${{ env.sdk }}.tar.bz2 --strip 1
 
       - name: store runners uid and gid
         run: |
@@ -70,7 +87,7 @@ jobs:
           build-args: ROS_DISTRO=${{ env.ros_distro }}
           tags: vxros2build:${{ env.ros_distro }}
 
-      - name: Build ROS 2 ${{ matrix.branch }} against VxWorks ${{ matrix.sdk }}
+      - name: Build ROS 2 ${{ env.ros_distro }} against VxWorks ${{ env.sdk }}
         uses: addnab/docker-run-action@v3
         with:
           image: vxros2build:${{ env.ros_distro }}
@@ -80,7 +97,7 @@ jobs:
             useradd -u "`cat /wrsdk/uid`" -m wruser -g wruser
             su wruser -c 'source /wrsdk/sdkenv.sh && make -C /work'
 
-#      - name: Build ROS 2 ${{ matrix.branch }} against VxWorks ${{ matrix.sdk }}
+#      - name: Build ROS 2 ${{ env.ros_distro }} against VxWorks ${{ env.sdk }}
 #        env:
 #          UID: ${{ env.uid }}
 #          GID: ${{ env.gid }}
@@ -108,7 +125,7 @@ jobs:
       - name: Upload VxWorks and the HDD image
         uses: actions/upload-artifact@v3
         with:
-          name: HDD image ${{ matrix.sdk }} ${{ matrix.branch }}
+          name: HDD image ${{ env.sdk }} ${{ env.ros_distro }}
           path: |
             ${{ github.workspace }}/ros2.img
             ${{ github.workspace }}/vxWorks
