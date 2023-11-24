@@ -42,8 +42,8 @@ jobs:
               workflow_id: '77241288',
               ref: 'refs/heads/two-workflows',
               inputs: {
-                sdk: ${{ env.sdk }},
-                ros_distro: ${{ matrix.ros_distro }}
+                sdk: '${{ env.sdk }}',
+                ros_distro: '${{ matrix.ros_distro }}'
               }
             });
  
