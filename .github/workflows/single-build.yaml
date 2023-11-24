@@ -1,4 +1,4 @@
-name: A Single VxWorks ROS 2 Build
+name: "A Single VxWorks ROS 2 Build"
 
 on:
   workflow_dispatch:
