@@ -1,28 +1,25 @@
 # This is a workflow for the VxWorks ROS 2 build.
 # It builds a ROS 2 VxWorks port against the VxWorks SDK 
-#
-# The workflow can be started 
-#  - manually
 
 name: 'VxWorks ROS 2 build'
 
 on:
   workflow_dispatch:
     inputs:
-      json_file_name:
-        description: 'Name of the JSON file'
+      ros_distro:
+        description: 'ROS 2 Distribution'
         required: true
-        default: 'vxros2build-qemu.json'
+        default: 'humble'
+      sdk:
+        description: 'SDK Name'
+        required: true
+        default: 'wrsdk-vxworks7-qemu-1.13.2'
 jobs:
   build:
-    strategy:
-      matrix:
-        ros_distro: [humble, iron, rolling]
-
     runs-on: ubuntu-22.04
     env:
-      JSON_FILE: ${{ github.event.inputs.json_file_name }}
-    continue-on-error: true
+      ros_distro: ${{ github.event.inputs.ros_distro }}
+      sdk: ${{ github.event.inputs.sdk }}
     steps:
 
       - name: Checks-out a branch ${{ github.ref }}
@@ -30,30 +27,19 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
-      - name: Fetch SDK name from ${{ env.JSON_FILE }}
-        run: |
-          sdk=$(jq -r --arg distro "${{ matrix.ros_distro }}" '.vxros2build[] | select(.ros_distro == $distro) | .sdk' .github/workflows/${{ env.JSON_FILE }})
-          if [ -z "$sdk" ]; then
-            echo "SDK not found for ${{ matrix.ros_distro }}. Stopping workflow."
-            echo "::error::SDK not found for ${{ matrix.ros_distro }}"
-            exit 1
-          fi
-          echo "sdk=$sdk" >> $GITHUB_ENV
-
       - name: Fetch SDK details for ${{ env.sdk }}
         run: |
-          url=$(jq -r --arg sdk "$sdk" '.sdks[] | select(.name == $sdk) | .url' .github/workflows/sdks.json)
+          url=$(jq -r --arg sdk "${{ env.sdk }}" '.sdks[] | select(.name == $sdk) | .url' .github/workflows/sdks.json)
           if [ -z "$url" ]; then
-            echo "URL not found for $sdk. Stopping workflow."
-            echo "::error::URL not found for $sdk"
+            echo "URL not found for ${{ env.sdk }}. Stopping workflow."
+            echo "::error::URL not found for ${{ env.sdk }}"
             exit 1
           fi
-          script=$(jq -r --arg sdk "$sdk" '.sdks[] | select(.name == $sdk) | .script' .github/workflows/sdks.json)
-          image=$(jq -r --arg sdk "$sdk" '.sdks[] | select(.name == $sdk) | .image' .github/workflows/sdks.json)
+          script=$(jq -r --arg sdk "${{ env.sdk }}" '.sdks[] | select(.name == $sdk) | .script' .github/workflows/sdks.json)
+          image=$(jq -r --arg sdk "${{ env.sdk }}" '.sdks[] | select(.name == $sdk) | .image' .github/workflows/sdks.json)
           echo "url=$url" >> $GITHUB_ENV
           echo "script=$script" >> $GITHUB_ENV
           echo "image=$image" >> $GITHUB_ENV
-          echo "ros_distro=${{ matrix.ros_distro }}" >> $GITHUB_ENV
 
       - name: Download the ${{ env.sdk }} SDK
         uses: carlosperate/download-file-action@v1
@@ -61,7 +47,7 @@ jobs:
           file-url: '${{ env.url }}'
           location: '/tmp'
 
-      - name: Extract the ${{ env.sdk }}} SDK
+      - name: Extract the ${{ env.sdk }} SDK
         run: |
           mkdir -p /tmp/wrsdk
           cd /tmp/wrsdk

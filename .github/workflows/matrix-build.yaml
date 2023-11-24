@@ -1,0 +1,76 @@
+name: Matrix ROS 2 VxWorks Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      json_file_name:
+        description: 'Build Config JSON File'
+        required: true
+        default: 'vxros2build-qemu.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ros_distro: [humble, iron, rolling]
+
+    steps:
+      - name: Checks-out a branch ${{ github.ref }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Fetch SDK name from ${{ env.json_file }}
+        run: |
+          sdk=$(jq -r --arg distro "${{ matrix.ros_distro }}" '.vxros2build[] | select(.ros_distro == $distro) | .sdk' .github/workflows/${{ github.event.inputs.json_file_name }})
+          if [ -z "$sdk" ]; then
+            echo "SDK not found for ${{ matrix.ros_distro }}. Stopping workflow."
+            echo "::error::SDK not found for ${{ matrix.ros_distro }}"
+            exit 1
+          fi
+          echo "sdk=$sdk" >> $GITHUB_ENV
+
+      - name: Fetch workflow ID using GitHub API
+        uses: actions/github-script@v4
+        id: get_workflow_id
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = process.env.GITHUB_REPOSITORY.split("/")[0];
+            const repo = process.env.GITHUB_REPOSITORY.split("/")[1];
+
+            const response = await github.request('GET /repos/${owner}/${repo}/actions/workflows', {
+              headers: {
+                Accept: 'application/vnd.github.v3+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+              }
+            });
+
+            const workflows = response.data.workflows;
+            const targetWorkflow = workflows.find(workflow => workflow.path === '.github/workflows/vxworks-ros2-build.yaml');
+
+            if (targetWorkflow) {
+              console.log(`Workflow ID for .github/workflows/vxworks-ros2-build.yaml: ${targetWorkflow.id}`);
+              core.setOutput('workflow_id', targetWorkflow.id.toString());
+            } else {
+              console.log('Workflow not found');
+            }
+
+      - name: Trigger VxWorks ROS 2 ${{ matrix.ros_distro }} build
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const workflowId = ${{ steps.get_workflow_id.outputs.workflow_id }};
+            const response = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflowId,
+              ref: '${{ github.ref }}',
+              inputs: {
+                sdk: '${{ env.sdk }}',
+                ros_distro: '${{ matrix.ros_distro }}'
+              }
+            });
+ 
