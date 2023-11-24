@@ -37,6 +37,7 @@ jobs:
           workflowPath=".github/workflows/vxworks-ros2-build.yaml"
           workflowContent=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
               "https://api.github.com/repos/${{ github.repository }}/contents/$workflowPath")
+          echo "$workflowContent"
           workflowID=$(echo "$workflowContent" | jq -r '.content' | base64 -d | yq -r '.on.workflow_dispatch.inputs.workflow_id')
           echo "::set-output name=workflow_id::$workflowID"
 
