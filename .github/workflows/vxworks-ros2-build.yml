@@ -1,8 +1,7 @@
 # This is a workflow for the VxWorks ROS 2 build.
 # It builds a ROS 2 VxWorks port against the VxWorks SDK 
 #
-# The workflow can be started 
-#  - manually
+# The workflow is callable
 
 name: 'VxWorks ROS 2 build'
 
