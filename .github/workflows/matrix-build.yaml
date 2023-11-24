@@ -31,18 +31,6 @@ jobs:
           fi
           echo "sdk=$sdk" >> $GITHUB_ENV
 
-      - name: Get Workflow ID
-        id: get_workflow_id
-        run: |
-          workflowPath=".github/workflows/vxworks-ros2-build.yaml"
-          workflowContent=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              "https://api.github.com/repos/${{ github.repository }}/contents/$workflowPath")
-          workflowContent=$(echo "$workflowContent" | jq -r '.content')
-          decodedContent=$(echo "$workflowContent" | base64 -d)
-          echo "$decodedContent"
-          workflowID=$(echo "$workflowContent" | jq -r '.content' | base64 -d | yq -r '.on.workflow_dispatch.inputs.workflow_id')
-          echo "::set-output name=workflow_id::$workflowID"
-
       - name: Trigger VxWorks ROS 2 ${{ matrix.ros_distro }} build
         uses: actions/github-script@v4
         with:
@@ -51,8 +39,8 @@ jobs:
             const response = await github.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: '${{ steps.get_workflow_id.outputs.workflow_id }}',
-              ref: 'refs/heads/two-workflows',
+              workflow_id: '77241288',
+              ref: '${{ github.ref }}',
               inputs: {
                 sdk: '${{ env.sdk }}',
                 ros_distro: '${{ matrix.ros_distro }}'
