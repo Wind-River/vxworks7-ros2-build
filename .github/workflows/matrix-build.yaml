@@ -33,6 +33,7 @@ jobs:
 
       - name: Fetch workflows using GitHub API
         uses: actions/github-script@v4
+        id: get_workflow_id
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -42,17 +43,27 @@ jobs:
                 'X-GitHub-Api-Version': '2022-11-28'
               }
             });
-            console.log(response.data);
+
+            const workflows = response.data.workflows;
+            const targetWorkflow = workflows.find(workflow => workflow.path === '.github/workflows/vxworks-ros2-build.yaml');
+
+            if (targetWorkflow) {
+              console.log(`Workflow ID for .github/workflows/vxworks-ros2-build.yaml: ${targetWorkflow.id}`);
+              core.setOutput('workflow_id', targetWorkflow.id.toString());
+            } else {
+              console.log('Workflow not found');
+            }
 
       - name: Trigger VxWorks ROS 2 ${{ matrix.ros_distro }} build
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const workflowId = ${{ steps.get_workflow_id.outputs.workflow_id }};
             const response = await github.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: '77241288',
+              workflow_id: workflowId,
               ref: '${{ github.ref }}',
               inputs: {
                 sdk: '${{ env.sdk }}',
