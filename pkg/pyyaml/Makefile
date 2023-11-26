@@ -47,4 +47,6 @@ PKG_MAKE_OPT = bdist
 PKG_MAKE_INSTALL_OPT = --help 1> /dev/null \
 		       && cp -r $(BUILD_DIR)/$(PKG_NAME)/${PKG_BUILD_DIR}/lib/* $(ROOT_DIR)/lib/python3.$(TGT_PYTHON_MINOR)/site-packages/. \
 		       && cp -r $(BUILD_DIR)/$(PKG_NAME)/${PKG_BUILD_DIR}/lib/* $(DEPLOY_DIR)/lib/python3.$(TGT_PYTHON_MINOR)/site-packages/.
+
+include $(WIND_USR_MK)/defs.make.mk
 include $(WIND_USR_MK)/rules.packages.mk

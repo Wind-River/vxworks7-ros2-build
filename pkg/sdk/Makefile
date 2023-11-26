@@ -61,5 +61,9 @@ sdk.install : sdk.build
 	$(call sdk_deploy,$*)
 	@$(MAKE_STAMP)
 
+sdk.clean:
+	@$(call echo_action,Cleaning,$*)
+	@$(CLEAN_STAMP)
+
 include $(WIND_USR_MK)/rules.packages.mk
 

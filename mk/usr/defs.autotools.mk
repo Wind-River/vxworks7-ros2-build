@@ -44,4 +44,11 @@ define pkg_configure
 	fi
 endef
 
+define pkg_clean
+	if [ -n "$(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR)" ] && \
+	   [ -d $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ]; then \
+		$(MAKE) -C $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) -f Makefile clean; \
+	fi
+endef
+
 endif

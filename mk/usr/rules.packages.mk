@@ -34,13 +34,6 @@ define pkg_distclean
 	fi
 endef
 
-define pkg_clean
-	if [ -n "$(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR)" ] && \
-	   [ -d $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ]; then \
-		$(MAKE) -C $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) -f Makefile clean; \
-	fi
-endef
-
 define pkg_patch
 	if [ -f $(PACKAGE_DIR)/$(1)/$(PKG_PATCH_DIR)/series ]; then \
 		PATCHES=$$(cat $(PACKAGE_DIR)/$(1)/$(PKG_PATCH_DIR)/series | grep -v '^ *#'); \
