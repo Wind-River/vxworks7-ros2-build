@@ -42,10 +42,7 @@ sdk.check : sdk.download
 sdk.unpack : sdk.check
 	@$(MAKE_STAMP)
 
-sdk.buildsys : sdk.unpack
-	@$(MAKE_STAMP)
-
-sdk.patch : sdk.buildsys
+sdk.patch : sdk.unpack
 	@$(call echo_action,Applying SDK patches,$*)
 	$(call sdk_patch,$*)
 	@$(MAKE_STAMP)
