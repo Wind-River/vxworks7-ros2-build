@@ -39,4 +39,5 @@ CMAKE_OPT += -DEIGEN_TEST_CXX11=ON
 # PKG_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT)
 PKG_MAKE_INSTALL_OPT = install
 
+include $(WIND_USR_MK)/defs.cmake.mk
 include $(WIND_USR_MK)/rules.packages.mk

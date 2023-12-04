@@ -48,4 +48,5 @@ tinyxml2.install : tinyxml2.build
 	cp $(ROOT_DIR)/lib/libtinyxml2*.so $(DEPLOY_DIR)/lib/.
 	@$(MAKE_STAMP)
 
+include $(WIND_USR_MK)/defs.cmake.mk
 include $(WIND_USR_MK)/rules.packages.mk

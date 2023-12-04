@@ -45,5 +45,6 @@ PKG_CONFIGURE_OPT = $(TGT_CONFIGURE_OPT) LIBS="$(PKG_LIBS)"
 PKG_CONFIGURE_OPT += --without-boost
 PKG_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT)
 
+include $(WIND_USR_MK)/defs.autotools.mk
 include $(WIND_USR_MK)/rules.packages.mk
 

@@ -34,40 +34,8 @@ OTHER_UNPACK ?= $(ECHO) "ERROR: Unknown source type, can't extract" ; exit 1
 OTHER_CHECKOUT ?= $(ECHO) "ERROR: Unknown protocol type, can't checkout" ; exit 1
 
 #PKG_PATCHES := $(sort $(wildcard *.patch))
-BUILD_SYS_FILES = vxworks.make vxworks.mak vxworks.rtp.mak vxworks.lib.mak vxworks.krnl.mak config.vx.app
-
-####
-
-# PATH := $(TPP_HOST_DIR)/usr/bin:$(PATH)
-# LD_LIBRARY_PATH := $(TPP_HOST_DIR)/usr/lib:$(LD_LIBRARY_PATH)
-# PKG_CONFIG_PATH := $(TPP_HOST_DIR)/usr/lib/pkgconfig:$(PKG_CONFIG_PATH)
-#PYTHONPATH := $(shell test -d $TPP_HOST_DIR && find $(TPP_HOST_DIR) -maxdepth 3 -type d -path '*/usr/lib/python*' -exec echo \{\}: \;)$(PYTHONPATH)
-# PKG_BUILD_TARGETS ?=  $(PKG_NAME).install
-
 
 PKG_CMAKE_DIR := $(PKG_SRC_DIR)
-
-# shared libraries still have issues
-EXE_FORMAT?=static
-
-# prefer shared libraries if not selected
-ifeq ($(EXE_FORMAT),)
-ifeq ($(LIB_FORMAT),)
-LIB_FORMAT := shared
-EXE_FORMAT := dynamic
-endif
-ifeq ($(EXE_FORMAT),dynamic)
-LIB_FORMAT := shared
-endif
-ifeq ($(EXE_FORMAT),static)
-LIB_FORMAT := static
-endif
-endif
-
-
-export LIB_FORMAT
-export EXE_FORMAT
-# export PATH
 
 define echo_action
 	@$(ECHO) "--------------------------------------------------------------------------------"; \

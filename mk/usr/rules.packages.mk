@@ -16,15 +16,7 @@
 
 .PHONY: all
 
-ifndef __packages_defs
 include $(WIND_USR_MK)/defs.packages.mk
-endif
-
-define pkg_install
-	cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) && \
-	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \
-	$(PKG_MAKE_INSTALL_VAR) $(MAKE) -C $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) -f Makefile $(PKG_MAKE_INSTALL_OPT)
-endef
 
 define pkg_distclean
 	if [ -n "$(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR)" ] && \
@@ -42,46 +34,6 @@ define pkg_distclean
 	fi
 endef
 
-define pkg_clean
-	if [ -n "$(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR)" ] && \
-	   [ -d $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ]; then \
-		$(MAKE) -C $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) -f Makefile clean; \
-	fi
-endef
-
-define pkg_build
-	cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) && \
-	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \
-	echo "MAKE_OPT: $(PKG_MAKE_OPT)" && \
-	$(PKG_MAKE_BUILD_VAR) $(MAKE) -j$(nproc) -C $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) -f Makefile $(PKG_MAKE_OPT)
-endef
-
-define pkg_configure
-	mkdir -p $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
-	if [ -n "$(VXWORKS_ENV_SH)" ] && \
-	   [ -f $(VXWORKS_ENV_SH) ]; then \
-		. ./$(VXWORKS_ENV_SH); \
-	fi ; \
-	cd $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) && \
-	if [ -f $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR)/CMakeLists.txt ]; then \
-		cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
-		cmake $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) \
-		    -DCMAKE_TOOLCHAIN_FILE=$(TGT_CMAKE_TOOLCHAIN_FILE) \
-		    -DCMAKE_INSTALL_PREFIX=$(ROOT_DIR) \
-		    -DCMAKE_PREFIX_PATH=$(ROOT_DIR) \
-		    $(CMAKE_OPT) ; \
-	else \
-		if [ ! -f ./configure ] && [ -f configure.in -o -f configure.ac ] ; then \
-			autoreconf --verbose --install --force || exit 1 ; \
-		fi ; \
-		if [ -f ./configure ]; then \
-			cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
-			$(PKG_CONFIGURE_VAR) $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR)/configure \
-				$(PKG_CONFIGURE_OPT) ; \
-		fi ; \
-	fi
-endef
-
 define pkg_patch
 	if [ -f $(PACKAGE_DIR)/$(1)/$(PKG_PATCH_DIR)/series ]; then \
 		PATCHES=$$(cat $(PACKAGE_DIR)/$(1)/$(PKG_PATCH_DIR)/series | grep -v '^ *#'); \
@@ -91,15 +43,6 @@ define pkg_patch
 			fi; \
 		done; \
 	fi
-endef
-
-define pkg_buildsys
-	mkdir -p $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) && \
-	for FILE in $(BUILD_SYS_FILES) $(PKG_EXTRA_SRC); do \
-		if [ -f $$FILE ] ; then \
-			cp $$FILE $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) ; \
-		fi  ; \
-	done
 endef
 
 define fetch_svn
@@ -300,14 +243,9 @@ endef
 	$(call pkg_configure,$*)
 	@$(MAKE_STAMP)
 
-%.patch : %.buildsys
+%.patch : %.unpack
 	@$(call echo_action,Patching,$*)
 	$(call pkg_patch,$*)
-	@$(MAKE_STAMP)
-
-%.buildsys: %.unpack
-	@$(call echo_action,Adding build system files,$*)
-	$(call pkg_buildsys,$*)
 	@$(MAKE_STAMP)
 
 %.unpack : %.check

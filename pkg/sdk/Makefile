@@ -42,10 +42,7 @@ sdk.check : sdk.download
 sdk.unpack : sdk.check
 	@$(MAKE_STAMP)
 
-sdk.buildsys : sdk.unpack
-	@$(MAKE_STAMP)
-
-sdk.patch : sdk.buildsys
+sdk.patch : sdk.unpack
 	@$(call echo_action,Applying SDK patches,$*)
 	$(call sdk_patch,$*)
 	@$(MAKE_STAMP)
@@ -60,6 +57,10 @@ sdk.install : sdk.build
 	@$(call echo_action,Deploying SDK artifacts,$*)
 	$(call sdk_deploy,$*)
 	@$(MAKE_STAMP)
+
+sdk.clean:
+	@$(call echo_action,Cleaning,$*)
+	@$(CLEAN_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
 
