@@ -25,6 +25,7 @@ ROS2_PATCH_DIRS=eclipse-iceoryx/iceoryx \
                 eclipse-cyclonedds/cyclonedds \
                 eProsima/Fast-DDS \
                 eProsima/foonathan_memory_vendor \
+                osrf/osrf_pycommon \
                 ros2/orocos_kdl_vendor \
                 ros2/pybind11_vendor \
                 ros2/ros2_tracing \
