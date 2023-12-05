@@ -45,6 +45,15 @@ distclean: clean
 clean: clean_buildstamps
 	for p in $(DEFAULT_BUILD); do rm -rf $(BUILD_DIR)/$$p; done;
 
+image: all
+	dd if=/dev/zero of=$(TOP_BUILDDIR)/ros2.img count=2048 bs=1M
+	mkfs.vfat -F 32 $(TOP_BUILDDIR)/ros2.img
+	mkdir -p $(TOP_BUILDDIR)/mount
+	fusefat -o rw+ $(TOP_BUILDDIR)/ros2.img $(TOP_BUILDDIR)/mount
+	find $(TOP_BUILDDIR)/export/deploy -type d -name '__pycache__' -exec rm -rf {} +
+	cp --no-preserve=ownership -r -L $(TOP_BUILDDIR)/export/deploy/* $(TOP_BUILDDIR)/mount/. 2>/dev/null
+	fusermount -u $(TOP_BUILDDIR)/mount
+
 info:
 	@$(ECHO) "DEFAULT_BUILD:      $(DEFAULT_BUILD)"
 	@$(ECHO) "WIND RELEASE:       $(WIND_RELEASE_ID)"
@@ -62,5 +71,4 @@ info:
 	@$(ECHO) "WIND_SDK_HOST_TOOLS:$(WIND_SDK_HOST_TOOLS)"
 	@$(ECHO) "3PP_DEPLOY_DIR:     $(3PP_DEPLOY_DIR)"
 	@$(ECHO) "3PP_DEVELOP_DIR:    $(3PP_DEVELOP_DIR)"
-
 
