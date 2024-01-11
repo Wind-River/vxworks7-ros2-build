@@ -25,7 +25,7 @@ export PATH := ${VIRTUAL_ENV}/bin:$(PATH)
 # export PS1 = "(cross) $(PS1)"
 
 PKG_PYTHON_BUILD_OPT ?= sdist bdist_wheel
-PKG_PYTHON_BUILD_VAR ?= CFLAGS="-I $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/include/python3.$(TGT_PYTHON_MINOR)" _PYTHON_HOST_PLATFORM=vxworks-x86_64 _PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__vxworks_vxworks PYTHONPATH=$(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/python3.$(TGT_PYTHON_MINOR)/:$(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/python3.$(TGT_PYTHON_MINOR)/site-packages
+PKG_PYTHON_BUILD_VAR ?= CFLAGS="-I $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/include/python3.$(TGT_PYTHON_MINOR)" _PYTHON_HOST_PLATFORM=vxworks-$(TGT_ARCH) _PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__vxworks_vxworks PYTHONPATH=$(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/python3.$(TGT_PYTHON_MINOR)/:$(WIND_CC_SYSROOT)/usr/3pp/develop/usr/lib/python3.$(TGT_PYTHON_MINOR)/site-packages
 
 
 define pkg_configure
