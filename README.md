@@ -69,7 +69,7 @@ Subject to the License, you can proceed to download the VxWorks SDK.
 * The build system will need to download source code from github.com and bitbucket.org.  A
   working Internet connection with access to both sites is required.
 
-For the standard build you must also have:
+For the standard build, you must also have:
 
 * Supported Linux host for both ROS 2 and VxWorks 7
    * ROS 2.0 Target Platforms
@@ -90,14 +90,16 @@ The following branches are active
 
 ## Directory Structure
 
-The project uses Makefile to invoke a ros2 and turtlebot3 `colcon`-based build, and also builds some dependencies.
+The project uses Makefile to invoke a ros2 and turtlebot3 `colcon`-based build and also builds some dependencies.
 
 ```bash
-├── Docker          - Dockefiles used to build ROS 2
-├── Makefile
 ├── pkg
 │   ├── asio        - Fast-RTPS dependency
+│   ├── colcon      - build dependency
 │   ├── eigen       - Eigen library
+│   ├── netifaces   - ROS 2 dependency   
+│   ├── python      - Python build
+│   ├── pyyaml      - ROS 2 dependency
 │   ├── ros2        - ROS 2 middleware
 │   ├── sdk         - various SDK improvements necessary to build ROS 2
 │   ├── tinyxml2    - Fast-RTPS dependency
@@ -105,7 +107,7 @@ The project uses Makefile to invoke a ros2 and turtlebot3 `colcon`-based build, 
 │   └── unixextra   - extra Unix functions necessary to build ROS 2
 ```
 
-After the build following artifacts will be created under `output` directory:
+After the build following artifacts will be created under the `output` directory:
 
 ```bash
 output
@@ -126,7 +128,7 @@ output
 
 ## ROS 2 VxWorks patches
 
-Patches are necessary to build ROS 2 for VxWorks, and are located in the separate [`layer` repository](https://github.com/Wind-River/vxworks7-layer-for-ros2)
+Patches are necessary to build ROS 2 for VxWorks and are located in the separate [`layer` repository](https://github.com/Wind-River/vxworks7-layer-for-ros2)
 The repository is cloned during the build to the *patches* dir.
 
 ```bash
@@ -187,14 +189,14 @@ See [Dockerfile](Docker/vxbuild/Dockerfile) for the complete list of environment
 
 ### Start build
 
-Inside the Docker container: check the `ROS_DISTRO` version, source the development environment and start build
+Inside the Docker container: check the `ROS_DISTRO` version, source the development environment, and start build
 
 ```bash
 wruser@vxros2:/work source /wrsdk/sdkenv.sh
 
 # check environment
 wruser@vxros2:/work$ make info
-DEFAULT_BUILD:      sdk unixextra asio tinyxml2 eigen ros2 pyyaml
+DEFAULT_BUILD:      sdk unixextra asio tinyxml2 eigen ros2 pyyaml netifaces
 WIND RELEASE:       23.09
 ROS DISTRO:         humble
 TARGET ARCH:        x86_64
@@ -247,7 +249,7 @@ sudo tunctl -u $USER -t tap0
 sudo ifconfig tap0 192.168.200.254 up
 ```
 
-VxWorks is tested with
+The VxWorks ROS 2 build is tested with
 
 ```bash
 $ sudo apt-get install qemu-system
@@ -277,7 +279,7 @@ $ sudo umount ~/tmp/mount
 
 ```bash
 sudo qemu-system-x86_64 -m 2G -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
--net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio \
+-net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial mon:stdio \
 -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" \
 -device ich9-ahci,id=ahci -drive file=./output/ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
@@ -515,7 +517,7 @@ wruser@vxros2:/work$ exit
 
 ```bash
 $ sudo qemu-system-x86_64 -m 2G -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
--net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial stdio \
+-net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial mon:stdio \
 -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" \
 -device ich9-ahci,id=ahci -drive file=./output/ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
