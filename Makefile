@@ -7,6 +7,9 @@ include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.vxworks.mk
 
+ifeq ($(ROS_DISTRO),)
+$(error Please export ROS_DISTRO)
+endif
 
 ifeq ($(WIND_RELEASE_ID),SR0640)
 DEFAULT_BUILD ?= sdk python unixextra asio tinyxml2 colcon ros2 turtlebot3
