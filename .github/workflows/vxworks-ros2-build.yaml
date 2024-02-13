@@ -2,6 +2,7 @@
 # It builds a ROS 2 VxWorks port against the VxWorks SDK 
 
 name: 'VxWorks ROS 2 build'
+run-name: Build ${{ inputs.ros_distro }} ${{ inputs.sdk }}
 
 on:
   workflow_dispatch:
