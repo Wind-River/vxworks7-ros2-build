@@ -98,6 +98,7 @@ ros2.configure: ros2.patch
 	sed -i "s+/work/buildspecs+$(BUILDSPECS_DIR)+g" $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin;
 	sed -i "s+/work/output+$(TOP_BUILDDIR)+g" $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin;
 	sed -i "s+/wrsdk/vxsdk/host+$(WIND_SDK_HOST_TOOLS)+g" $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin;
+	sed -i "s+/wrsdk/vxsdk/sysroot+$(WIND_SDK_CC_SYSROOT)+g" $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin;
 	@$(MAKE_STAMP)
 
 ros2.build: ros2.configure
