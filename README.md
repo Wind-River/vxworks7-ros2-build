@@ -6,15 +6,15 @@
 
 Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `iron` and the latest VxWorks SDK is `23.09`.
 
-|           | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
-|:---------:|:-------------|
-|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | |
-|**[`iron`](https://docs.ros.org/en/iron/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | |
-|**[`rolling`](https://docs.ros.org/en/rolling/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | |
+|           | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
+|:---------:|:-------------|:-------------|
+|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) |  [Raspberry Pi 4](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
+|**[`iron`](https://docs.ros.org/en/iron/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
+|**[`rolling`](https://docs.ros.org/en/rolling/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
 
 ## Prebuilt image
 
-The VxWorks ROS 2 `iron` and `humble` images are prebuilt and can be tested by downloading them from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml).
+The VxWorks ROS 2 `humble`, `iron`, and `rolling` images are prebuilt and can be tested by downloading them from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml).
 
 ## Overview
 
@@ -37,7 +37,7 @@ The default configuration build configuration will build a minimal set of
 ROS 2 packages are necessary for running the Turtlebot 3 and example Python and C++ applications.
 
 This configuration is suited for prototyping and personal
-use.  Please refer to the details of each individual ROS 2 package for details
+use.  Please refer to the details of each ROS 2 package for details
 on what requirements and terms of use they may have.
 
 *NOTE*: ROS 2 is not part of any VxWorks® product. If you need help,
@@ -172,6 +172,15 @@ mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
 tar -jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.13.2.tar.bz2 --strip 1
 ```
 
+The 23.09 SDK for Raspberry Pi 4 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
+
+```bash
+cd ~/Downloads 
+wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-raspberrypi4b-1.5.1.tar.bz2
+mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
+tar -jxvf ~/Downloads//wrsdk-vxworks7-raspberrypi4b-1.5.1.tar.bz2 --strip 1
+```
+
 ### Run Docker image
 
 ```bash
@@ -262,7 +271,7 @@ A filesystem with ROS 2 artifacts needs to be prepared to boot with VxWorks.
 
 ### Create an HDD image
 
-Run QEMU with a prebuilt VxWorks kernel and a created HDD image.
+Run x86_64 QEMU with a prebuilt VxWorks kernel and a created HDD image.
 
 ```bash
 # create a disk 2048MB
@@ -298,6 +307,15 @@ The HDD image will be mounted inside VxWorks under the `/usr` directory
 
 ```bash
 telnet 192.168.200.1
+```
+
+### Raspberry Pi 4
+
+Follow [README](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) to deploy VxWorks on the SDCard.
+Copy the content of the `deploy` directory to the '/usr' directory of the SDCard
+
+```bash
+$ sudo cp -r -L ./output/export/deploy/* /usr/.
 ```
 
 ### Run ROS 2 C++ examples
