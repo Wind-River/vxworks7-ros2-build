@@ -361,6 +361,28 @@ Process 'python3' (process Id = 0xffff800008269c00) launched.
 [INFO] [talker]: Publishing: "Hello World: 1"
 ```
 
+### Run `dummy_robot`, see [this](https://docs.ros.org/en/humble/Tutorials/Demos/dummy-robot-demo.html) tutorial for more details
+
+On the VxWorks side
+
+```bash
+[vxWorks *]# python3 ros2 launch dummy_robot_bringup dummy_robot_bringup_launch.py
+Launching process 'python3' ...
+```
+
+Start RViz on your Linux machine to see a robot arm moving, or run
+
+```bash
+~/ros2_native_ws$ ros2 topic list
+/joint_states
+/map
+/parameter_events
+/robot_description
+/scan
+/tf
+/tf_static
+```
+
 ## Build a simple CMake-based OSS project
 
 ```bash
