@@ -145,6 +145,11 @@ jobs:
           # Add user to kvm group
           sudo usermod -aG kvm $USER
 
+          # Setup tun
+          sudo apt-get install uml-utilities
+          sudo tunctl -u $USER -t tap0
+          sudo ifconfig tap0 192.168.200.254 up
+
           # Run tests
           echo "Running tests..."
           ./tests/main_script.exp
