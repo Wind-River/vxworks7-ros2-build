@@ -19,7 +19,10 @@ on:
         description: 'Run tests'
         required: false
         default: false
-
+      debug:
+        description: 'Debug'
+        required: false
+        default: false
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -27,6 +30,7 @@ jobs:
       ros_distro: ${{ github.event.inputs.ros_distro }}
       sdk: ${{ github.event.inputs.sdk }}
       test: ${{ github.event.inputs.test }}
+      debug: ${{ github.event.inputs.debug }}
     steps:
 
       - name: Checks-out a branch ${{ github.ref }}
@@ -122,6 +126,11 @@ jobs:
           path: |
             ${{ github.workspace }}/ros2.img
             ${{ github.workspace }}/vxWorks
+
+
+      - name: Setup tmate session
+        if: ${{ env.debug == 'true' }}
+        uses: mxschmitt/action-tmate@v3
 
       - name: Run Tests with QEMU and expect
         if: ${{ env.test == 'true' }}
