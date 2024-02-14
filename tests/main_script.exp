@@ -1,0 +1,101 @@
+#!/usr/bin/expect
+
+#
+# Runs ROS 2 tests on VxWorks
+#
+
+# Function to run all tests
+proc run_tests {test_scripts} {
+    foreach test_script $test_scripts {
+        source $test_script
+    }
+    foreach test_function [info procs] {
+        if {[string match "test*" $test_function]} {
+            $test_function
+            send "\r"
+            expect -exact {[vxWorks}
+        }
+    }
+}
+
+# Function to send Ctrl-A X to QEMU to exit
+proc quit_qemu {} {
+    send "\001x"
+}
+
+# Function to send Ctrl-C to a spawned process
+proc send_ctrl_c {} {
+    send "\003"
+}
+
+# Default path to ros2.img
+set default_img_path "./ros2.img"
+
+# Get the provided path or use the default
+set img_path $default_img_path
+if {[llength $argv] > 0} {
+    set img_path [lindex $argv 0]
+}
+
+# Get a list of all test scripts in the test directory
+set test_directory "tests"  ;# Update with your directory path
+set test_scripts [glob -nocomplain -directory $test_directory test*.exp]
+puts "Running: $test_scripts"
+
+# Set timeout for Expect commands (in seconds)
+set timeout 60
+
+# Execute the find command to locate the vxWorks kernel image file
+if {[info exists env(WIND_SDK_HOME)] && $env(WIND_SDK_HOME) ne ""} {
+    set vxWorks_kernel_path [exec find $env(WIND_SDK_HOME)/vxsdk/bsps/ -name "vxWorks" -print -quit]
+} else {
+    set vxWorks_kernel_path [exec find . -maxdepth 1 -name "vxWorks" -print -quit]
+}
+
+if { $vxWorks_kernel_path eq "" } {
+    puts "vxWorks kernel image file not found."
+    exit 1
+} else {
+    puts "vxWorks kernel image file found at: $vxWorks_kernel_path"
+}
+
+# Spawn the QEMU process
+spawn qemu-system-x86_64 -m 2G -kernel $vxWorks_kernel_path -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial mon:stdio -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" -device ich9-ahci,id=ahci -drive file=$img_path,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+
+# Expect QEMU to start
+expect {
+    -glob "Instantiating*" {
+        # QEMU started successfully, wait for the -> symbols
+        expect {
+            -re {->} {
+                # -> symbol encountered, initiate QEMU exit
+                send "cmd\r"
+                expect -exact {[vxWorks}
+                
+                # Call the run_tests function with the list of test scripts
+                run_tests $test_scripts
+ 
+                puts "\nAll tests Done, quitting QEMU"
+                quit_qemu
+            }
+            timeout {
+                # Handle timeout if -> symbols are not encountered within the specified timeout
+                # You can add specific actions or error handling here
+                puts "Timeout: Did not receive -> symbols."
+                exit 1 ;# Exit the script if QEMU didn't reach the expected state within the timeout
+            }
+        }
+    }
+    timeout {
+        # Handle timeout if QEMU doesn't start within the specified timeout
+        # Add actions as needed
+        puts "Timeout: QEMU did not start."
+    }
+}
+
+# Wait for QEMU to finish (optional)
+wait
+
+# Exit Expect script
+exit
+
