@@ -1,0 +1,9 @@
+proc test-timer_lambda_py {} {
+    send "python3 ros2 run examples_rclcpp_minimal_timer timer_lambda\r"
+    expect -exact {Hello, world!}
+    expect -exact {Hello, world!}
+    expect -exact {Hello, world!}
+    expect -exact {Hello, world!}
+    expect -exact {Hello, world!}
+    send_ctrl_c
+}

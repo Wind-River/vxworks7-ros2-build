@@ -15,12 +15,22 @@ on:
         description: 'SDK Name'
         required: true
         default: 'wrsdk-vxworks7-qemu-1.13.2'
+      test:
+        description: 'Run tests'
+        required: false
+        default: false
+      debug:
+        description: 'Debug'
+        required: false
+        default: false
 jobs:
   build:
     runs-on: ubuntu-22.04
     env:
       ros_distro: ${{ github.event.inputs.ros_distro }}
       sdk: ${{ github.event.inputs.sdk }}
+      test: ${{ github.event.inputs.test }}
+      debug: ${{ github.event.inputs.debug }}
     steps:
 
       - name: Checks-out a branch ${{ github.ref }}
@@ -116,3 +126,30 @@ jobs:
           path: |
             ${{ github.workspace }}/ros2.img
             ${{ github.workspace }}/vxWorks
+
+
+      - name: Setup tmate session
+        if: ${{ env.debug == 'true' }}
+        uses: mxschmitt/action-tmate@v3
+
+      - name: Run Tests with QEMU and expect
+        if: ${{ env.test == 'true' }}
+        run: |
+          # Change directory to GitHub workspace
+          cd ${{ github.workspace }}
+
+          # Update apt and install dependencies
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 expect
+
+          # Add user to kvm group
+          sudo usermod -aG kvm $USER
+
+          # Setup tun
+          sudo apt-get install uml-utilities
+          sudo tunctl -u $USER -t tap0
+          sudo ifconfig tap0 192.168.200.254 up
+
+          # Run tests
+          echo "Running tests..."
+          ./tests/main_script.exp
