@@ -8,9 +8,9 @@ Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, se
 
 |           | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
 |:---------:|:-------------|:-------------|
-|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) |  [Raspberry Pi 4](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
-|**[`iron`](https://docs.ros.org/en/iron/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
-|**[`rolling`](https://docs.ros.org/en/rolling/)**| [QEMU x86_64](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
+|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) |  [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
+|**[`iron`](https://docs.ros.org/en/iron/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
+|**[`rolling`](https://docs.ros.org/en/rolling/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
 
 ## Prebuilt image
 
@@ -311,7 +311,7 @@ telnet 192.168.200.1
 
 ### Raspberry Pi 4
 
-Follow [README](https://labs.windriver.com/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) to deploy VxWorks on the SDCard.
+Follow [README](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) to deploy VxWorks on the SDCard.
 Copy the content of the `deploy` directory to the '/usr' directory of the SDCard
 
 ```bash
