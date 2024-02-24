@@ -64,7 +64,7 @@ define sdk_patch
 endef
 
 define sdk_deploy
-	cp $(WIND_CC_SYSROOT)/usr/lib/common/lib*.so.1 $(DEPLOY_DIR)/lib/. ; \
+	cp $(WIND_CC_SYSROOT)/usr/lib/common/lib*.so.[0-9] $(DEPLOY_DIR)/lib/. ; \
 	cp $(3PP_DEVELOP_DIR)/usr/bin/* $(DEPLOY_DIR)/bin/. ; \
 	cp $(3PP_DEVELOP_DIR)/usr/lib/lib*.so* $(DEPLOY_DIR)/lib/. ; \
 	cp -r $(3PP_DEVELOP_DIR)/usr/lib/python3.* $(DEPLOY_DIR)/lib/.
