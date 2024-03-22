@@ -72,7 +72,8 @@ ROS2_PYTHON_TOOLS=ros2action ros2cli ros2component ros2doctor \
 	ros2run ros2service ros2topic
 
 PKG_PKGS_UP_TO+=$(ROS2_EXAMPLES) \
-	$(ROS2_PYTHON_TOOLS)
+	$(ROS2_PYTHON_TOOLS) \
+	sros2
 
 #	pendulum_control
 
