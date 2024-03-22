@@ -20,7 +20,7 @@ __python_defs = TRUE
 
 include $(WIND_USR_MK)/defs.vxworks.mk
 
-export VIRTUAL_ENV := $(WIND_SDK_HOME)/vxsdk/host/x86_64-linux/cross_venv/cross
+export VIRTUAL_ENV := $(WIND_SDK_HOST_TOOLS)/x86_64-linux/cross_venv/cross
 export PATH := ${VIRTUAL_ENV}/bin:$(PATH)
 # export PS1 = "(cross) $(PS1)"
 
