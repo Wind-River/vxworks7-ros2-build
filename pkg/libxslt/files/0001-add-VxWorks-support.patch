@@ -1,0 +1,34 @@
+From 78c8dc843c8b533473762865a6d994edc3d6a6bc Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 21 Mar 2024 15:50:26 +0100
+Subject: [PATCH] add VxWorks support
+
+---
+ CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a18f7402..7bc57548 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -43,7 +43,7 @@ option(LIBXSLT_WITH_CRYPTO "Add crypto support to exslt" OFF)
+ option(LIBXSLT_WITH_MODULES "Add the module support" ON)
+ option(LIBXSLT_WITH_PROFILER "Add the profiling support" ON)
+ option(LIBXSLT_WITH_PYTHON "Build Python bindings" ON)
+-option(LIBXSLT_WITH_TESTS "Build tests" ON)
++option(LIBXSLT_WITH_TESTS "Build tests" OFF)
+ option(LIBXSLT_WITH_THREADS "Add multithread support" ON)
+ set(LIBXSLT_WITH_TRIO OFF)
+ option(LIBXSLT_WITH_XSLT_DEBUG "Add the debugging code" ON)
+@@ -211,7 +211,7 @@ if(CMAKE_C_COMPILER_ID MATCHES "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
+ -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline \
+ -Wredundant-decls -Wno-long-long -Wno-format-extra-args")
+ 
+-	if(BUILD_SHARED_LIBS AND UNIX AND NOT APPLE)
++	if(BUILD_SHARED_LIBS AND UNIX AND NOT APPLE AND NOT VXWORKS)
+ 		check_linker_flag(C "LINKER:--undefined-version" FLAG_UNDEFINED_VERSION)
+ 		if (FLAG_UNDEFINED_VERSION)
+ 			target_link_options(LibXslt PRIVATE "LINKER:--undefined-version")
+-- 
+2.34.1
+
