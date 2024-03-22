@@ -1,0 +1,33 @@
+From 7d311da3ed8efe02619692843f269625ac23f8b3 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 21 Mar 2024 23:56:18 +0100
+Subject: [PATCH] add VxWorks support
+
+---
+ setupinfo.py | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/setupinfo.py b/setupinfo.py
+index d111128a..8501e02b 100644
+--- a/setupinfo.py
++++ b/setupinfo.py
+@@ -263,11 +263,11 @@ def print_libxml_error():
+ 
+ def libraries():
+     standard_libs = []
+-    if 'linux' in sys.platform:
+-        standard_libs.append('rt')
+-    if not OPTION_BUILD_LIBXML2XSLT:
+-        standard_libs.append('z')
+-    standard_libs.append('m')
++    #if 'linux' in sys.platform:
++    #    standard_libs.append('rt')
++    #if not OPTION_BUILD_LIBXML2XSLT:
++    #    standard_libs.append('z')
++    #standard_libs.append('m')
+ 
+     if sys.platform in ('win32',):
+         libs = ['libxslt', 'libexslt', 'libxml2', 'iconv']
+-- 
+2.34.1
+
