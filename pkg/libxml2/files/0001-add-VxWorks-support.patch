@@ -1,0 +1,57 @@
+From d459511ee0a9feee90ea9e80f1ca4ba9175dfa63 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 21 Mar 2024 15:05:44 +0100
+Subject: [PATCH] add VxWorks support
+
+---
+ CMakeLists.txt | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e68f3684..ba74e862 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -32,11 +32,11 @@ set(LIBXML2_WITH_EXPR ON)
+ option(LIBXML2_WITH_FTP "Add the FTP support" OFF)
+ option(LIBXML2_WITH_HTML "Add the HTML support" ON)
+ option(LIBXML2_WITH_HTTP "Add the HTTP support" ON)
+-option(LIBXML2_WITH_ICONV "Add ICONV support" ON)
++option(LIBXML2_WITH_ICONV "Add ICONV support" OFF)
+ option(LIBXML2_WITH_ICU "Add ICU support" OFF)
+ option(LIBXML2_WITH_ISO8859X "Add ISO8859X support if no iconv" ON)
+ option(LIBXML2_WITH_LEGACY "Add deprecated APIs for compatibility" OFF)
+-option(LIBXML2_WITH_LZMA "Use liblzma" ON)
++option(LIBXML2_WITH_LZMA "Use liblzma" OFF)
+ option(LIBXML2_WITH_MEM_DEBUG "Add the memory debugging module" OFF)
+ option(LIBXML2_WITH_MODULES "Add the dynamic modules support" ON)
+ option(LIBXML2_WITH_OUTPUT "Add the serialization support" ON)
+@@ -49,7 +49,7 @@ option(LIBXML2_WITH_REGEXPS "Add Regular Expressions support" ON)
+ option(LIBXML2_WITH_SAX1 "Add the older SAX1 interface" ON)
+ option(LIBXML2_WITH_SCHEMAS "Add Relax-NG and Schemas support" ON)
+ option(LIBXML2_WITH_SCHEMATRON "Add Schematron support" ON)
+-option(LIBXML2_WITH_TESTS "Build tests" ON)
++option(LIBXML2_WITH_TESTS "Build tests" OFF)
+ option(LIBXML2_WITH_THREADS "Add multithread support" ON)
+ option(LIBXML2_WITH_THREAD_ALLOC "Add per-thread memory" OFF)
+ option(LIBXML2_WITH_TLS "Enable thread-local storage" OFF)
+@@ -341,7 +341,7 @@ target_include_directories(
+ )
+ 
+ if(LIBXML2_WITH_MODULES)
+-	if(HAVE_DLOPEN)
++	if(HAVE_DLOPEN AND NOT VXWORKS)
+ 		target_link_libraries(LibXml2 PRIVATE dl)
+ 		set(MODULE_PLATFORM_LIBS "-ldl")
+ 	endif()
+@@ -422,7 +422,7 @@ if(CMAKE_C_COMPILER_ID MATCHES "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
+ -Wstrict-prototypes -Wmissing-prototypes \
+ -Wno-long-long -Wno-format-extra-args")
+ 
+-	if(BUILD_SHARED_LIBS AND UNIX AND NOT APPLE)
++if(BUILD_SHARED_LIBS AND UNIX AND NOT APPLE AND NOT VXWORKS)
+ 		check_linker_flag(C "LINKER:--undefined-version" FLAG_UNDEFINED_VERSION)
+ 		if (FLAG_UNDEFINED_VERSION)
+ 			target_link_options(LibXml2 PRIVATE "LINKER:--undefined-version")
+-- 
+2.34.1
+
