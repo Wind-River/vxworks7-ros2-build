@@ -444,8 +444,20 @@ Native ROS 2 is used mostly for fast prototyping during ROS 2 development. Use t
 $ cd vxworks7-ros2-build
 $ docker run -ti -h ros2native -v $PWD:/work vxros2build:humble
 wruser@ros2native:/work$ mkdir -p ros2_native/src && cd ros2_native
-wruser@ros2native:/work/ros2_native$ vcs import src < /work/build/ros2/ros2_ws/ros2.repos
-wruser@ros2native:/work/ros2_native$ colcon build --merge-install --cmake-force-configure --packages-up-to-regex examples_rcl* ros2action ros2component ros2node ros2pkg ros2service ros2topic ros2cli ros2lifecycle ros2multicast ros2param ros2run demo_* dummy_robot launch --cmake-args -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_TESTING:BOOL=OFF
+wruser@ros2native:/work/ros2_native$ vcs import src < /work/output/build/ros2/ros2_ws/ros2.repos
+wruser@ros2native:/work/ros2_native$ colcon build --merge-install --cmake-force-configure --packages-up-to-regex \
+   examples_rclcpp_minimal_timer \
+   examples_rclcpp_minimal_client \
+   examples_rclcpp_minimal_service \
+   examples_rclcpp_minimal_publisher \
+   examples_rclpy_* \
+   demo_nodes_cpp \
+   demo_nodes_py \
+   dummy_robot \
+   ros2action ros2cli ros2component ros2doctor \
+   ros2interface ros2lifecycle ros2multicast ros2node ros2param ros2pkg \
+   ros2run ros2service ros2topic sros2 \
+   --cmake-args -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_TESTING:BOOL=OFF -DSECURITY=ON
 
 wruser@ros2native:/work/ros2_native/install$ source setup.bash
 wruser@ros2native:/work/ros2_native/install$ ros2 run demo_nodes_py talker
