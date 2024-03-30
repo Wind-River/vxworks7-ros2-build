@@ -36,6 +36,7 @@ PKG_SRC_DIR = ${PKG_NAME}-${PKG_NAME}-$(PKG_VER)
 lxml.uninstall_cython : lxml.patch
 	rm -rf $(WIND_SDK_HOST_TOOLS)/x86_64-linux/lib/python3.$(TGT_PYTHON_MINOR)/site-packages/Cython*
 	pip install -r $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/requirements.txt
+	@$(MAKE_STAMP)
 
 CONFIGURE_DEPENDS = lxml.uninstall_cython
 
