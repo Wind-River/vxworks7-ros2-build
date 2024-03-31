@@ -6,4 +6,6 @@ proc test-timer_lambda_py {} {
     expect -exact {Hello, world!}
     expect -exact {Hello, world!}
     send_ctrl_c
+    expect -exact {[vxWorks}
+    send "rtp delete /usr/lib/examples_rclcpp_minimal_timer/timer_lambda"
 }
