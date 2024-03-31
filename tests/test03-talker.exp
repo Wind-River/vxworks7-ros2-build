@@ -1,0 +1,39 @@
+proc test-talker {} {
+    send "/usr/lib/demo_nodes_cpp/talker\r"
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+
+    spawn telnet 192.168.200.1
+    set telnet_id $spawn_id
+    puts "telnet_id: $telnet_id"
+    # Expect telnet to start
+    expect {
+        -glob "Escape character*" {
+            # telnet started successfully, wait for the -> symbols
+            expect {
+                -re {->} {
+                    # -> symbol encountered, initiate telnet exit
+                    send -i $telnet_id "cmd\r"
+                    expect -i $telnet_id -exact {[vxWorks}
+                    send -i $telnet_id "/usr/lib/demo_nodes_cpp/listener\r"
+                    expect -i $telnet_id -exact {I heard}
+                    expect -i $telnet_id -exact {I heard}
+                    expect -i $telnet_id -exact {I heard}
+                    expect -i $telnet_id -exact {I heard}
+                    expect -i $telnet_id -exact {I heard}
+                    send -i $telnet_id "\003"
+                    send -i $telnet_id "exit"
+                }
+            }
+        }
+        timeout {
+            # Handle timeout if telnet doesn't start within the specified timeout
+            # Add actions as needed
+            puts "Timeout: telnet did not start."
+        }
+    }
+    send_ctrl_c
+}
