@@ -63,6 +63,8 @@ info:
 	@$(ECHO) "ROS DISTRO:         $(ROS_DISTRO)"
 	@$(ECHO) "TARGET ARCH:        $(TGT_ARCH)"
 	@$(ECHO) "TARGET PYTHON:      Python3.$(TGT_PYTHON_MINOR)"
+	@$(ECHO) "HOST PYTHON:        `which python3`"
+	@$(ECHO) "CMAKE:              `which cmake`"
 	@$(ECHO) "CURDIR:             $(CURDIR)"
 	@$(ECHO) "DOWNLOADS_DIR:      $(DOWNLOADS_DIR)"
 	@$(ECHO) "PACKAGE_DIR:        $(PACKAGE_DIR)"
