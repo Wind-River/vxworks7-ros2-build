@@ -4,13 +4,13 @@
 
 ## VxWorks SDK and ROS 2 support
 
-Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `iron` and the latest VxWorks SDK is `23.09`.
+Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `iron` and the latest VxWorks SDK is `24.03`.
 
-|           | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
-|:---------:|:-------------|:-------------|
-|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) |  [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
-|**[`iron`](https://docs.ros.org/en/iron/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
-|**[`rolling`](https://docs.ros.org/en/rolling/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
+|           | [24.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
+|:---------:|:-------------|:-------------|:-------------|
+|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_qemu.html) | [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) |  [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
+|**[`iron`](https://docs.ros.org/en/iron/)**| | [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
+|**[`rolling`](https://docs.ros.org/en/rolling/)**| | [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
 
 ## Prebuilt image
 
@@ -64,7 +64,7 @@ Subject to the License, you can proceed to download the VxWorks SDK.
 ## Prerequisite(s)
 
 * Download a VxWorks Software Development Kit from Wind River Labs
-   * [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43)
+   * [24.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43)
 
 * The build system will need to download source code from github.com and bitbucket.org.  A
   working Internet connection with access to both sites is required.
@@ -74,8 +74,8 @@ For the standard build, you must also have:
 * Supported Linux host for both ROS 2 and VxWorks 7
    * ROS 2.0 Target Platforms
       * http://www.ros.org/reps/rep-2000.html
-   * VxWorks 7 23.09
-      * https://docs.windriver.com/bundle/vxworks_release_notes_23_09/page/index-release_notes.html
+   * VxWorks 7 24.03
+      * https://docs.windriver.com/bundle/vxworks_release_notes_24_03/page/index-release_notes.html
    * For ROS 2 Humble Hawksbill, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
    * For ROS 2 Iron Irwini, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
    * For ROS 2 Rolling Ridley, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
@@ -86,7 +86,7 @@ For the standard build, you must also have:
 
 The following branches are active
 
-- [x] `master` - builds ROS2 `humble`, `iron`, and `rolling` against VxWorks `23.09` SDK depending on what VxWorks SDK and what Docker image are used
+- [x] `master` - builds ROS2 `humble`, `iron`, and `rolling` against VxWorks `24.03` SDK depending on what VxWorks SDK and what Docker image are used
 
 ## Directory Structure
 
@@ -163,22 +163,22 @@ docker build --no-cache --build-arg ROS_DISTRO=rolling -t vxros2build:rolling Do
 
 ### Download and extract the VxWorks SDK
 
-The 23.09 SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
+The 24.03 SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
 
 ```bash
 cd ~/Downloads 
-wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.13.2.tar.bz2
+wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.14.tar.bz2
 mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
-tar -jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.13.2.tar.bz2 --strip 1
+tar -jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.14.tar.bz2 --strip 1
 ```
 
-The 23.09 SDK for Raspberry Pi 4 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
+The 24.03 SDK for Raspberry Pi 4 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
 
 ```bash
 cd ~/Downloads 
-wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-raspberrypi4b-1.5.1.tar.bz2
+wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-raspberrypi4b-1.6.tar.bz2
 mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
-tar -jxvf ~/Downloads//wrsdk-vxworks7-raspberrypi4b-1.5.1.tar.bz2 --strip 1
+tar -jxvf ~/Downloads//wrsdk-vxworks7-raspberrypi4b-1.6.tar.bz2 --strip 1
 ```
 
 ### Run Docker image
@@ -205,11 +205,13 @@ wruser@vxros2:/work source /wrsdk/sdkenv.sh
 
 # check environment
 wruser@vxros2:/work$ make info
-DEFAULT_BUILD:      sdk unixextra asio tinyxml2 eigen ros2 pyyaml netifaces
-WIND RELEASE:       23.09
+DEFAULT_BUILD:      sdk unixextra asio tinyxml2 eigen libxml2 libxslt ros2 pyyaml netifaces lxml
+WIND RELEASE:       24.03
 ROS DISTRO:         humble
 TARGET ARCH:        x86_64
 TARGET PYTHON:      Python3.9
+HOST PYTHON:        /wrsdk/vxsdk/host/x86_64-linux/bin/python3
+CMAKE:              /wrsdk/vxsdk/host/x86_64-linux/bin/cmake
 CURDIR:             /work
 DOWNLOADS_DIR:      /work/output/downloads
 PACKAGE_DIR:        /work/pkg
