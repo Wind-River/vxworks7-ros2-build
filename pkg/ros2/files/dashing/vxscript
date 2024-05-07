@@ -1,6 +1,6 @@
 symlink "/ata4","/usr"
 shellConfigDefaultValueSet "VXE_PATH", "/usr/bin"
 rtpSpStackSize=0x100000
-taskSpawn 0,50,0,0x20000,setenv,"LD_LIBRARY_PATH","/usr/lib"
-taskSpawn 0,50,0,0x20000,setenv,"AMENT_PREFIX_PATH","/usr"
+putgenv "LD_LIBRARY_PATH=/usr/lib"
+putgenv "AMENT_PREFIX_PATH=/usr"
 cd "/usr/bin"
