@@ -1,0 +1,6 @@
+proc test-timer_lambda {} {
+    send "set env\r"
+    expect -exact {LD_LIBRARY_PATH}
+    expect -exact {AMENT_PREFIX_PATH}
+    expect -exact {ROS_LOG_DIR}
+}
