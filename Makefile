@@ -61,6 +61,7 @@ info:
 	@$(ECHO) "DEFAULT_BUILD:      $(DEFAULT_BUILD)"
 	@$(ECHO) "WIND RELEASE:       $(WIND_RELEASE_ID)"
 	@$(ECHO) "ROS DISTRO:         $(ROS_DISTRO)"
+	@$(ECHO) "TARGET BSP:         $(TGT_BSP)"
 	@$(ECHO) "TARGET ARCH:        $(TGT_ARCH)"
 	@$(ECHO) "TARGET PYTHON:      Python3.$(TGT_PYTHON_MINOR)"
 	@$(ECHO) "HOST PYTHON:        `which python3`"

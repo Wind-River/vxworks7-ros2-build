@@ -34,6 +34,7 @@ endif
 ## Add missing variablse from SDK
 export TOOL=llvm
 export TGT_ARCH=$(shell wr-cc -print-target-triple -c README.md | cut -d '-' -f 1 | sed -e 's/arm64/aarch64/g')
+export TGT_BSP=$(shell grep _WRS_CONFIG_BSP $(WIND_CC_SYSROOT)/h/config/autoconf.h | grep -Ev '_BASED|_ARM|_CORE' | head -n1 | cut -d '_' -f 5-6)
 
 3PP_DIR?=$(WIND_CC_SYSROOT)/usr/3pp
 3PP_DEVELOP_DIR=$(3PP_DIR)/develop
