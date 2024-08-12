@@ -43,6 +43,7 @@ ROS_IGNORE_DIRS=ros-visualization \
                 ros2/rmw_connextdds \
                 ament/ament_lint \
                 ament/uncrustify_vendor \
+		ament/google_benchmark_vendor \
 		ros2/mimick_vendor \
 		ros2/performance_test_fixture \
 		eclipse-iceoryx
