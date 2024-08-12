@@ -5,7 +5,7 @@
             "install-base": "/work/output/export/root",
             "cmake-force-configure": true,
             "cmake-args": [
-                "-DCMAKE_BUILD_TYPE:STRING=Debug",
+                "-DCMAKE_BUILD_TYPE:STRING=Release",
                 "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON",
                 "-DCMAKE_TOOLCHAIN_FILE=/work/buildspecs/cmake/toolchain.cmake",
                 "-DCMAKE_MAKE_PROGRAM:FILEPATH=/wrsdk/vxsdk/host/x86_64-linux/bin/make",
