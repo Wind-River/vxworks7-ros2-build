@@ -1,6 +1,20 @@
 {
   "sdks": [
     {
+      "name": "wrsdk-vxworks7-qemu-1.14",
+      "version": 24.03,
+      "url": "https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.14.tar.bz2",
+      "script": "./sdkenv.sh",
+      "image": "./vxsdk/bsps/*/vxWorks"
+    },
+    {
+      "name": "wrsdk-vxworks7-raspberrypi4b-1.6",
+      "version": 24.03,
+      "url": "https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-raspberrypi4b-1.6.tar.bz2",
+      "script": "./sdkenv.sh",
+      "image": "./vxsdk/bsps/*/vxWorks"
+    },
+    {
       "name": "wrsdk-vxworks7-qemu-1.13.2",
       "version": 23.09,
       "url": "https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.13.2.tar.bz2",
