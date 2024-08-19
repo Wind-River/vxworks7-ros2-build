@@ -1,5 +1,5 @@
 xxx="/usr";iosViewPrune iosViewCurrent(), xxx, strlen(xxx)+1
-symlink "/ata4","/usr"
+symlink "/ata0","/usr"
 shellConfigDefaultValueSet "VXE_PATH", "/usr/bin"
 rtpSpStackSize=0x100000
 putgenv "LD_LIBRARY_PATH=/usr/lib"
