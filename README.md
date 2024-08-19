@@ -289,9 +289,9 @@ $ sudo umount ~/tmp/mount
 ```
 
 ```bash
-sudo qemu-system-x86_64 -m 2G -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
+sudo qemu-system-x86_64 -m 2G -machine q35 -cpu Nehalem -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
 -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial mon:stdio \
--append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" \
+-append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=194.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata0/vxscript" \
 -device ich9-ahci,id=ahci -drive file=./output/ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
 
@@ -379,6 +379,42 @@ Process 'python3' (process Id = 0xffff800008269c00) launched.
 
 [INFO] [talker]: Publishing: "Hello World: 0"
 [INFO] [talker]: Publishing: "Hello World: 1"
+```
+
+### Run SROS2 examples
+
+Use Docker image to create keystore, keys, and certificates for the talker and listener nodes.
+
+```bash
+source /opt/ros/humble/setup.sh
+
+ros2 security create_keystore demo_keystore
+ros2 security create_enclave demo_keystore /talker_listener/talker
+ros2 security create_enclave demo_keystore /talker_listener/listener
+```
+
+Copy directory `demo_keystore` to the `deploy`, and create `ros2.img`
+
+```bash
+cp demo_keystore output/deploy/.
+make image
+```
+
+Start QEMU, enable security and run SROS2 example.
+
+```bash
+sudo qemu-system-x86_64 -m 2G -machine q35 -cpu Nehalem -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
+-net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial mon:stdio \
+-append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=194.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata0/vxscript" \
+-device ich9-ahci,id=ahci -drive file=./output/ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
+
+-> cmd
+[vxWorks *]# set env "ROS_SECURITY_ENABLE=true"
+
+[vxWorks *]# python3 ros2 run demo_nodes_cpp talker --ros-args --enclave /talker_listener/talker
+[INFO] [1724090590.900000000] [rcl]: Found security directory: /usr/demo_keystore/enclaves/talker_listener/talker
+[INFO] [1724090592.800000000] [talker]: Publishing: 'Hello World: 1'
+[INFO] [1724090593.800000000] [talker]: Publishing: 'Hello World: 2'
 ```
 
 ### Run `dummy_robot`, see [this](https://docs.ros.org/en/humble/Tutorials/Demos/dummy-robot-demo.html) tutorial for more details
@@ -570,9 +606,9 @@ wruser@vxros2:/work$ exit
 3. Create `ros2.img` as described [here](#create-an-hdd-image) and start QEMU
 
 ```bash
-$ sudo qemu-system-x86_64 -m 2G -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
+$ sudo qemu-system-x86_64 -m 2G -machine q35 -cpu Nehalem -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
 -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial mon:stdio \
--append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata4/vxscript" \
+-append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata0/vxscript" \
 -device ich9-ahci,id=ahci -drive file=./output/ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
 

@@ -14,7 +14,7 @@ on:
       sdk:
         description: 'SDK Name'
         required: true
-        default: 'wrsdk-vxworks7-qemu-1.13.2'
+        default: 'wrsdk-vxworks7-qemu-1.14'
       test:
         description: 'Run tests'
         required: false
