@@ -23,7 +23,8 @@
 
 PKG_PKGS_UP_TO=hls_lfcd_lds_driver \
               dynamixel_sdk \
-	      turtlebot3_node
+	      turtlebot3_node \
+	      turtlebot3_example
 
 PKG_PATCH_DIRS=utils/DynamixelSDK \
                utils/hls_lfcd_lds_driver \
