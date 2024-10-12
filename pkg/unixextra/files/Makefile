@@ -79,6 +79,10 @@ ifneq (,$(findstring pthread_getname.c,$(SOURCES)))
 	install -d $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
 	install -m 644 pthread.h $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
 endif
+ifneq (,$(findstring posix_fallocate.c,$(SOURCES)))
+	install -d $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
+	install -m 644 fcntl.h $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
+endif
 	install -d $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)
 	install -m 755 $(TARGET).a $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)
 	install -m 755 $(TARGET).so* $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)

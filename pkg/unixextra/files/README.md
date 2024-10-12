@@ -11,6 +11,6 @@ $ make install DESTDIR=~/tmp
 Also individual files can be added in the library. It is done since some files got merged in the VxWorks sources
 
 ```bash
-$ make SOURCES=fmatch.c
-$ make install SOURCES=fmatch.c DESTDIR=~/tmp
+$ make SOURCES="posix_fallocate.c" TESTS="tests/posix_fallocate_test"
+$ make install SOURCES="posix_fallocate.c" DESTDIR=~/tmp
 ```
