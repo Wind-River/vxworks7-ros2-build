@@ -291,7 +291,7 @@ $ sudo umount ~/tmp/mount
 ```bash
 sudo qemu-system-x86_64 -m 2G -machine q35 -cpu Nehalem -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
 -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial mon:stdio \
--append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=194.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata0/vxscript" \
+-append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata0/vxscript" \
 -device ich9-ahci,id=ahci -drive file=./output/ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 ```
 
@@ -405,7 +405,7 @@ Start QEMU, enable security and run SROS2 example.
 ```bash
 sudo qemu-system-x86_64 -m 2G -machine q35 -cpu Nehalem -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
 -net nic -net tap,ifname=tap0,script=no,downscript=no -display none -serial mon:stdio \
--append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=194.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata0/vxscript" \
+-append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata0/vxscript" \
 -device ich9-ahci,id=ahci -drive file=./output/ros2.img,if=none,id=ros2disk,format=raw -device ide-hd,drive=ros2disk,bus=ahci.0
 
 -> cmd
