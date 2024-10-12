@@ -82,7 +82,8 @@ define sdk_patch
 endef
 
 define sdk_install
-	pip3 install -r files/$(WIND_RELEASE_ID)/requirements.txt
+	pip3 install -r files/$(WIND_RELEASE_ID)/requirements.txt ;
+	export SSL_CERT_FILE=$(shell python3 -m certifi) ;
 
 	if [ ! -f "$(VIRTUAL_ENV)/bin/activate" ]; then \
 		echo "setup 'crossenv'."; \

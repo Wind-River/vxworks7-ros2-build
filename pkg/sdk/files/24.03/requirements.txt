@@ -1,3 +1,9 @@
 empy==3.3.4
 crossenv
 wheel
+numpy
+lark-parser
+vcstool
+colcon-common-extensions
+colcon-mixin
+certifi

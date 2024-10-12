@@ -85,13 +85,6 @@ ros2.configure: ros2.patch
 	for i in $(ROS_IGNORE_DIRS); do \
 		touch $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/$$i/COLCON_IGNORE; \
 	done;
-	pip3 install numpy;
-	pip3 install lark-parser;
-	pip3 install vcstool;
-	pip3 install colcon-common-extensions;
-	pip3 install colcon-mixin;
-	pip3 install certifi;
-	export SSL_CERT_FILE=$(shell python3 -m certifi);
 	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default;
 	cp files/$(ROS_DISTRO)/*.mixin $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/.;
 	sed -i "s/-3./-3$(TGT_PYTHON_MINOR)/g" $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin;
