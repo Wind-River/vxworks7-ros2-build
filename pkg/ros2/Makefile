@@ -105,14 +105,14 @@ ros2.build: ros2.configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
 	export COLCON_HOME=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon; \
-	colcon build --mixin vxworks --packages-up-to-regex $(PKG_PKGS_UP_TO)
+	colcon build --mixin vxworks --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO)
 	@$(MAKE_STAMP)
 
 ros2.install : ros2.build
 	@$(call echo_action,Installing runtime dependencies,$*)
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) setuptools
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) catkin_pkg
-	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) empy
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) empy==3.3.4
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyelftools
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) packaging
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) lark-parser
