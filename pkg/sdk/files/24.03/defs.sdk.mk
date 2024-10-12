@@ -23,33 +23,73 @@ ifeq ($(__sdk_defs),)
 __sdk_defs = TRUE
 
 include $(WIND_USR_MK)/defs.packages.mk
+include $(WIND_USR_MK)/defs.python.mk
 
 define sdk_fix
 	if [ ! -f $(WIND_CC_SYSROOT)/mk/defs.autotools.mk ]; then \
+		echo "copying 'defs.autotools.mk'."; \
 		cp files/defs.autotools.mk $(WIND_CC_SYSROOT)/mk/.; \
+	else \
+		echo "'defs.autotools.mk' already exists, do not copy."; \
 	fi
 endef
 
 define vxworks_fix
-	sed -i 's/STATUS/int/g' `find $(WIND_CC_SYSROOT)/usr/h -name stat.h`
-	sed -i 's/u_int/unsigned int/g'  $(WIND_CC_SYSROOT)/usr/h/public/net/ifaddrs.h
+        if grep -q 'STATUS' `find $(WIND_CC_SYSROOT)/usr/h -name stat.h`; then \
+                echo "'STATUS' found, replacing it with 'int'"; \
+                sed -i 's/STATUS/int/g' `find $(WIND_CC_SYSROOT)/usr/h -name stat.h`; \
+        else \
+                echo "'STATUS' not found, no changes needed."; \
+        fi
+
+        if grep -q 'u_int' $(WIND_CC_SYSROOT)/usr/h/public/net/ifaddrs.h; then \
+                echo "'u_int' found, replacing it with unsigned 'int'";  \
+                sed -i 's/u_int/unsigned int/g' $(WIND_CC_SYSROOT)/usr/h/public/net/ifaddrs.h; \
+        else \
+                echo "'u_int' not found, no changes needed."; \
+        fi
 endef
 
 define python_fix
-	ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.$(TGT_PYTHON_MINOR) $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 ; \
-	ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.$(TGT_PYTHON_MINOR) $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python ; \
+	if [ ! -L $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 ]; then \
+		ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.$(TGT_PYTHON_MINOR) $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3; \
+		echo "'python3' symbolic link created."; \
+	else \
+		echo "'python3' symbolic link already exists."; \
+	fi
+
+	if [ ! -L $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python ]; then \
+		ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.$(TGT_PYTHON_MINOR) $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python; \
+		echo "'python' symbolic link created."; \
+	else \
+		echo "'python' symbolic link already exists."; \
+	fi
+
 	if [ ! -f $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 ]; then \
 		cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),https://bootstrap.pypa.io/get-pip.py,get-pip.py) ; \
 		python3 $(DOWNLOADS_DIR)/get-pip.py ; \
+		echo "'pip3' was not found and has been installed." ; \
+	else \
+		echo "'pip3' already exists, no installation needed." ; \
 	fi
 endef
 
 define sdk_patch
+	$(call echo_action,Fixing SDK,$*)
 	$(call sdk_fix,$*)
-	$(call echo_action,Applying VxWorks patches,$*)
-	$(call vxworks_fix,$*)
 	$(call echo_action,Applying Host Python patches,$*)
 	$(call python_fix,$*)
+endef
+
+define sdk_install
+	pip3 install -r files/$(WIND_RELEASE_ID)/requirements.txt
+
+	if [ ! -f "$(VIRTUAL_ENV)/bin/activate" ]; then \
+		echo "setup 'crossenv'."; \
+		python3.$(TGT_PYTHON_MINOR) -m crossenv $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/bin/python3 $(VIRTUAL_ENV); \
+	else \
+		echo "'crossenv' already exists."; \
+	fi
 endef
 
 define sdk_deploy

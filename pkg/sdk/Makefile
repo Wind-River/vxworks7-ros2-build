@@ -46,9 +46,6 @@ sdk.unpack : sdk.check
 sdk.patch : sdk.unpack
 	@$(call echo_action,Applying SDK patches,$*)
 	$(call sdk_patch,$*)
-	pip3 install crossenv
-	pip3 install wheel
-	python3.$(TGT_PYTHON_MINOR) -m crossenv $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/bin/python3 $(VIRTUAL_ENV)
 	@$(MAKE_STAMP)
 
 sdk.configure : sdk.patch
@@ -58,6 +55,8 @@ sdk.build : sdk.configure
 	@$(MAKE_STAMP)
 
 sdk.install : sdk.build
+	@$(call echo_action,Installing extra SDK packages,$*)
+	$(call sdk_install,$*)
 	@$(call echo_action,Deploying SDK artifacts,$*)
 	$(call sdk_deploy,$*)
 	@$(MAKE_STAMP)
