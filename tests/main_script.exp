@@ -28,6 +28,20 @@ proc send_ctrl_c {} {
     send "\003"
 }
 
+# Function to display usage information
+proc show_usage {} {
+    puts "Usage:"
+    puts "  main_script <ros2.img>"
+    puts "  ros2.img - by default ./ros2.img"
+    exit 0
+}
+
+foreach arg $argv {
+    if {$arg == "-h" || $arg == "--help"} {
+        show_usage
+    }
+}
+
 # Default path to ros2.img
 set default_img_path "./ros2.img"
 
@@ -38,7 +52,7 @@ if {[llength $argv] > 0} {
 }
 
 # Get a list of all test scripts in the test directory
-set test_directory "tests"  ;# Update with your directory path
+set test_directory [file dirname [info script]]
 set test_scripts [lsort [glob -nocomplain -directory $test_directory test*.exp]]
 puts "\nExecuting: $test_scripts"
 
