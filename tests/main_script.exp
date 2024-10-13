@@ -1,15 +1,15 @@
 #!/usr/bin/expect
 
-#
 # Runs ROS 2 tests on VxWorks
-#
 
 # Function to run all tests
 proc run_tests {test_scripts} {
     foreach test_script $test_scripts {
         source $test_script
     }
-    foreach test_function [info procs] {
+    set all_procs [info procs]
+    set test_procs [lsort [lsearch -all -inline $all_procs test*]]
+    foreach test_function $test_procs {
         if {[string match "test*" $test_function]} {
             $test_function
             send "\r"
@@ -39,8 +39,8 @@ if {[llength $argv] > 0} {
 
 # Get a list of all test scripts in the test directory
 set test_directory "tests"  ;# Update with your directory path
-set test_scripts [glob -nocomplain -directory $test_directory test*.exp]
-puts "Running: $test_scripts"
+set test_scripts [lsort [glob -nocomplain -directory $test_directory test*.exp]]
+puts "\nExecuting: $test_scripts"
 
 # Set timeout for Expect commands (in seconds)
 set timeout 60
@@ -80,7 +80,6 @@ expect {
             }
             timeout {
                 # Handle timeout if -> symbols are not encountered within the specified timeout
-                # You can add specific actions or error handling here
                 puts "Timeout: Did not receive -> symbols."
                 exit 1 ;# Exit the script if QEMU didn't reach the expected state within the timeout
             }
@@ -88,7 +87,6 @@ expect {
     }
     timeout {
         # Handle timeout if QEMU doesn't start within the specified timeout
-        # Add actions as needed
         puts "Timeout: QEMU did not start."
     }
 }

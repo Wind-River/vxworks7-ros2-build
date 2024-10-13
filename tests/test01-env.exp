@@ -1,4 +1,5 @@
-proc test-timer_lambda {} {
+proc test01-set_env {} {
+    puts "\nTEST: PRINT ENVIRONMENT"
     send "set env\r"
     expect -exact {LD_LIBRARY_PATH}
     expect -exact {AMENT_PREFIX_PATH}

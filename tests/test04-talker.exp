@@ -1,4 +1,5 @@
-proc test-talker {} {
+proc test04-talker {} {
+    puts "\nTEST: PUB/SUB"
     send "/usr/lib/demo_nodes_cpp/talker\r"
     expect -exact {Publishing}
     expect -exact {Publishing}
@@ -31,7 +32,6 @@ proc test-talker {} {
         }
         timeout {
             # Handle timeout if telnet doesn't start within the specified timeout
-            # Add actions as needed
             puts "Timeout: telnet did not start."
         }
     }

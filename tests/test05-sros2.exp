@@ -1,0 +1,27 @@
+proc test05-sros2_talker_py {} {
+    puts "\nTEST: SROS2"
+    set timeout 10
+
+    # Check for ca.cert.pem, otherwise skip it
+    send "ls /usr/demo_keystore/public\r"
+    expect {
+        -re "ca.cert.pem" {
+            send "set env \"ROS_SECURITY_ENABLE=true\"\r"
+            expect -exact {[vxWorks}
+            send "python3 ros2 run demo_nodes_cpp talker --ros-args --enclave /talker_listener/talker\r"
+            expect -exact {Found security directory}
+            expect -exact {Publishing}
+            expect -exact {Publishing}
+            expect -exact {Publishing}
+            expect -exact {Publishing}
+            send_ctrl_c
+            expect -exact {[vxWorks}
+            send "set env \"ROS_SECURITY_ENABLE=false\"\r"
+            expect -exact {[vxWorks}
+            send "rtp delete /usr/lib/demo_nodes_cpp/talker"
+        }
+        timeout {
+            puts "demo_keystore not found, skipping commands."
+        }
+    }
+}
