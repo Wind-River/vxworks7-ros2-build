@@ -1,0 +1,18 @@
+{
+  "$schema": "./schemas/wrsdk-schema.json",
+  "vxworks" : [
+    {
+      "release": "24.03",
+      "sdk": [
+         {
+            "name": "qemu",
+            "sdk_version": "1.14"
+         },
+         {
+            "name": "raspberrypi4b",
+            "sdk_version": "1.6"
+         }
+      ]
+    }
+  ]
+}

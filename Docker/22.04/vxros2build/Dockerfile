@@ -1,4 +1,5 @@
-FROM vxbuild:22.04
+ARG BASE_IMAGE=vxbuild:22.04
+FROM $BASE_IMAGE
 
 # Environment variables
 ARG ROS_DISTRO=humble

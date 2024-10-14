@@ -2,7 +2,7 @@
 # It builds a ROS 2 VxWorks port against the VxWorks SDK 
 
 name: 'VxWorks ROS 2 build'
-run-name: Build ${{ inputs.ros_distro }} ${{ inputs.sdk }}
+run-name: Build ${{ inputs.ros_distro }} ${{ inputs.vxworks }} ${{ inputs.sdk }}
 
 on:
   workflow_dispatch:
@@ -11,10 +11,14 @@ on:
         description: 'ROS 2 Distribution'
         required: true
         default: 'humble'
+      vxworks:
+        description: 'VxWorks Release'
+        required: true
+        default: '24.03'
       sdk:
         description: 'SDK Name'
         required: true
-        default: 'wrsdk-vxworks7-qemu-1.14'
+        default: 'qemu'
       test:
         description: 'Run tests'
         required: false
@@ -26,65 +30,74 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     env:
       ros_distro: ${{ github.event.inputs.ros_distro }}
+      vxworks: ${{ github.event.inputs.vxworks }}
       sdk: ${{ github.event.inputs.sdk }}
       test: ${{ github.event.inputs.test }}
       debug: ${{ github.event.inputs.debug }}
     steps:
 
       - name: Checks-out a branch ${{ github.ref }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
 
-      - name: Fetch SDK details for ${{ env.sdk }}
-        run: |
-          url=$(jq -r --arg sdk "${{ env.sdk }}" '.sdks[] | select(.name == $sdk) | .url' .github/workflows/sdks.json)
-          if [ -z "$url" ]; then
-            echo "URL not found for ${{ env.sdk }}. Stopping workflow."
-            echo "::error::URL not found for ${{ env.sdk }}"
-            exit 1
-          fi
-          script=$(jq -r --arg sdk "${{ env.sdk }}" '.sdks[] | select(.name == $sdk) | .script' .github/workflows/sdks.json)
-          image=$(jq -r --arg sdk "${{ env.sdk }}" '.sdks[] | select(.name == $sdk) | .image' .github/workflows/sdks.json)
-          echo "url=$url" >> $GITHUB_ENV
-          echo "script=$script" >> $GITHUB_ENV
-          echo "image=$image" >> $GITHUB_ENV
-
-      - name: Download the ${{ env.sdk }} SDK
-        uses: carlosperate/download-file-action@v1
+      - name: Use Download SDK action
+        uses: ./.github/actions/setup-wrsdk
         with:
-          file-url: '${{ env.url }}'
-          location: '/tmp'
-
-      - name: Extract the ${{ env.sdk }} SDK
-        run: |
-          mkdir -p /tmp/wrsdk
-          cd /tmp/wrsdk
-          tar xvfj /tmp/${{ env.sdk }}.tar.bz2 --strip 1
+          sdks_list: wrsdks.json
+          sdk: ${{ env.sdk }}
+          vxworks: ${{ env.vxworks }}
+          directory: /tmp
+          sdkenv: false
 
       - name: store runners uid and gid
         run: |
           echo "`id -u`" > /tmp/wrsdk/uid
           echo "`id -g`" > /tmp/wrsdk/gid
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+
       - name: Build vxbuild docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: Docker/22.04/vxbuild/.
-          push: false
-          tags: vxbuild:22.04
+          push: true
+          tags: localhost:5000/local/vxbuild:22.04
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Inspect
+        run: |
+          docker buildx imagetools inspect localhost:5000/local/vxbuild:22.04
 
       - name: Build vxros2build docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: Docker/22.04/vxros2build/.
           push: false
-          build-args: ROS_DISTRO=${{ env.ros_distro }}
+          load: true
+          build-args: |
+            ROS_DISTRO=${{ env.ros_distro }}
+            BASE_IMAGE=localhost:5000/local/vxbuild:22.04
           tags: vxros2build:${{ env.ros_distro }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Build ROS 2 ${{ env.ros_distro }} against VxWorks ${{ env.sdk }}
+      - name: Verify Docker vxros2build:${{ env.ros_distro }} image
+        run: |
+          docker images vxros2build:${{ env.ros_distro }}
+
+      - name: Build ROS 2 ${{ env.ros_distro }} against VxWorks ${{ env.vxworks }} ${{ env.sdk }}
         uses: addnab/docker-run-action@v3
         with:
           image: vxros2build:${{ env.ros_distro }}
@@ -137,9 +150,9 @@ jobs:
           df -h /tmp/mount/
           sudo umount /tmp/mount
 
-      - name: Prepare artifacts
+      - name: Copy VxWorks image
         run: |
-          cp /tmp/wrsdk/${{ env.image }} ${{ github.workspace }}
+          cp /tmp/wrsdk/vxsdk/bsps/*/*xWorks* ${{ github.workspace }}
 
       - name: Upload VxWorks and the HDD image
         uses: actions/upload-artifact@v3
@@ -147,7 +160,7 @@ jobs:
           name: HDD image ${{ env.sdk }} ${{ env.ros_distro }}
           path: |
             ${{ github.workspace }}/ros2.img
-            ${{ github.workspace }}/vxWorks
+            ${{ github.workspace }}/*xWorks*
 
 
       - name: Setup tmate session

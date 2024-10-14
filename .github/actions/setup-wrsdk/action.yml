@@ -1,0 +1,95 @@
+# This is an action for the VxWorks ROS 2 build.
+# It downloads the WRLabs SDK and unpack it
+#
+
+name: 'Setup WRSDK'
+description: 'Download and setup the VxWorks SDK'
+
+inputs:
+  sdks_list:
+    description: 'JSON file that provides a description of all supported SDKs'
+    required: false
+    default: 'wrsdks.json'
+  sdk:
+    description: 'SDK Name'
+    required: false
+    default: 'qemu'
+  vxworks:
+    description: 'VxWorks Release'
+    required: false
+    default: '24.03'
+  directory:
+    description: 'Directory to download and extract the SDK'
+    required: false
+    default: '/tmp'
+  sdkenv:
+    description: 'Source SDK environment'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install jsonschema
+      shell: bash
+
+    - name: Calculate SDK URL
+      id: calculate-url
+      run: |
+        cd $GITHUB_ACTION_PATH
+        python ./parse_wrsdks.py ${{ inputs.sdks_list }} ${{ inputs.sdk }} ${{ inputs.vxworks }} > ${{ inputs.directory }}/sdk-url.txt
+        cd ${{ inputs.directory }}
+        echo SDK_URL=$(cat sdk-url.txt) >> $GITHUB_ENV
+        echo FILENAME=$(basename $(cat sdk-url.txt)) >> $GITHUB_ENV
+      shell: bash
+
+    - name: Cache SDK tarball
+      id: cache-sdk-tarball
+      uses: actions/cache@v3
+      with:
+        path: ${{ inputs.directory }}/${{ env.FILENAME }}
+        key: ${{ runner.os }}-sdk-tarball-${{ env.FILENAME }}
+        restore-keys: |
+          ${{ runner.os }}-sdk-tarball-
+
+    - name: Download SDK
+      if: steps.cache-sdk-tarball.outputs.cache-hit != 'true'
+      run: wget --no-check-certificate ${{ env.SDK_URL }} -P ${{ inputs.directory }}
+      shell: bash
+
+    - name: Cache extracted SDK
+      id: cache-sdk
+      uses: actions/cache@v3
+      with:
+        path: ${{ inputs.directory }}/wrsdk
+        key: ${{ runner.os }}-wrsdk-${{ env.FILENAME }}
+        restore-keys: |
+          ${{ runner.os }}-wrsdk-
+
+    - name: Extract SDK
+      if: steps.cache-sdk.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p ${{ inputs.directory }}/wrsdk
+        cd  ${{ inputs.directory }}/wrsdk
+        tar xvfj ${{ inputs.directory }}/${{ env.FILENAME }} --strip 1
+      shell: bash
+
+    - name: Source SDK environment
+      if: ${{ inputs.sdkenv }} == 'true'
+      run: |
+        . ${{ inputs.directory }}/wrsdk/sdkenv.sh
+        echo "WIND_SDK_HOME=$WIND_SDK_HOME" >> $GITHUB_ENV
+        echo "WIND_SDK_CCBASE_PATH=$WIND_SDK_CCBASE_PATH" >> $GITHUB_ENV
+        echo "WIND_SDK_CC_SYSROOT=$WIND_SDK_CC_SYSROOT" >> $GITHUB_ENV
+        echo "WIND_CC_SYSROOT=$WIND_SDK_CC_SYSROOT" >> $GITHUB_ENV
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> $GITHUB_ENV  
+      shell: bash

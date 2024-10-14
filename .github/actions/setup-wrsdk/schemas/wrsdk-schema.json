@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri",
+      "default": "https://d13321s3lxgewa.cloudfront.net"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "vxworks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "release": {
+            "type": "string",
+            "pattern": "^\\d{2}\\.\\d{2}$"
+          },
+          "sdk": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": ["qemu", "raspberrypi4b"],
+                  "default": "qemu"
+                },
+                "sdk_version": {
+                  "type": "string",
+                  "pattern": "^\\d+\\.\\d+$"
+                }
+              },
+              "required": ["name", "sdk_version"]
+            }
+          }
+        },
+        "required": ["release", "sdk"]
+      }
+    }
+  },
+  "required": ["$schema", "vxworks"]
+}
+
