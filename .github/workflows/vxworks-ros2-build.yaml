@@ -27,6 +27,10 @@ on:
         description: 'Debug'
         required: false
         default: false
+
+  schedule:
+    - cron: '0 0 * * 0'  # Runs at 00:00 UTC every Sunday
+
 jobs:
   build:
     runs-on: ubuntu-22.04
