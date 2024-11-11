@@ -40,11 +40,12 @@ jobs:
         ports:
           - 5000:5000
     env:
-      ros_distro: ${{ github.event.inputs.ros_distro }}
-      vxworks: ${{ github.event.inputs.vxworks }}
-      sdk: ${{ github.event.inputs.sdk }}
-      test: ${{ github.event.inputs.test }}
-      debug: ${{ github.event.inputs.debug }}
+      # Check if input variables exist, otherwise set defaults for scheduled runs
+      ros_distro: ${{ github.event.inputs.ros_distro || 'humble' }}
+      vxworks: ${{ github.event.inputs.vxworks || '24.03' }}
+      sdk: ${{ github.event.inputs.sdk || 'qemu' }}
+      test: ${{ github.event.inputs.test || 'false' }}
+      debug: ${{ github.event.inputs.debug || 'false' }}
     steps:
 
       - name: Checks-out a branch ${{ github.ref }}
