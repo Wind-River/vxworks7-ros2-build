@@ -1,6 +1,6 @@
 # VxWorks® 7 ROS 2 Build
 
-![vxworks ros2 build workflow](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml/badge.svg)
+![vxworks ros2 build workflow](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yaml/badge.svg)
 
 ## VxWorks SDK and ROS 2 support
 
@@ -14,7 +14,7 @@ Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, se
 
 ## Prebuilt image
 
-The VxWorks ROS 2 `humble`, `iron`, and `rolling` images are prebuilt and can be tested by downloading them from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yml).
+The VxWorks ROS 2 `humble`, `iron`, and `rolling` images are prebuilt and can be tested by downloading them from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yaml).
 
 ## Overview
 
