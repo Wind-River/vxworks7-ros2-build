@@ -6,11 +6,11 @@
 
 Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `iron` and the latest VxWorks SDK is `24.03`.
 
-|           | [24.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
-|:---------:|:-------------|:-------------|:-------------|
-|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_qemu.html) | [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) |  [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
-|**[`iron`](https://docs.ros.org/en/iron/)**| | [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
-|**[`rolling`](https://docs.ros.org/en/rolling/)**| | [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
+|           | [24.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [24.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
+|:---------:|:-------------|:-------------|:-------------|:-------------|
+|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_raspberrypi4b.html) | [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) |  [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
+|**[`iron`](https://docs.ros.org/en/iron/)**| | | [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
+|**[`rolling`](https://docs.ros.org/en/rolling/)**| | | [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
 
 ## Prebuilt image
 
