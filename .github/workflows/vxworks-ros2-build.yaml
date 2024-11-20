@@ -39,15 +39,17 @@ jobs:
         image: registry:2
         ports:
           - 5000:5000
+    outputs:
+      sdk: ${{ steps.set_outputs.outputs.sdk }}
+      ros_distro: ${{ steps.set_outputs.outputs.ros_distro }}
     env:
       # Check if input variables exist, otherwise set defaults for scheduled runs
       ros_distro: ${{ github.event.inputs.ros_distro || 'humble' }}
       vxworks: ${{ github.event.inputs.vxworks || '24.03' }}
       sdk: ${{ github.event.inputs.sdk || 'qemu' }}
-      test: ${{ github.event.inputs.test || 'false' }}
       debug: ${{ github.event.inputs.debug || 'false' }}
-    steps:
 
+    steps:
       - name: Checks-out a branch ${{ github.ref }}
         uses: actions/checkout@v4
         with:
@@ -80,6 +82,9 @@ jobs:
           tags: localhost:5000/local/vxbuild:22.04
           cache-from: type=gha
           cache-to: type=gha,mode=max
+        env:
+          DOCKER_BUILD_SUMMARY: false
+          DOCKER_BUILD_RECORD_UPLOAD: false
 
       - name: Inspect
         run: |
@@ -97,6 +102,9 @@ jobs:
           tags: vxros2build:${{ env.ros_distro }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+        env:
+          DOCKER_BUILD_SUMMARY: false
+          DOCKER_BUILD_RECORD_UPLOAD: false
 
       - name: Verify Docker vxros2build:${{ env.ros_distro }} image
         run: |
@@ -134,14 +142,6 @@ jobs:
             /tmp/sros2_script.sh
             mv /tmp/demo_keystore /work/output/export/deploy/.
 
-#      - name: Build ROS 2 ${{ env.ros_distro }} against VxWorks ${{ env.sdk }}
-#        env:
-#          UID: ${{ env.uid }}
-#          GID: ${{ env.gid }}
-#        uses: docker://razr/vxros2build:${{ env.ros_distro }}
-#        with:
-#          args: source /github/home/wrsdk/${{ env.script }} && make -C /github/workspace
-
       - name: Create an HDD image
         run: |
           sudo apt-get update
@@ -160,24 +160,45 @@ jobs:
           cp /tmp/wrsdk/vxsdk/bsps/*/*xWorks* ${{ github.workspace }}
 
       - name: Upload VxWorks and the HDD image
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: HDD image ${{ env.sdk }} ${{ env.ros_distro }}
           path: |
             ${{ github.workspace }}/ros2.img
             ${{ github.workspace }}/*xWorks*
 
-
       - name: Setup tmate session
         if: ${{ env.debug == 'true' }}
         uses: mxschmitt/action-tmate@v3
 
-      - name: Run Tests with QEMU and expect
-        if: ${{ env.test == 'true' }}
+      - name: Set outputs for sdk and ros_distro
+        id: set_outputs
         run: |
-          # Change directory to GitHub workspace
-          cd ${{ github.workspace }}
+          echo "sdk=${{ env.sdk }}" >> $GITHUB_OUTPUT
+          echo "ros_distro=${{ env.ros_distro }}" >> $GITHUB_OUTPUT
 
+  test:
+    runs-on: ubuntu-22.04
+    needs: build
+    if: ${{ github.event.inputs.test != 'false' && (github.event.inputs.test || 'false') == 'true' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Use SDK and ROS Distro from build job
+        run: |
+          echo "SDK: ${{ needs.build.outputs.sdk }}"
+          echo "ROS Distro: ${{ needs.build.outputs.ros_distro }}"
+
+      - name: Download HDD image and VxWorks artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: HDD image ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+
+      - name: Install QEMU and expect
+        run: |
           # Update apt and install dependencies
           sudo apt-get update
           sudo apt-get install -y qemu-system-x86 expect
@@ -189,6 +210,11 @@ jobs:
           sudo apt-get install uml-utilities
           sudo tunctl -u $USER -t tap0
           sudo ifconfig tap0 192.168.200.254 up
+
+      - name: Run Tests with QEMU and expect
+        run: |
+          # Change directory to GitHub workspace
+          cd ${{ github.workspace }}
 
           # Run tests
           echo "Running tests..."
