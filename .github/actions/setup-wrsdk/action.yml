@@ -31,7 +31,7 @@ runs:
   using: 'composite'
   steps:
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.x'
 
@@ -53,7 +53,7 @@ runs:
 
     - name: Cache SDK tarball
       id: cache-sdk-tarball
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ inputs.directory }}/${{ env.FILENAME }}
         key: ${{ runner.os }}-sdk-tarball-${{ env.FILENAME }}
@@ -67,7 +67,7 @@ runs:
 
     - name: Cache extracted SDK
       id: cache-sdk
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ inputs.directory }}/wrsdk
         key: ${{ runner.os }}-wrsdk-${{ env.FILENAME }}
