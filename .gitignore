@@ -1,2 +1,5 @@
 output*
 .vscode/
+.cproject
+.project
+.settings/
