@@ -21,31 +21,33 @@
 
 # SYNOPSIS        variables for ROS 2 packages
 
-ROS2_PATCH_DIRS=eclipse-iceoryx/iceoryx \
+ROS2_PATCH_DIRS=ament/googletest \
+		eclipse-iceoryx/iceoryx \
                 eclipse-cyclonedds/cyclonedds \
                 eProsima/Fast-DDS \
                 eProsima/foonathan_memory_vendor \
                 osrf/osrf_pycommon \
+                osrf/osrf_testing_tools_cpp \
+                ros/class_loader \
+                ros/urdfdom \
+                ros2/mimick_vendor \
                 ros2/orocos_kdl_vendor \
                 ros2/pybind11_vendor \
-                ros2/ros2_tracing \
-                ros2/rmw_implementation \
                 ros2/rclcpp \
                 ros2/rclpy \
+                ros2/rcpputils \
                 ros2/rcutils \
+                ros2/rmw \
+                ros2/rmw_implementation \
+                ros2/ros2_tracing \
                 ros2/ros2cli
 
 # Ignore not used
 ROS_IGNORE_DIRS=ros-visualization \
 		ros2/rviz \
-                osrf/osrf_testing_tools_cpp \
                 ros-planning \
                 ros2/rmw_connextdds \
-                ament/ament_lint \
                 ament/uncrustify_vendor \
-		ament/google_benchmark_vendor \
-		ros2/mimick_vendor \
-		ros2/performance_test_fixture \
 		eclipse-iceoryx
 
 # Ignore Python-specific packages
