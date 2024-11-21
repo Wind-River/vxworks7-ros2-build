@@ -12,9 +12,10 @@
                 "-DPython3_EXECUTABLE=/wrsdk/vxsdk/host/x86_64-linux/bin/python3",
                 "-DPYTHON_SOABI=cpython-39-vxworks",
                 "-DSECURITY=ON",
-                "-DBUILD_TESTING:BOOL=OFF",
                 "-DCMAKE_EXE_LINKER_FLAGS=-rpath-link /work/output/export/root/lib",
-                "-DFORCE_BUILD_VENDOR_PKG=ON"
+                "-DFORCE_BUILD_VENDOR_PKG=ON",
+                "-DCMAKE_CXX_FLAGS=-fwarning-level-low",
+                "-DCMAKE_C_FLAGS=-fwarning-level-low"
             ]
         }
     }

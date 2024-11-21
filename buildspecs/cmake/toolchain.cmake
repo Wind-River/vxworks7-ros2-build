@@ -35,8 +35,15 @@ if (NOT VX_TARGET_TYPE STREQUAL "DKM" AND NOT VX_TARGET_TYPE STREQUAL "RTP")
     message(FATAL_ERROR "VX_TARGET_TYPE only could be DKM or RTP.")
 endif()
 
+execute_process(
+    COMMAND sh -c "wr-cc -print-target-triple | cut -d '-' -f 1 | sed -e 's/arm64/aarch64/g'"
+    OUTPUT_VARIABLE ARCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
 # load VxWorks.cmake
 set(CMAKE_SYSTEM_NAME VxWorks)
+set(CMAKE_SYSTEM_PROCESSOR ${ARCH})
 set(CMAKE_SYSTEM_VERSION 7)
 
 # set compiler
