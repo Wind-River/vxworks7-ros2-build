@@ -25,7 +25,6 @@ ROS2_PATCH_DIRS=ament/googletest \
 		eclipse-iceoryx/iceoryx \
                 eclipse-cyclonedds/cyclonedds \
                 eProsima/Fast-DDS \
-                eProsima/foonathan_memory_vendor \
                 osrf/osrf_pycommon \
                 osrf/osrf_testing_tools_cpp \
                 ros/class_loader \
