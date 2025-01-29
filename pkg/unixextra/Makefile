@@ -38,7 +38,7 @@ PKG_SRC_DIR = src
 PKG_PATCH_DIR = files
 
 PKG_CONFIGURE_OPT = $(TGT_CONFIGURE_OPT)
-ifeq ($(WIND_RELEASE_ID),24.03)
+ifneq (,$(filter $(WIND_RELEASE_ID),24.03 24.09))
 PKG_MAKE_OPT = SOURCES="flock.c socketpair.c vdprintf.c posix_fallocate.c" TESTS=
 endif
 PKG_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT) DESTDIR=$(WIND_CC_SYSROOT) PREFIX=/usr INCLUDE_PATH=h/published/UTILS_UNIX LIBRARY_PATH=lib/common
