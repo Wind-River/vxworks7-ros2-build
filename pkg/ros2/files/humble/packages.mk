@@ -41,16 +41,25 @@ ROS2_PATCH_DIRS=ament/googletest \
                 ros2/ros2_tracing \
                 ros2/ros2cli
 
+ifeq ($(shell test $(call wind_release_id,$(WIND_RELEASE_ID)) -lt 2403 && echo true),true)
+ROS_IGNORE_TESTING_DIRS=osrf/osrf_testing_tools_cpp \
+		ament/ament_lint \
+		ament/google_benchmark_vendor \
+		ros2/mimick_vendor \
+		ros2/performance_test_fixture
+endif
+
 # Ignore not used
 ROS_IGNORE_DIRS=ros-visualization \
 		ros2/rviz \
                 ros-planning \
                 ros2/rmw_connextdds \
                 ament/uncrustify_vendor \
-		eclipse-iceoryx
+		eclipse-iceoryx \
+		$(ROS_IGNORE_TESTING_DIRS)
 
 # Ignore Python-specific packages
-#ROS_IGNORE_DIRS+= \
+#ROS_IGNORE_PYTHON_DIRS+= \
                 ament/ament_cmake/ament_cmake_pytest \
                 osrf/osrf_pycommon \
                 ros2/demos/demo_nodes_py \

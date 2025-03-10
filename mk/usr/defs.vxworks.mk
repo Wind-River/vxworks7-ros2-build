@@ -50,4 +50,6 @@ endif
 export WIND_RELEASE_ID
 export TGT_PYTHON_MINOR
 
+wind_release_id = $(shell echo $(1) | sed 's/\.//g')
+
 endif

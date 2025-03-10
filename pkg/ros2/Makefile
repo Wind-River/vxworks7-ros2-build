@@ -24,6 +24,7 @@
 include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.crossbuild.mk
+include $(WIND_USR_MK)/defs.vxworks.mk
 
 PACKAGES += ros2
 
@@ -98,10 +99,17 @@ ros2.build: ros2.configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
 	export COLCON_HOME=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon; \
-	colcon build --mixin vxworks --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO)
+	if [ $(call wind_release_id,$(WIND_RELEASE_ID)) -gt 2309 ]; then  \
+		MIXINS="vxworks warnings-low build-testing-on"; \
+	else \
+		MIXINS="vxworks build-testing-off"; \
+	fi; \
+	colcon build --mixin $$MIXINS --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO);
 	@$(MAKE_STAMP)
 
 ros2.install : ros2.build
+	@$(call echo_action,Installing mixin,$*)
+	cp -r $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon $(ROOT_DIR)
 	@$(call echo_action,Installing runtime dependencies,$*)
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) setuptools
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) catkin_pkg
