@@ -1,8 +1,6 @@
 {
     "build": {
         "vxworks": {
-            "merge-install": true,
-            "install-base": "/work/output/export/root",
             "cmake-force-configure": true,
             "cmake-args": [
                 "-DCMAKE_BUILD_TYPE:STRING=Release",
