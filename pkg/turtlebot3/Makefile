@@ -35,8 +35,8 @@ PKG_URL = https://github.com/Wind-River/vxworks7-layer-for-ros2.git
 PKG_TYPE = git
 PKG_COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
 
-PKG_REPO_COMMIT_ID = $(PKG_VER)-devel
-PKG_REPO_URL = https://raw.githubusercontent.com/ROBOTIS-GIT/${PKG_NAME}/${PKG_REPO_COMMIT_ID}/${PKG_NAME}.repos
+PKG_REPO_COMMIT_ID = $(PKG_VER)
+PKG_REPO_URL = https://raw.githubusercontent.com/ROBOTIS-GIT/${PKG_NAME}/refs/heads/${PKG_REPO_COMMIT_ID}/${PKG_NAME}.repos
 
 PKG_LICENSE = BSD
 
@@ -71,7 +71,7 @@ $(PKG_NAME).build: $(PKG_NAME).configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/ros2/$(PKG_BUILD_DIR); \
         export COLCON_HOME=$(BUILD_DIR)/ros2/$(PKG_BUILD_DIR)/.colcon; \
-	colcon build --mixin $$ROS2_MIXINS --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO);
+	colcon build --mixin $(ROS2_MIXINS) --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO);
 	@$(MAKE_STAMP)
 
 $(PKG_NAME).install : $(PKG_NAME).build
