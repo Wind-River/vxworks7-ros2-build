@@ -23,6 +23,7 @@
 include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.crossbuild.mk
+include $(WIND_USR_MK)/defs.ros2.mk
 
 PKG_NAME = turtlebot3
 PKG_VER = $(ROS_DISTRO)
@@ -46,19 +47,6 @@ PKG_BUILD_TYPE = Debug
 
 include $(PACKAGE_DIR)/${PKG_NAME}/packages.mk
 
-define ros2_patch
-        for pn in $(1); do \
-	        N=$$(basename $$pn); \
-                if ls $(BUILD_DIR)/ros2/$(PKG_SRC_DIR)/$$N/usr_src/0001-* 1> /dev/null 2>&1; then \
-                        PATCHES="$(BUILD_DIR)/ros2/$(PKG_SRC_DIR)/$$N/usr_src/*.patch"; \
-                        for PATCH in $$PATCHES; do \
-                                cd $(BUILD_DIR)/ros2/$(PKG_BUILD_DIR)/src/$$pn ; \
-                                $(PATCH) -p1 < $$PATCH ; \
-                        done; \
-                fi \
-	done;
-endef
-
 $(PKG_NAME).download:
 	@$(MAKE_STAMP)
 
@@ -76,16 +64,14 @@ $(PKG_NAME).patch: $(PKG_NAME).unpack
 
 $(PKG_NAME).configure: $(PKG_NAME).patch
 	@$(call echo_action,Configuring,$*)
-	for i in $(PKG_IGNORE_DIRS); do \
-		touch $(BUILD_DIR)/ros2/$(PKG_BUILD_DIR)/src/$$i/COLCON_IGNORE; \
-	done;
+	$(call ros2_ignore,$(PKG_IGNORE_DIRS))
 	@$(MAKE_STAMP)
 
 $(PKG_NAME).build: $(PKG_NAME).configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/ros2/$(PKG_BUILD_DIR); \
         export COLCON_HOME=$(BUILD_DIR)/ros2/$(PKG_BUILD_DIR)/.colcon; \
-        colcon build --mixin vxworks --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO)
+	colcon build --mixin $$ROS2_MIXINS --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO);
 	@$(MAKE_STAMP)
 
 $(PKG_NAME).install : $(PKG_NAME).build

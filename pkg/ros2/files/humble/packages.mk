@@ -39,7 +39,8 @@ ROS2_PATCH_DIRS=ament/googletest \
                 ros2/rmw \
                 ros2/rmw_implementation \
                 ros2/ros2_tracing \
-                ros2/ros2cli
+                ros2/ros2cli \
+                ros2/yaml_cpp_vendor
 
 ifeq ($(shell test $(call wind_release_id,$(WIND_RELEASE_ID)) -lt 2403 && echo true),true)
 ROS_IGNORE_TESTING_DIRS=osrf/osrf_testing_tools_cpp \

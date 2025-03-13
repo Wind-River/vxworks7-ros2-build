@@ -24,7 +24,7 @@
 include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.crossbuild.mk
-include $(WIND_USR_MK)/defs.vxworks.mk
+include $(WIND_USR_MK)/defs.ros2.mk
 
 PACKAGES += ros2
 
@@ -53,19 +53,6 @@ PKG_BUILD_TYPE := Debug
 
 include $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/packages.mk
 
-define ros2_patch
-        for pn in $(1); do \
-	        N=$$(basename $$pn); \
-                if ls $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/$$N/usr_src/0001-* 1> /dev/null 2>&1; then \
-                        PATCHES="$(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/$$N/usr_src/*.patch"; \
-                        for PATCH in $$PATCHES; do \
-                                cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/$$pn ; \
-                                $(PATCH) -p1 < $$PATCH ; \
-                        done; \
-                fi \
-	done;
-endef
-
 ros2.unpack: ros2.download
 	@$(call echo_action,Unpacking,$*)
 	$(call pkg_unpack,$(PKG_NAME))
@@ -83,9 +70,7 @@ ros2.patch: ros2.unpack
 
 ros2.configure: ros2.patch
 	@$(call echo_action,Configuring,$*)
-	for i in $(ROS_IGNORE_DIRS); do \
-		touch $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/$$i/COLCON_IGNORE; \
-	done;
+	$(call ros2_ignore,$(ROS_IGNORE_DIRS))
 	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default;
 	cp files/$(ROS_DISTRO)/*.mixin $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/.;
 	sed -i "s/-3./-3$(TGT_PYTHON_MINOR)/g" $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin;
@@ -99,12 +84,7 @@ ros2.build: ros2.configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
 	export COLCON_HOME=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon; \
-	if [ $(call wind_release_id,$(WIND_RELEASE_ID)) -gt 2309 ]; then  \
-		MIXINS="vxworks warnings-low build-testing-on"; \
-	else \
-		MIXINS="vxworks build-testing-off"; \
-	fi; \
-	colcon build --mixin $$MIXINS --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO);
+	colcon build --mixin $(ROS2_MIXINS) --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO);
 	@$(MAKE_STAMP)
 
 ros2.install : ros2.build
