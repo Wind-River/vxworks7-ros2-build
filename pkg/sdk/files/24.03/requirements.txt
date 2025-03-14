@@ -1,9 +1,10 @@
-empy==3.3.4
-crossenv
-wheel
-numpy
-lark-parser
-vcstool
+certifi
 colcon-common-extensions
 colcon-mixin
-certifi
+crossenv
+empy==3.3.4
+lark-parser
+numpy
+typeguard
+vcstool
+wheel
