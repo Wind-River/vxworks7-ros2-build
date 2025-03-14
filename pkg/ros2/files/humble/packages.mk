@@ -60,7 +60,7 @@ ROS_IGNORE_DIRS=ros-visualization \
 		$(ROS_IGNORE_TESTING_DIRS)
 
 # Ignore Python-specific packages
-#ROS_IGNORE_PYTHON_DIRS+= \
+ROS_IGNORE_PYTHON_DIRS+= \
                 ament/ament_cmake/ament_cmake_pytest \
                 osrf/osrf_pycommon \
                 ros2/demos/demo_nodes_py \
@@ -83,9 +83,11 @@ ROS2_PYTHON_TOOLS=ros2action ros2cli ros2component ros2doctor \
 	ros2interface ros2lifecycle ros2multicast ros2node ros2param ros2pkg \
 	ros2run ros2service ros2topic
 
+ROS2_UR_DEPS=tf2_geometry_msgs trajectory_msgs yaml_cpp_vendor
+
 PKG_PKGS_UP_TO+=$(ROS2_EXAMPLES) \
 	$(ROS2_PYTHON_TOOLS) \
-	sros2
+	sros2 $(ROS2_UR_DEPS)
 
 #	pendulum_control
 
