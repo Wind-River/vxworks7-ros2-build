@@ -35,6 +35,7 @@ RUN apt-get update && apt -y upgrade \
     && apt install --no-install-recommends -y \
     ros-${ROS_DISTRO}-ros-base \
     ros-dev-tools \
+    ros-${ROS_DISTRO}-cyclonedds \
     autoconf automake libtool libltdl-dev mercurial \
     && rm -rf /var/lib/apt/lists/*
 
@@ -44,3 +45,9 @@ RUN apt-get update \
     libacl1-dev libasio-dev liblttng-ust-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN mkdir -p /usr/local/lib && cd /usr/local/lib \
+    && cp -a /opt/ros/humble/lib/x86_64-linux-gnu/libdds* . \
+    && cp -a /opt/ros/humble/lib/x86_64-linux-gnu/libcyclonedds* . \
+    && cp -a /opt/ros/humble/lib/x86_64-linux-gnu/libiceoryx_* . \
+    && cp /opt/ros/humble/bin/idlc /usr/local/bin/. \
+    && ldconfig
