@@ -3,6 +3,7 @@
         "vxworks": {
             "cmake-force-configure": true,
             "cmake-args": [
+                "-DCMAKE_FIND_ROOT_PATH=/work/output/export/root",
                 "-DCMAKE_BUILD_TYPE:STRING=Release",
                 "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON",
                 "-DCMAKE_TOOLCHAIN_FILE=/work/buildspecs/cmake/toolchain.cmake",

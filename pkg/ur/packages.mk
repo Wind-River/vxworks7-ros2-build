@@ -21,9 +21,10 @@
 
 # SYNOPSIS        variables for UR packages
 
-PKG_PKGS_UP_TO=fmt_vendor ur
+PKG_PKGS_UP_TO=ur
 
 PKG_PATCH_DIRS=pal-robotics/backward_ros \
+	       PickNikRobotics/RSL \
 	       ros-controls/realtime_tools \
                UniversalRobots/Universal_Robots_Client_Library \
 	       UniversalRobots/Universal_Robots_ROS2_Driver

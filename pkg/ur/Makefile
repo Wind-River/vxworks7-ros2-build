@@ -76,15 +76,15 @@ $(PKG_NAME).build: $(PKG_NAME).configure
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
 	. $(ROOT_DIR)/setup.bash; \
         export COLCON_HOME=$(ROOT_DIR)/.colcon; \
-	colcon build --install-base $(ROOT_DIR) --merge-install \
+	colcon build --merge-install \
 	  --mixin vxworks build-testing-off warnings-low --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO);
 	@$(MAKE_STAMP)
 
 $(PKG_NAME).install : $(PKG_NAME).build
 	@$(call echo_action,Installing build artifacts,$*)
-	cp -r $(ROOT_DIR)/bin/* $(DEPLOY_DIR)/bin/.
-	cp -r $(ROOT_DIR)/lib/* $(DEPLOY_DIR)/lib/.
-	cp -r $(ROOT_DIR)/share $(DEPLOY_DIR)/.
+	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/install ; \
+	cp -r bin/* $(DEPLOY_DIR)/bin/. ; \
+	cp -r lib/* $(DEPLOY_DIR)/lib/. ;
 	@$(MAKE_STAMP)
 
 include $(WIND_USR_MK)/rules.packages.mk
