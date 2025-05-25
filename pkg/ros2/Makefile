@@ -73,11 +73,7 @@ ros2.configure: ros2.patch
 	$(call ros2_ignore,$(ROS_IGNORE_DIRS))
 	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default;
 	cp files/$(ROS_DISTRO)/*.mixin $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/.;
-	sed -i "s/-3./-3$(TGT_PYTHON_MINOR)/g" $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin;
-	sed -i "s+/work/buildspecs+$(BUILDSPECS_DIR)+g" $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin;
-	sed -i "s+/work/output+$(TOP_BUILDDIR)+g" $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin;
-	sed -i "s+/wrsdk/vxsdk/host+$(WIND_SDK_HOST_TOOLS)+g" $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin;
-	sed -i "s+/wrsdk/vxsdk/sysroot+$(WIND_SDK_CC_SYSROOT)+g" $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin;
+	envsubst < files/$(ROS_DISTRO)/vxworks.mixin.template > $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin
 	@$(MAKE_STAMP)
 
 ros2.build: ros2.configure
