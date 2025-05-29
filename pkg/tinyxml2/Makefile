@@ -40,9 +40,9 @@ PKG_SRC_DIR = src
 
 PKG_MAKE_INSTALL_OPT=install
 
-tinyxml2.install : tinyxml2.build
-	@$(call echo_action,Installing,tinyxml2)
-	$(call pkg_install,tinyxml2)
+tinyxml2.deploy : tinyxml2.install
+	@$(call echo_action,Deploying,$*)
+	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)
 	install -d $(DEPLOY_DIR)/bin
 	install -m 755 $(BUILD_DIR)/tinyxml2/$(PKG_BUILD_DIR)/xmltest* $(DEPLOY_DIR)/bin
 	cp $(ROOT_DIR)/lib/libtinyxml2*.so $(DEPLOY_DIR)/lib/.
