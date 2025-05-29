@@ -87,6 +87,9 @@ ros2.build: ros2.configure
 ros2.install : ros2.build
 	@$(call echo_action,Installing mixin,$*)
 	cp -r $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon $(ROOT_DIR)
+	@$(MAKE_STAMP)
+
+ros2.deploy : ros2.install
 	@$(call echo_action,Installing runtime dependencies,$*)
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) setuptools
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) catkin_pkg

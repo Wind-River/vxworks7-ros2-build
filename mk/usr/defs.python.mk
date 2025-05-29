@@ -37,10 +37,14 @@ define pkg_build
 	$(PKG_PYTHON_BUILD_VAR) python3.$(TGT_PYTHON_MINOR) setup.py $(PKG_PYTHON_BUILD_OPT)
 endef
 
+define pkg_deploy
+	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) ; \
+	$(VIRTUAL_ENV)/bin/cross-pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) dist/*.whl
+endef
+
 define pkg_install
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) ; \
-	$(VIRTUAL_ENV)/bin/cross-pip3 install --ignore-installed --prefix=$(ROOT_DIR) dist/*.whl ; \
-	$(VIRTUAL_ENV)/bin/cross-pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) dist/*.whl
+	$(VIRTUAL_ENV)/bin/cross-pip3 install --ignore-installed --prefix=$(ROOT_DIR) dist/*.whl
 endef
 
 define pkg_clean

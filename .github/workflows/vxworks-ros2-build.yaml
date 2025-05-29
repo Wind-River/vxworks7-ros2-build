@@ -118,7 +118,7 @@ jobs:
           run:  |
             groupadd -g "`cat /wrsdk/gid`" wruser
             useradd -u "`cat /wrsdk/uid`" -m wruser -g wruser
-            su wruser -c 'source /wrsdk/sdkenv.sh && make -C /work'
+            su wruser -c 'source /wrsdk/sdkenv.sh && make fs -C /work'
 
       - name: Create an SROS2 script
         run: |

@@ -228,6 +228,11 @@ endef
 	@$(CLEAN_STAMP)
 	@$(DISTCLEAN_STAMP)
 
+%.deploy : %.install
+	@$(call echo_action,Deploying,$*)
+	$(call pkg_deploy,$*)
+	@$(MAKE_STAMP)
+
 %.install : %.build
 	@$(call echo_action,Installing,$*)
 	$(call pkg_install,$*)

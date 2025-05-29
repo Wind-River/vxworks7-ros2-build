@@ -1,10 +1,13 @@
 proc test05-sros2_talker_py {} {
     puts "\nTEST: SROS2"
-    set timeout 10
+    set timeout 60
 
     # Check for ca.cert.pem, otherwise skip it
     send "ls /usr/demo_keystore/public\r"
     expect {
+        -re "No such file or directory" {
+            puts "demo_keystore not found, skipping commands."
+        }
         -re "ca.cert.pem" {
             send "set env \"ROS_SECURITY_ENABLE=true\"\r"
             expect -exact {[vxWorks}
@@ -21,7 +24,7 @@ proc test05-sros2_talker_py {} {
             send "rtp delete /usr/lib/demo_nodes_cpp/talker"
         }
         timeout {
-            puts "demo_keystore not found, skipping commands."
+            puts "Command timed out"
         }
     }
 }

@@ -57,6 +57,9 @@ sdk.build : sdk.configure
 sdk.install : sdk.build
 	@$(call echo_action,Installing extra SDK packages,$*)
 	$(call sdk_install,$*)
+	@$(MAKE_STAMP)
+
+sdk.deploy : sdk.install
 	@$(call echo_action,Deploying SDK artifacts,$*)
 	$(call sdk_deploy,$*)
 	@$(MAKE_STAMP)

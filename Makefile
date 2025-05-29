@@ -48,7 +48,10 @@ distclean: clean
 clean: clean_buildstamps
 	for p in $(DEFAULT_BUILD); do rm -rf $(BUILD_DIR)/$$p; done;
 
-image: all
+fs: all
+	for p in $(DEFAULT_BUILD); do $(MAKE) -C pkg/$$p $$p.deploy || exit 1; done;
+
+image: fs
 	dd if=/dev/zero of=$(TOP_BUILDDIR)/ros2.img count=2048 bs=1M
 	mkfs.vfat -F 32 $(TOP_BUILDDIR)/ros2.img
 	mkdir -p $(TOP_BUILDDIR)/mount

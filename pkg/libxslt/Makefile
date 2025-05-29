@@ -40,5 +40,13 @@ PKG_SRC_DIR = ${PKG_NAME}-$(PKG_VER)
 
 PKG_MAKE_INSTALL_OPT=install
 
+libxslt.deploy : libxslt.install
+	@$(call echo_action,Deploying,$*)
+	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) && \
+	cmake --install . --component runtime --prefix $(DEPLOY_DIR)
+	mkdir -p $(DEPLOY_DIR)/python
+	cp -P $(ROOT_DIR)/python/libxslt* $(DEPLOY_DIR)/python/
+	@$(MAKE_STAMP)
+
 include $(WIND_USR_MK)/defs.cmake.mk
 include $(WIND_USR_MK)/rules.packages.mk

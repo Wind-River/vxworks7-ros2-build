@@ -18,6 +18,9 @@ __cmake_defs = TRUE
 
 include $(WIND_USR_MK)/defs.packages.mk
 
+define pkg_deploy
+endef
+
 define pkg_install
 	cd $(BUILD_DIR)/$(1)/$(PKG_BUILD_DIR) && \
 	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \

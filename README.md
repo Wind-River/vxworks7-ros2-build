@@ -124,7 +124,7 @@ output
 └── export
     ├── deploy      - a ready-to-deploy filesystem with ROS 2 libraries and binaries
     └── root        - development artifacts with ROS 2 libraries and headers
-``` 
+```
 
 ## ROS 2 VxWorks patches
 
@@ -273,20 +273,38 @@ A filesystem with ROS 2 artifacts needs to be prepared to boot with VxWorks.
 
 ### Create an HDD image
 
-Run x86_64 QEMU with a prebuilt VxWorks kernel and a created HDD image.
+Run `x86_64` QEMU with a prebuilt VxWorks kernel and a prepared HDD image.
+
+#### Run `make image`
+
+It will automatically create an image.
 
 ```bash
-# create a disk 2048MB
+$ sudo apt-get install dosfstools fusefat
+$ make image
+```
+
+#### Create an HDD image manually
+
+If you want to do it manually, run
+
+```bash
+$ echo create a ready-to-deploy filesystem
+$ make fs
+
+$ echo create a disk 2048MB
 $ dd if=/dev/zero of=./output/ros2.img count=2048 bs=1M
-# format it as a FAT32
+$ echo format it as a FAT32
 $ mkfs.vfat -F 32 ./output/ros2.img
 
-# mount, copy, unmount, you need to be `sudo`
+$ echo mount, copy, unmount, you need to be `sudo`
 $ mkdir -p ~/tmp/mount
 $ sudo mount -o loop -t vfat ./output/ros2.img ~/tmp/mount
 $ sudo cp -r -L ./output/export/deploy/* ~/tmp/mount/.
 $ sudo umount ~/tmp/mount
 ```
+
+### Run `x86_64 QEMU`
 
 ```bash
 sudo qemu-system-x86_64 -m 2G -machine q35 -cpu Nehalem -kernel ~/Downloads/wrsdk/vxsdk/bsps/*/vxWorks \
@@ -396,7 +414,7 @@ ros2 security create_enclave demo_keystore /talker_listener/listener
 Copy directory `demo_keystore` to the `deploy`, and create `ros2.img`
 
 ```bash
-cp demo_keystore output/deploy/.
+cp demo_keystore output/export/deploy/.
 make image
 ```
 

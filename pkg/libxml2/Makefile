@@ -40,5 +40,13 @@ PKG_SRC_DIR = ${PKG_NAME}-$(PKG_VER)
 
 PKG_MAKE_INSTALL_OPT=install
 
+libxml2.deploy : libxml2.install
+	@$(call echo_action,Deploying,$*)
+	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) && \
+	cmake --install . --component runtime --prefix $(DEPLOY_DIR)
+	mkdir -p $(DEPLOY_DIR)/python
+	cp -P $(ROOT_DIR)/python/*libxml2* $(DEPLOY_DIR)/python/
+	@$(MAKE_STAMP)
+
 include $(WIND_USR_MK)/defs.cmake.mk
 include $(WIND_USR_MK)/rules.packages.mk
