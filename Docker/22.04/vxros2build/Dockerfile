@@ -16,7 +16,7 @@ RUN echo 'Etc/UTC' > /etc/timezone && \
 # Install packages needed for ROS 2 builds
 RUN apt-get update && apt install -q -y \
     software-properties-common \
-    curl \
+    curl gettext \
     && add-apt-repository universe \
     && rm -rf /var/lib/apt/lists/*
 
