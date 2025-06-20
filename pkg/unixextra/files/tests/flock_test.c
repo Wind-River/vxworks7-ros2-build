@@ -1,8 +1,8 @@
 /* flock_test - test program for flock
 
-Usage: ./flock_test <filename> <sn>
-       ./flock_test <sn>
-       ./flock_test
+Usage: flock_test [filename] [lock_opt:sn]
+       flock_test [lock_opt:sn]
+       flock_test
 
 [vxWorks *]# echo "" > /tmp/stamp
 
@@ -49,7 +49,6 @@ int main (
 
     /* parse input parameters
      * flock_test [filename] [lock_opt:sn] */
-
     if (argc > 1)
     {
         if (argv[1][0] == 's' || argv[1][1] == 'n')
@@ -60,7 +59,7 @@ int main (
         else
         {
             fname = argv[1];
-            if (argv[2][0] == 's' || argv[2][1] == 'n')
+            if (argc > 2 && (argv[2][0] == 's' || argv[2][1] == 'n'))
             {
                 lock = (argv[2][0] == 's') ? LOCK_SH : LOCK_EX;
                 lock |= (argv[2][1] == 'n') ? LOCK_NB : 0;
@@ -71,21 +70,25 @@ int main (
     fd = open (fname, O_RDWR);
     if (fd == -1 )
     {
-        printf("open %s failed with %d (%s)\n", fname, errno, strerror(errno));
-        if(errno == ENOENT)
-            printf("Create it first: [vxWorks *]# echo > %s\n", fname);
-        exit (-1);
+        if (errno == ENOENT)
+        {
+            printf("file %s does not exist, create it\n", fname);
+            fd = open(fname, O_RDWR | O_CREAT, 0666);
+            if (fd == -1)
+            {
+                printf("create %s failed with %d (%s)\n", fname, errno, strerror(errno));
+                exit(-1);
+            }
+        }
+        else
+        {
+            printf("open %s failed with %d (%s)\n", fname, errno, strerror(errno));
+            exit(-1);
+        }
     }
 
-    if (argc > 2)
-        if (argv[2][0] == 's' || argv[2][1] == 'n')
-        {
-            lock = (argv[2][0] == 's') ? LOCK_SH : LOCK_EX;
-            lock |= (argv[2][1] == 'n') ? LOCK_NB : 0;
-        }
-
-    printf ("Press <RETURN> to acquire %s %s lock on %s ... ",
-        (lock & LOCK_EX)?"an exclusive":"a shared", (lock & LOCK_NB)?"(non-blocking)":"(blocking)", fname);
+    printf ("Press <RETURN> to acquire %s %s lock on %s (%d) ... ",
+        (lock & LOCK_EX)?"an exclusive":"a shared", (lock & LOCK_NB)?"(non-blocking)":"(blocking)", fname, fd);
     fflush(stdout);
     getchar();
 
@@ -102,7 +105,7 @@ int main (
     getchar();
 
     if (flock(fd, LOCK_UN) == -1)
-        {printf("unflock %s failed", fname);exit(-1);}
+        {printf("unlock %s failed with %d (%s)\n", fname, errno, strerror(errno)); exit(-1);}
 
     printf ("done\n");
     fflush(stdout);
