@@ -4,17 +4,17 @@
 
 ## VxWorks SDK and ROS 2 support
 
-Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `iron` and the latest VxWorks SDK is `24.03`.
+Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `jazzy` and the latest VxWorks SDK is `24.03`.
 
-|           | [24.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [24.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [23.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
-|:---------:|:-------------|:-------------|:-------------|:-------------|
-|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_raspberrypi4b.html) | [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) |  [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
-|**[`iron`](https://docs.ros.org/en/iron/)**| | | [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
-|**[`rolling`](https://docs.ros.org/en/rolling/)**| | | [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) |
+|           | [24.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [24.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
+|:---------:|:-------------|:-------------|
+|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_raspberrypi4b.html) |
+|**[`jazzy`](https://docs.ros.org/en/jazzy/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_raspberrypi4b.html) |
+|**[`rolling`](https://docs.ros.org/en/rolling/)**| | |
 
 ## Prebuilt image
 
-The VxWorks ROS 2 `humble`, `iron`, and `rolling` images are prebuilt and can be tested by downloading them from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yaml).
+The VxWorks ROS 2 `humble`, `Jazzy`, and `rolling` images are prebuilt and can be tested by downloading them from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yaml).
 
 ## Overview
 
