@@ -24,6 +24,7 @@ __sdk_defs = TRUE
 
 include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.python.mk
+include $(WIND_USR_MK)/defs.vxworks.mk
 
 define sdk_fix
 	if [ ! -f $(WIND_CC_SYSROOT)/mk/defs.autotools.mk ]; then \
@@ -48,6 +49,19 @@ define vxworks_fix
         else \
                 echo "'u_int' not found, no changes needed."; \
         fi
+
+        # Patch getpagesize cast, idempotent
+        if ! grep -q 'static_cast<int>(sysconf(_SC_PAGESIZE))' $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX/unistd.h; then \
+            sed -i '/return (int)sysconf(_SC_PAGESIZE);/c\
+#ifdef __cplusplus\
+    return static_cast<int>(sysconf(_SC_PAGESIZE));\
+#else\
+    return (int)sysconf(_SC_PAGESIZE);\
+#endif' $(WIND_CC_SYSROOT)/usr/h/published/UTILS_UNIX/unistd.h; \
+            echo "Patched getpagesize() cast to C++ safe version"; \
+        else \
+            echo "getpagesize() cast already patched, skipping"; \
+        fi
 endef
 
 define python_fix
@@ -67,7 +81,7 @@ define python_fix
 
 	if [ ! -f $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 ]; then \
 		cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),https://bootstrap.pypa.io/get-pip.py,get-pip.py) ; \
-		python3 $(DOWNLOADS_DIR)/get-pip.py ; \
+		$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 $(DOWNLOADS_DIR)/get-pip.py ; \
 		echo "'pip3' was not found and has been installed." ; \
 	else \
 		echo "'pip3' already exists, no installation needed." ; \
@@ -82,8 +96,8 @@ define sdk_patch
 endef
 
 define sdk_install
-	pip3 install -r files/$(WIND_RELEASE_ID)/requirements.txt ;
-	export SSL_CERT_FILE=$(shell python3 -m certifi) ;
+	$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 install -r files/$(WIND_RELEASE_ID)/requirements.txt ;
+	export SSL_CERT_FILE=$(shell $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 -m certifi) ;
 
 	if [ ! -f "$(VIRTUAL_ENV)/bin/activate" ]; then \
 		echo "setup 'crossenv'."; \
