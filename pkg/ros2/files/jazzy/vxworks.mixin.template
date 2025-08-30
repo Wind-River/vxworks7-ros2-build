@@ -1,0 +1,20 @@
+{
+    "build": {
+        "vxworks": {
+            "cmake-force-configure": true,
+            "cmake-args": [
+                "-DCMAKE_FIND_ROOT_PATH=${ROOT_DIR}",
+                "-DCMAKE_BUILD_TYPE:STRING=Release",
+                "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON",
+                "-DCMAKE_TOOLCHAIN_FILE=${BUILDSPECS_DIR}/cmake/toolchain.cmake",
+                "-DCMAKE_MAKE_PROGRAM:FILEPATH=${WIND_SDK_HOST_TOOLS}/x86_64-linux/bin/make",
+                "-DPython3_EXECUTABLE=${WIND_SDK_HOST_TOOLS}/x86_64-linux/bin/python3",
+                "-DPython3_NumPy_INCLUDE_DIR=${Python3_NumPy_INCLUDE_DIR}",
+                "-DPYTHON_SOABI=cpython-3${TGT_PYTHON_MINOR}-vxworks",
+                "-DSECURITY=ON",
+                "-DCMAKE_EXE_LINKER_FLAGS=-rpath-link ${ROOT_DIR}/lib",
+                "-DFORCE_BUILD_VENDOR_PKG=ON"
+            ]
+        }
+    }
+}

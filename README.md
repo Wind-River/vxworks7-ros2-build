@@ -151,14 +151,18 @@ cd vxworks7-ros2-build
 
 ### Build Docker image
 
-A Docker (Ubuntu 22.04) based build is recommended to avoid the necessity of installing build dependencies.
+A Docker (Ubuntu 22.04 or 24.04) based build is recommended to avoid the necessity of installing build dependencies.
 
 ```bash
 docker build --no-cache -t vxbuild:22.04 Docker/22.04/vxbuild/.
 docker build --no-cache -t vxros2build:humble Docker/22.04/vxros2build/.
+```
 
-docker build --no-cache --build-arg ROS_DISTRO=iron -t vxros2build:iron Docker/22.04/vxros2build/.
-docker build --no-cache --build-arg ROS_DISTRO=rolling -t vxros2build:rolling Docker/22.04/vxros2build/.
+```bash
+docker build --no-cache -t vxbuild:24.04 Docker/24.04/vxbuild/.
+docker build --no-cache -t vxros2build:jazzy Docker/24.04/vxros2build/.
+
+docker build --no-cache --build-arg ROS_DISTRO=rolling -t vxros2build:rolling Docker/24.04/vxros2build/.
 ```
 
 ### Download and extract the VxWorks SDK
@@ -181,7 +185,7 @@ mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
 tar -jxvf ~/Downloads//wrsdk-vxworks7-raspberrypi4b-1.6.tar.bz2 --strip 1
 ```
 
-### Run Docker image
+### Run Docker image e.g. `humble`
 
 ```bash
 cd vxworks7-ros2-build
