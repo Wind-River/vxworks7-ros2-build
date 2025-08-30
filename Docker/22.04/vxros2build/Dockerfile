@@ -46,8 +46,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /usr/local/lib && cd /usr/local/lib \
-    && cp -a /opt/ros/humble/lib/x86_64-linux-gnu/libdds* . \
-    && cp -a /opt/ros/humble/lib/x86_64-linux-gnu/libcyclonedds* . \
-    && cp -a /opt/ros/humble/lib/x86_64-linux-gnu/libiceoryx_* . \
-    && cp /opt/ros/humble/bin/idlc /usr/local/bin/. \
+    && cp -a /opt/ros/${ROS_DISTRO}/lib/x86_64-linux-gnu/libdds* . \
+    && cp -a /opt/ros/${ROS_DISTRO}/lib/x86_64-linux-gnu/libcyclonedds* . \
+    && cp -a /opt/ros/${ROS_DISTRO}/lib/x86_64-linux-gnu/libiceoryx_* . \
+    && cp /opt/ros/${ROS_DISTRO}/bin/idlc /usr/local/bin/. \
     && ldconfig
