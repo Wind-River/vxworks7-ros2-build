@@ -47,6 +47,9 @@ ifeq ($(WIND_RELEASE_ID),)
 else
         TGT_PYTHON_MINOR=9
 endif
+# move it to cmake
+Python3_NumPy_INCLUDE_DIR=$(shell python3 -c "import numpy; print(numpy.get_include())")
+export Python3_NumPy_INCLUDE_DIR
 export WIND_RELEASE_ID
 export TGT_PYTHON_MINOR
 
