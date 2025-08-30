@@ -42,12 +42,15 @@ ROS2_PATCH_DIRS=ament/googletest \
                 ros2/ros2cli \
                 ros2/yaml_cpp_vendor
 
-ifeq ($(shell test $(call wind_release_id,$(WIND_RELEASE_ID)) -lt 2403 && echo true),true)
-ROS_IGNORE_TESTING_DIRS=osrf/osrf_testing_tools_cpp \
-		ament/ament_lint \
-		ament/google_benchmark_vendor \
-		ros2/mimick_vendor \
-		ros2/performance_test_fixture
+ROS2_MIXINS=vxworks warnings-low build-testing-on
+
+# Check if ROS2_MIXINS contains "build-testing-off"
+ifeq ($(findstring build-testing-off,$(ROS2_MIXINS)),build-testing-off)
+ROS_IGNORE_TESTING_DIRS = osrf/osrf_testing_tools_cpp \
+                          ament/ament_lint \
+                          ament/google_benchmark_vendor \
+                          ros2/mimick_vendor \
+                          ros2/performance_test_fixture
 endif
 
 # Ignore not used

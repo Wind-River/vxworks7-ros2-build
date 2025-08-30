@@ -48,6 +48,8 @@ ROS_IGNORE_DIRS=ros-visualization \
 		ros2/performance_test_fixture \
 		eclipse-iceoryx
 
+ROS2_MIXINS=vxworks warnings-low build-testing-off
+
 # Ignore Python-specific packages
 #ROS_IGNORE_DIRS+= \
                 ament/ament_cmake/ament_cmake_pytest \

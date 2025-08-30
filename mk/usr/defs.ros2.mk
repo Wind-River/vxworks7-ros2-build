@@ -48,14 +48,4 @@ define ros2_ignore
 	done;
 endef
 
-define ros2_select_mixins
-	if [ $(call wind_release_id,$(WIND_RELEASE_ID)) -gt 2309 ]; then \
-		echo "vxworks warnings-low build-testing-on"; \
-	else \
-		echo "vxworks build-testing-off"; \
-	fi
-endef
-
-ROS2_MIXINS := $(shell $(call ros2_select_mixins))
-
 endif

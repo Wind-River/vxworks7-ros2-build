@@ -57,6 +57,8 @@ ROS_IGNORE_DIRS=ros-visualization \
                 ros2/rosidl_python/rosidl_generator_py \
                 ros-visualization/rqt/rqt_gui_py
 
+ROS2_MIXINS=vxworks build-testing-off
+
 ROS2_EXAMPLES=examples_rclcpp_minimal_timer \
               examples_rclcpp_minimal_client \
               examples_rclcpp_minimal_service \
