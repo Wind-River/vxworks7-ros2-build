@@ -63,6 +63,7 @@ ROS2_EXAMPLES=examples_rclcpp_minimal_timer \
               examples_rclcpp_minimal_client \
               examples_rclcpp_minimal_service \
               examples_rclcpp_minimal_publisher \
+              examples_rclcpp_minimal_subscriber \
               examples_rclpy_* \
               demo_nodes_cpp \
               demo_nodes_py \
