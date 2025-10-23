@@ -1,0 +1,102 @@
+# syntax=docker/dockerfile:1
+
+FROM scratch
+
+ENV AMENT_PREFIX_PATH=/usr
+ENV LD_LIBRARY_PATH=/usr/lib
+ENV ROS_LOG_DIR=/ram0
+ENV ROS_SECURITY_KEYSTORE=/usr/demo_keystore
+ENV ROS_SECURITY_ENABLE=false
+ENV ROS_SECURITY_STRATEGY=Enforce
+
+WORKDIR /ram0
+WORKDIR /usr/lib
+# Copy all required shared libraries
+COPY \
+     lib/libament_index_cpp.so \
+     lib/libbuiltin_interfaces__rosidl_generator_c.so \
+     lib/libbuiltin_interfaces__rosidl_typesupport_introspection_c.so \
+     lib/libbuiltin_interfaces__rosidl_typesupport_introspection_cpp.so \
+     lib/librcl.so \
+     lib/librclcpp.so \
+     lib/librcpputils.so \
+     lib/librcl_interfaces__rosidl_generator_c.so \
+     lib/librcl_logging_interface.so \
+     lib/librcl_interfaces__rosidl_typesupport_c.so \
+     lib/librcl_interfaces__rosidl_typesupport_cpp.so \
+     lib/librcl_interfaces__rosidl_typesupport_introspection_c.so \
+     lib/librcl_interfaces__rosidl_typesupport_introspection_cpp.so \
+     lib/librosidl_typesupport_cpp.so \
+     lib/librcl_yaml_param_parser.so \
+     lib/libyaml.so \
+     lib/librosgraph_msgs__rosidl_typesupport_cpp.so \
+     lib/librmw_implementation.so \
+     lib/libstd_msgs__rosidl_typesupport_cpp.so \
+     lib/libstd_msgs__rosidl_typesupport_fastrtps_cpp.so \
+     lib/libstd_msgs__rosidl_typesupport_introspection_cpp.so \
+     lib/liblibstatistics_collector.so \
+     lib/librcl_logging_spdlog.so \
+     lib/libspdlog.so.1 \
+     lib/librosidl_typesupport_c.so \
+     lib/librosidl_runtime_c.so \
+     lib/libstatistics_msgs__rosidl_typesupport_cpp.so \
+     lib/librmw.so \
+     lib/librcutils.so \
+     /usr/lib/
+
+# DDS
+COPY lib/librmw_fastrtps_cpp.so \
+     lib/librmw_fastrtps_shared_cpp.so \
+     lib/libfastrtps.so.2.6 \
+     lib/librosidl_typesupport_fastrtps_c.so \
+     lib/librosidl_typesupport_fastrtps_cpp.so \
+     lib/librosidl_typesupport_introspection_c.so \
+     lib/librosidl_typesupport_introspection_cpp.so \
+     lib/librcl_interfaces__rosidl_typesupport_fastrtps_c.so \
+     lib/librcl_interfaces__rosidl_typesupport_fastrtps_cpp.so \
+     lib/libfastcdr.so.1 \
+     lib/libbuiltin_interfaces__rosidl_typesupport_fastrtps_c.so \
+     lib/libbuiltin_interfaces__rosidl_typesupport_fastrtps_cpp.so \
+     lib/librmw_dds_common.so \
+     lib/librmw_dds_common__rosidl_generator_c.so \
+     lib/librmw_dds_common__rosidl_typesupport_c.so \
+     lib/librmw_dds_common__rosidl_typesupport_cpp.so \
+     lib/librmw_dds_common__rosidl_typesupport_fastrtps_c.so \
+     lib/librmw_dds_common__rosidl_typesupport_fastrtps_cpp.so \
+     lib/librmw_dds_common__rosidl_typesupport_introspection_c.so \
+     lib/librmw_dds_common__rosidl_typesupport_introspection_cpp.so \
+     lib/libtinyxml2.so.6 \
+     /usr/lib/
+
+# VxWorks
+COPY lib/libunix.so.1 \
+     lib/libunixextra.so.1 \
+     lib/libc.so.1 \
+     lib/libcplusplus.so.1 \
+     lib/libllvm.so.1 \
+     lib/libllvmcplus.so.1 \
+     lib/libnet.so.1 \
+     lib/libssl.so.3 \
+     lib/libcrypto.so.3 \
+     lib/libz.so.1 \
+     /usr/lib/
+
+WORKDIR /usr/lib/examples_rclcpp_minimal_subscriber
+COPY lib/examples_rclcpp_minimal_subscriber/subscriber_lambda /usr/lib/examples_rclcpp_minimal_subscriber
+
+CMD ["/usr/lib/examples_rclcpp_minimal_subscriber/subscriber_lambda"]
+
+LABEL com.windriver.vxworks.rtp.rtpStackSize   0x100000
+LABEL com.windriver.vxworks.rtp.rtpPriority    50
+LABEL com.windriver.vxworks.rtp.rtpOptions     0x80
+LABEL com.windriver.vxworks.rtp.rtpTaskOptions 0x1000000
+
+VOLUME "/ram0:/ram0"
+VOLUME "/dev/random:/dev/random:--:iodev"
+VOLUME "/dev/urandom:/dev/urandom:--:iodev"
+VOLUME "/dev/shm:/dev/shm:--:iodev"
+# VOLUME "/dev/zero:/dev/zero:--:iodev"
+
+USER 1001:1000
+STOPSIGNAL SIGTERM
+
