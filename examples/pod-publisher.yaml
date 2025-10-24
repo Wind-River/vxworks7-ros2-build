@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: publisher
+spec:
+  nodeName: vxkubelet
+  containers:
+  - name: publisher
+    image: razr/publisher_lambda
+    imagePullPolicy: IfNotPresent
+

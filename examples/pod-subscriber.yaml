@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: subscriber
+spec:
+  nodeName: vxkubelet
+  containers:
+  - name: subscriber
+    image: razr/subscriber_lambda
+    imagePullPolicy: IfNotPresent
+
