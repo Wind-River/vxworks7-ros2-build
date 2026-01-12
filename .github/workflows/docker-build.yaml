@@ -8,44 +8,62 @@ name: 'Docker build'
 
 on:
   workflow_dispatch:
+    inputs:
+      ros_distro:
+        description: 'ROS 2 Distribution (e.g., humble, jazzy)'
+        required: true
+        default: 'humble'
+        type: choice
+        options:
+          - humble
+          - jazzy
 
 jobs:
   build:
-    strategy:
-      matrix:
-        ubuntu: [22.04]
-        ros_distro: [humble, iron]
-
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-
       - name: Checks-out a branch ${{ github.ref_name }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
 
-      - name: Build vxbuild:${{ matrix.ubuntu }} docker image
-        uses: docker/build-push-action@v3
-        with:
-          context: Docker/${{ matrix.ubuntu }}/vxbuild/.
-          push: false
-          tags: vxbuild:${{ matrix.ubuntu }}
-
-      - name: Build vxros2build:${{ matrix.ros_distro }} docker image
-        uses: docker/build-push-action@v3
-        with:
-          context: Docker/${{ matrix.ubuntu }}/vxros2build/.
-          push: false
-          build-args: ROS_DISTRO=${{ matrix.ros_distro }}
-          tags: vxros2build:${{ matrix.ros_distro }}
-
-      - name: Save vxros2build:${{ matrix.ros_distro }} Docker Image
+      - name: Resolve supported Ubuntu version
+        id: version
         run: |
-          docker save vxros2build:${{ matrix.ros_distro }} | gzip > ${{ github.workspace }}/vxros2build.${{ matrix.ros2 }}.tar.gz
+          sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Upload vxros2build:${{ matrix.ros_distro }} Docker Image
-        uses: actions/upload-artifact@v2
+          # Look up the ubuntu version for the selected distro in ros2.json
+          UBUNTU_VER=$(jq -r ".[\"${{ github.event.inputs.ros_distro }}\"].ubuntu" .github/workflows/ros2.json)
+          
+          if [ "$UBUNTU_VER" == "null" ]; then
+            echo "Error: Distro ${{ github.event.inputs.ros_distro }} not found in ros2.json"
+            exit 1
+          fi
+          
+          echo "ubuntu=$UBUNTU_VER" >> $GITHUB_OUTPUT
+
+      - name: Build vxbuild:${{ steps.version.outputs.ubuntu }} docker image
+        uses: docker/build-push-action@v5
         with:
-          name: Docker Image vxros2build ${{ matrix.ros_distro }}
+          context: Docker/${{ steps.version.outputs.ubuntu }}/vxbuild/.
+          push: false
+          tags: vxbuild:${{ steps.version.outputs.ubuntu }}
+
+      - name: Build vxros2build:${{ github.event.inputs.ros_distro }} docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: Docker/${{ steps.version.outputs.ubuntu }}/vxros2build/.
+          push: false
+          build-args: ROS_DISTRO=${{ github.event.inputs.ros_distro }}
+          tags: vxros2build:${{ github.event.inputs.ros_distro }}
+
+      - name: Save vxros2build:${{ github.event.inputs.ros_distro }} Docker Image
+        run: |
+          docker save vxros2build:${{ github.event.inputs.ros_distro }} | gzip > ${{ github.workspace }}/vxros2build.${{ github.event.inputs.ros_distro }}.tar.gz
+
+      - name: Upload vxros2build:${{ github.event.inputs.ros_distro }} Docker Image
+        uses: actions/upload-artifact@v4
+        with:
+          name: Docker Image vxros2build ${{ github.event.inputs.ros_distro }}
           path: |
-            ${{ github.workspace }}/vxros2build.${{ matrix.ros_distro }}.tar.gz
+            ${{ github.workspace }}/vxros2build.${{ github.event.inputs.ros_distro }}.tar.gz

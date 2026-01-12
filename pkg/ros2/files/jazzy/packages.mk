@@ -21,7 +21,8 @@
 
 # SYNOPSIS        variables for ROS 2 packages
 
-ROS2_PATCH_DIRS=ament/googletest \
+ROS2_PATCH_DIRS=ament/ament_cmake \
+		ament/googletest \
 		eclipse-iceoryx/iceoryx \
                 eclipse-cyclonedds/cyclonedds \
                 eProsima/Fast-DDS \
