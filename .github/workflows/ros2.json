@@ -1,0 +1,4 @@
+{
+  "humble": { "ubuntu": "22.04" },
+  "jazzy":  { "ubuntu": "24.04" }
+}
