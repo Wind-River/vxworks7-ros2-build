@@ -31,8 +31,8 @@ ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
 # Install bootstrap tools
-RUN apt-get update && apt -y upgrade \
-    && apt install --no-install-recommends -y \
+RUN apt-get -o Acquire::Retries=5 update \
+    && apt-get install --no-install-recommends -y \
     ros-${ROS_DISTRO}-ros-base \
     ros-dev-tools \
     ros-${ROS_DISTRO}-cyclonedds \
