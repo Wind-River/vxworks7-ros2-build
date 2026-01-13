@@ -33,7 +33,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     services:
       registry:
         image: registry:2
@@ -54,6 +54,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
+
+      - name: Resolve supported Ubuntu version
+        id: version
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+
+          # Look up the ubuntu version for the selected distro in ros2.json
+          UBUNTU_VER=$(jq -r ".[\"${{ github.event.inputs.ros_distro }}\"].ubuntu" .github/workflows/ros2.json)
+
+          if [ "$UBUNTU_VER" == "null" ]; then
+            echo "Error: Distro ${{ github.event.inputs.ros_distro }} not found in ros2.json"
+            exit 1
+          fi
+
+          echo "ubuntu=$UBUNTU_VER" >> $GITHUB_OUTPUT
 
       - name: Use Download SDK action
         uses: ./.github/actions/setup-wrsdk
@@ -77,9 +92,9 @@ jobs:
       - name: Build vxbuild docker image
         uses: docker/build-push-action@v6
         with:
-          context: Docker/22.04/vxbuild/.
+          context: Docker/${{ steps.version.outputs.ubuntu }}/vxbuild/.
           push: true
-          tags: localhost:5000/local/vxbuild:22.04
+          tags: localhost:5000/local/vxbuild:${{ steps.version.outputs.ubuntu }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
         env:
@@ -88,17 +103,17 @@ jobs:
 
       - name: Inspect
         run: |
-          docker buildx imagetools inspect localhost:5000/local/vxbuild:22.04
+          docker buildx imagetools inspect localhost:5000/local/vxbuild:${{ steps.version.outputs.ubuntu }}
 
       - name: Build vxros2build docker image
         uses: docker/build-push-action@v6
         with:
-          context: Docker/22.04/vxros2build/.
+          context: Docker/${{ steps.version.outputs.ubuntu }}/vxros2build/.
           push: false
           load: true
           build-args: |
             ROS_DISTRO=${{ env.ros_distro }}
-            BASE_IMAGE=localhost:5000/local/vxbuild:22.04
+            BASE_IMAGE=localhost:5000/local/vxbuild:${{ steps.version.outputs.ubuntu }}
           tags: vxros2build:${{ env.ros_distro }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -115,17 +130,18 @@ jobs:
         with:
           image: vxros2build:${{ env.ros_distro }}
           options: -v ${{ github.workspace }}:/work -v /tmp/wrsdk:/wrsdk
+          shell: bash
           run:  |
             groupadd -g "`cat /wrsdk/gid`" wruser
             useradd -u "`cat /wrsdk/uid`" -m wruser -g wruser
-            su wruser -c 'source /wrsdk/sdkenv.sh && make fs -C /work'
+            su wruser -c "bash -lc 'source /wrsdk/sdkenv.sh && make fs -C /work'"
 
       - name: Create an SROS2 script
         run: |
           cat << 'EOF' > /tmp/sros2_script.sh
           #!/bin/bash
           
-          . /opt/ros/humble/setup.sh
+          . /opt/ros/${{ env.ros_distro }}/setup.sh
           ros2 security create_keystore demo_keystore
           ros2 security create_enclave demo_keystore /talker_listener/talker
           ros2 security create_enclave demo_keystore /talker_listener/listener
@@ -178,7 +194,7 @@ jobs:
           echo "ros_distro=${{ env.ros_distro }}" >> $GITHUB_OUTPUT
 
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: build
     if: ${{ github.event.inputs.test != 'false' && (github.event.inputs.test || 'false') == 'true' }}
     steps:
