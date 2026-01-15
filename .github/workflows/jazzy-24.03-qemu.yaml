@@ -1,0 +1,17 @@
+name: "Jazzy 24.03 QEMU Build"
+
+on:
+  schedule:
+    - cron: '0 1 * * 0'  # every Sunday at 01:00 UTC
+
+  workflow_dispatch:
+
+jobs:
+  build-jazzy:
+    uses: ./.github/workflows/vxworks-ros2-build.yaml
+    with:
+      ros_distro: jazzy
+      vxworks: "24.03"
+      sdk: qemu
+      test: false
+      debug: false

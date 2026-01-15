@@ -1,20 +1,18 @@
 # VxWorks® 7 ROS 2 Build
 
-![vxworks ros2 build workflow](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yaml/badge.svg)
-
 ## VxWorks SDK and ROS 2 support
 
 Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `jazzy` and the latest VxWorks SDK is `24.03`.
 
-|           | [24.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) | [24.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43) |
+|           | [24.03 QEMU x86_64 SDK](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_qemu.html) | [24.03 Raspberry Pi 4 SDK](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_raspberrypi4b.html) |
 |:---------:|:-------------|:-------------|
-|**[`humble`](https://docs.ros.org/en/humble/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_raspberrypi4b.html) |
-|**[`jazzy`](https://docs.ros.org/en/jazzy/)**| [QEMU x86_64](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_qemu.html) | [Raspberry Pi 4](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_raspberrypi4b.html) |
+|**[`humble`](https://docs.ros.org/en/humble/)**| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/humble-24.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-rpi4.humble/badge.svg) |
+|**[`jazzy`](https://docs.ros.org/en/jazzy/)**| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-qemu.yaml/badge.svg) |
 |**[`rolling`](https://docs.ros.org/en/rolling/)**| | |
 
 ## Prebuilt image
 
-The VxWorks ROS 2 `humble`, `Jazzy`, and `rolling` images are prebuilt and can be tested by downloading them from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yaml).
+The VxWorks ROS 2 `humble`, `jazzy`, and `rolling` images are prebuilt and can be tested by downloading them from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yaml).
 
 ## Overview
 
@@ -72,13 +70,13 @@ Subject to the License, you can proceed to download the VxWorks SDK.
 For the standard build, you must also have:
 
 * Supported Linux host for both ROS 2 and VxWorks 7
-   * ROS 2.0 Target Platforms
+   * ROS 2 Target Platforms
       * http://www.ros.org/reps/rep-2000.html
    * VxWorks 7 24.03
       * https://docs.windriver.com/bundle/vxworks_release_notes_24_03/page/index-release_notes.html
    * For ROS 2 Humble Hawksbill, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
-   * For ROS 2 Iron Irwini, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
-   * For ROS 2 Rolling Ridley, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
+   * For ROS 2 Jazzy Jalisco, Ubuntu Noble (24.04) 64-bit LTS is the Tier 1 host
+   * For ROS 2 Rolling Ridley, Ubuntu Noble (24.04) 64-bit LTS is the Tier 1 host
 * Docker Engine installed on your Linux host
    * https://docs.docker.com/engine/install/ubuntu/
 
@@ -86,7 +84,7 @@ For the standard build, you must also have:
 
 The following branches are active
 
-- [x] `master` - builds ROS2 `humble`, `iron`, and `rolling` against VxWorks `24.03` SDK depending on what VxWorks SDK and what Docker image are used
+- [x] `master` - builds ROS2 `humble`, `jazzy`, and `rolling` against VxWorks `24.03` SDK depending on what VxWorks SDK and what Docker image are used
 
 ## Directory Structure
 

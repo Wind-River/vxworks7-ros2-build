@@ -5,31 +5,53 @@ name: 'VxWorks ROS 2 build'
 run-name: Build ${{ inputs.ros_distro }} ${{ inputs.vxworks }} ${{ inputs.sdk }}
 
 on:
+  workflow_call:
+    inputs:
+      ros_distro:
+        required: true
+        type: string
+        default: humble
+      vxworks:
+        required: true
+        type: string
+        default: "24.03"
+      sdk:
+        required: true
+        type: string
+        default: qemu
+      test:
+        required: false
+        type: boolean
+        default: false
+      debug:
+        required: false
+        type: boolean
+        default: false
+  
   workflow_dispatch:
     inputs:
       ros_distro:
-        description: 'ROS 2 Distribution'
+        description: "ROS 2 Distribution"
         required: true
-        default: 'humble'
+        default: humble
       vxworks:
-        description: 'VxWorks Release'
+        description: "VxWorks Release"
         required: true
-        default: '24.03'
+        default: "24.03"
       sdk:
-        description: 'SDK Name'
+        description: "SDK Name"
         required: true
-        default: 'qemu'
+        default: qemu
       test:
-        description: 'Run tests'
+        description: "Run tests"
         required: false
         default: false
+        type: boolean
       debug:
-        description: 'Debug'
+        description: "Debug"
         required: false
         default: false
-
-  schedule:
-    - cron: '0 0 * * 0'  # Runs at 00:00 UTC every Sunday
+        type: boolean
 
 jobs:
   build:
@@ -43,11 +65,9 @@ jobs:
       sdk: ${{ steps.set_outputs.outputs.sdk }}
       ros_distro: ${{ steps.set_outputs.outputs.ros_distro }}
     env:
-      # Check if input variables exist, otherwise set defaults for scheduled runs
-      ros_distro: ${{ github.event.inputs.ros_distro || 'humble' }}
-      vxworks: ${{ github.event.inputs.vxworks || '24.03' }}
-      sdk: ${{ github.event.inputs.sdk || 'qemu' }}
-      debug: ${{ github.event.inputs.debug || 'false' }}
+      ros_distro: ${{ inputs.ros_distro }}
+      vxworks:   ${{ inputs.vxworks }}
+      sdk:       ${{ inputs.sdk }}
 
     steps:
       - name: Checks-out a branch ${{ github.ref }}
@@ -61,10 +81,10 @@ jobs:
           sudo apt-get update && sudo apt-get install -y jq
 
           # Look up the ubuntu version for the selected distro in ros2.json
-          UBUNTU_VER=$(jq -r ".[\"${{ github.event.inputs.ros_distro }}\"].ubuntu" .github/workflows/ros2.json)
+          UBUNTU_VER=$(jq -r ".[\"${{ env.ros_distro }}\"].ubuntu" .github/workflows/ros2.json)
 
           if [ "$UBUNTU_VER" == "null" ]; then
-            echo "Error: Distro ${{ github.event.inputs.ros_distro }} not found in ros2.json"
+            echo "Error: Distro ${{ env.ros_distro }} not found in ros2.json"
             exit 1
           fi
 
@@ -184,7 +204,7 @@ jobs:
             ${{ github.workspace }}/*xWorks*
 
       - name: Setup tmate session
-        if: ${{ env.debug == 'true' }}
+        if: ${{ inputs.debug }}
         uses: mxschmitt/action-tmate@v3
 
       - name: Set outputs for sdk and ros_distro
@@ -196,7 +216,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ github.event.inputs.test != 'false' && (github.event.inputs.test || 'false') == 'true' }}
+    if: ${{ inputs.test }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

@@ -1,0 +1,17 @@
+name: "Humble 24.03 QEMU Build"
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # every Sunday at 00:00 UTC
+
+  workflow_dispatch:
+
+jobs:
+  build-humble:
+    uses: ./.github/workflows/vxworks-ros2-build.yaml
+    with:
+      ros_distro: humble
+      vxworks: "24.03"
+      sdk: qemu
+      test: false
+      debug: false
