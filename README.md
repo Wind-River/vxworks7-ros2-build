@@ -6,8 +6,8 @@ Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, se
 
 |           | [24.03 QEMU x86_64 SDK](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_qemu.html) | [24.03 Raspberry Pi 4 SDK](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_raspberrypi4b.html) |
 |:---------:|:-------------|:-------------|
-|**[`humble`](https://docs.ros.org/en/humble/)**| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/humble-24.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-rpi4.humble/badge.svg) |
-|**[`jazzy`](https://docs.ros.org/en/jazzy/)**| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-qemu.yaml/badge.svg) |
+|**[`humble`](https://docs.ros.org/en/humble/)**| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/humble-24.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/humble-24.03-raspberrypi4b.yaml/badge.svg) |
+|**[`jazzy`](https://docs.ros.org/en/jazzy/)**| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-raspberrypi4b.yaml/badge.svg) |
 |**[`rolling`](https://docs.ros.org/en/rolling/)**| | |
 
 ## Prebuilt image
