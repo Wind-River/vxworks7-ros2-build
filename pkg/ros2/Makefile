@@ -31,15 +31,20 @@ PACKAGES += ros2
 PKG_NAME = ros2
 PKG_VER = $(ROS_DISTRO)
 
-PKG_URL = https://github.com/Wind-River/vxworks7-layer-for-ros2.git
+PKG_LAYER_URL ?= https://github.com/Wind-River/vxworks7-layer-for-ros2.git
+PKG_URL = $(PKG_LAYER_URL)
+
 # layer branch is calculated as $(ROS_DISTRO)-release-$(WIND_RELEASE_ID)
 ifeq ($(ROS_DISTRO),rolling)
-PKG_COMMIT_ID = $(ROS_DISTRO)-$(WIND_RELEASE_ID)
+PKG_LAYER_COMMIT_ID ?= $(ROS_DISTRO)-$(WIND_RELEASE_ID)
 PKG_REPO_COMMIT_ID = $(ROS_DISTRO)
 else
-PKG_COMMIT_ID = $(ROS_DISTRO)-release-$(WIND_RELEASE_ID)
+PKG_LAYER_COMMIT_ID ?= $(ROS_DISTRO)-release-$(WIND_RELEASE_ID)
 PKG_REPO_COMMIT_ID = $(ROS_DISTRO)-release
 endif
+
+PKG_COMMIT_ID = $(PKG_LAYER_COMMIT_ID)
+
 PKG_TYPE = git
 
 PKG_REPO_URL = https://raw.githubusercontent.com/ros2/ros2/${PKG_REPO_COMMIT_ID}/${PKG_NAME}.repos

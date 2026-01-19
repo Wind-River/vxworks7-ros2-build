@@ -61,7 +61,12 @@ define clone_git
 		LANG=C git clone $(DOWNLOADS_DIR)/$$GIT_DIR_NAME $(PKG_SRC_DIR) --progress ; \
 		if [ -n "$(PKG_COMMIT_ID)" ]; then \
 			cd $(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) && \
-			LANG=C git checkout $(PKG_COMMIT_ID); \
+			case "$(PKG_COMMIT_ID)" in \
+				pr-*) \
+					echo "Fetching $(PKG_COMMIT_ID)..." ; \
+					git fetch $(PKG_URL) pull/23/head:$(PKG_COMMIT_ID) ; \
+			esac ; \
+			git checkout $(PKG_COMMIT_ID) ; \
 		fi ; \
 	else \
 		$(ECHO) "$(BUILD_DIR)/$(1)/$(PKG_SRC_DIR) already exists." ; \
