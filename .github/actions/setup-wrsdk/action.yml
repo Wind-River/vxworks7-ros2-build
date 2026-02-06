@@ -68,9 +68,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: ${{ inputs.directory }}/wrsdk
-        key: ${{ runner.os }}-wrsdk-${{ env.FILENAME }}
-        restore-keys: |
-          ${{ runner.os }}-wrsdk-
+        key: ${{ runner.os }}-wrsdk-${{ env.FILENAME }}-${{ inputs.sdk }}
 
     - name: Extract SDK
       if: steps.cache-sdk.outputs.cache-hit != 'true'
