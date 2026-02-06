@@ -57,8 +57,6 @@ runs:
       with:
         path: ${{ inputs.directory }}/${{ env.FILENAME }}
         key: ${{ runner.os }}-sdk-tarball-${{ env.FILENAME }}
-        restore-keys: |
-          ${{ runner.os }}-sdk-tarball-
 
     - name: Download SDK
       if: steps.cache-sdk-tarball.outputs.cache-hit != 'true'
