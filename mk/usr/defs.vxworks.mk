@@ -22,13 +22,24 @@
 ifeq ($(__vxworks_defs),)
 __vxworks_defs = TRUE
 
-ifeq ($(WIND_CC_SYSROOT),)
-ifeq ($(WIND_SDK_CC_SYSROOT),)
-$(error WIND_CC_SYSROOT is not set, please source the environment)
-else
-export WIND_CC_SYSROOT=$(WIND_SDK_CC_SYSROOT)
-export WIND_SDK_HOST_TOOLS=$(WIND_SDK_HOME)/vxsdk/host
+# WIND_SDK_HOME must be in the environment
+WIND_SDK_HOME ?= $(shell echo $$WIND_SDK_HOME)
+ifeq ($(WIND_SDK_HOME),)
+  $(error WIND_SDK_HOME is not set, please export it before running make)
 endif
+export WIND_SDK_HOME
+
+# Derive WIND_SDK_HOST_TOOLS immediately
+WIND_SDK_HOST_TOOLS := $(WIND_SDK_HOME)/vxsdk/host
+export WIND_SDK_HOST_TOOLS
+
+# Handle WIND_CC_SYSROOT fallback
+ifeq ($(WIND_CC_SYSROOT),)
+  ifeq ($(WIND_SDK_CC_SYSROOT),)
+    $(error WIND_CC_SYSROOT is not set, please source the SDK environment)
+  else
+    export WIND_CC_SYSROOT=$(WIND_SDK_CC_SYSROOT)
+  endif
 endif
 
 ## Add missing variablse from SDK

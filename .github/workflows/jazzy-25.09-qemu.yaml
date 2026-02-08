@@ -1,8 +1,8 @@
-name: "Jazzy 24.03 Raspberry Pi 4 Build"
+name: "Jazzy 25.09 QEMU Build"
 
 on:
   schedule:
-    - cron: '0 3 * * 0'  # every Sunday at 03:00 UTC
+    - cron: '0 4 * * 0'  # every Sunday at 04:00 UTC
 
   workflow_dispatch:
 
@@ -11,7 +11,7 @@ jobs:
     uses: ./.github/workflows/vxworks-ros2-build.yaml
     with:
       ros_distro: jazzy
-      vxworks: "24.03"
-      sdk: raspberrypi4b
+      vxworks: "25.09"
+      sdk: qemu
       test: false
       debug: false

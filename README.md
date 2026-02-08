@@ -4,15 +4,15 @@
 
 Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `jazzy` and the latest VxWorks SDK is `24.03`.
 
-|           | [24.03 QEMU x86_64 SDK](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_qemu.html) | [24.03 Raspberry Pi 4 SDK](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2403/README_raspberrypi4b.html) |
-|:---------:|:-------------|:-------------|
-|**[`humble`](https://docs.ros.org/en/humble/)**| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/humble-24.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/humble-24.03-raspberrypi4b.yaml/badge.svg) |
-|**[`jazzy`](https://docs.ros.org/en/jazzy/)**| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-raspberrypi4b.yaml/badge.svg) |
-|**[`rolling`](https://docs.ros.org/en/rolling/)**| | |
+| QEMU x86_64 | Raspberry Pi 4 |
+|---|---|
+| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/humble-24.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/humble-24.03-raspberrypi4b.yaml/badge.svg) |
+| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-raspberrypi4b.yaml/badge.svg) |
+| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-25.09-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-25.09-raspberrypi4b.yaml/badge.svg) |
 
 ## Prebuilt image
 
-The VxWorks ROS 2 `humble`, `jazzy`, and `rolling` images are prebuilt and can be tested by downloading them from [here](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/vxworks-ros2-build.yaml).
+Prebuilt VxWorks ROS 2 images for the `humble` and `jazzy` distributions are available for testing and can be downloaded from their respective GitHub Actions workflows
 
 ## Overview
 
