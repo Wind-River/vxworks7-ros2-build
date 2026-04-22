@@ -52,17 +52,24 @@ export TGT_BSP=$(shell grep _WRS_CONFIG_BSP $(WIND_CC_SYSROOT)/h/config/autoconf
 3PP_DEPLOY_DIR=$(3PP_DIR)/deploy
 
 WIND_RELEASE_ID=$(shell grep _WRS_CONFIG_CORE_RELEASE $(WIND_CC_SYSROOT)/h/config/auto.conf | cut -d '=' -f 2)
+# move it to cmake
 ifeq ($(WIND_RELEASE_ID),)
 	WIND_RELEASE_ID=SR0640
 	TGT_PYTHON_MINOR=8
 else
         TGT_PYTHON_MINOR=9
 endif
-# move it to cmake
 Python3_NumPy_INCLUDE_DIR=$(shell python3 -c "import numpy; print(numpy.get_include())")
-export Python3_NumPy_INCLUDE_DIR
-export WIND_RELEASE_ID
+Python_INCLUDE_DIR=$(3PP_DEVELOP_DIR)/usr/include/python3.$(TGT_PYTHON_MINOR)
+Python_LIBRARY=$(3PP_DEVELOP_DIR)/usr/lib/libpython3.$(TGT_PYTHON_MINOR).so
+Python_SOABI=cpython-3${TGT_PYTHON_MINOR}-vxworks
 export TGT_PYTHON_MINOR
+export Python3_NumPy_INCLUDE_DIR
+export Python_INCLUDE_DIR
+export Python_LIBRARY
+export Python_SOABI
+
+export WIND_RELEASE_ID
 
 wind_release_id = $(shell echo $(1) | sed 's/\.//g')
 

@@ -9,8 +9,11 @@
                 "-DCMAKE_TOOLCHAIN_FILE=${BUILDSPECS_DIR}/cmake/toolchain.cmake",
                 "-DCMAKE_MAKE_PROGRAM:FILEPATH=${WIND_SDK_HOST_TOOLS}/x86_64-linux/bin/make",
                 "-DPython3_EXECUTABLE=${WIND_SDK_HOST_TOOLS}/x86_64-linux/bin/python3",
+                "-DPython_ROOT_DIR=/usr/3pp/develop/usr/",
+                "-DPython_INCLUDE_DIR=${Python_INCLUDE_DIR}",
+                "-DPython_LIBRARY=${Python_LIBRARY}",
                 "-DPython3_NumPy_INCLUDE_DIR=${Python3_NumPy_INCLUDE_DIR}",
-                "-DPYTHON_SOABI=cpython-3${TGT_PYTHON_MINOR}-vxworks",
+                "-DPython_SOABI=${Python_SOABI}",
                 "-DSECURITY=ON",
                 "-DCMAKE_EXE_LINKER_FLAGS=-rpath-link ${ROOT_DIR}/lib",
                 "-DFORCE_BUILD_VENDOR_PKG=ON"
