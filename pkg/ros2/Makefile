@@ -85,6 +85,7 @@ ros2.build: ros2.configure
 	@$(call echo_action,Building,$*)
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
 	export COLCON_HOME=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon; \
+	export COLCON_EXTENSION_BLOCKLIST=colcon_core.environment.library_path; \
 	colcon build --install-base $(ROOT_DIR) --merge-install \
 	  --mixin $(ROS2_MIXINS) --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO);
 	@$(MAKE_STAMP)
