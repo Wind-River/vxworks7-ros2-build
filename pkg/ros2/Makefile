@@ -65,7 +65,14 @@ ros2.unpack: ros2.download
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
 	curl -o $(PKG_NAME).repos $(PKG_REPO_URL); \
 	mkdir src; \
-	vcs import src < $(PKG_NAME).repos
+	vcs import src < $(PKG_NAME).repos; \
+	if ls $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/*.repos >/dev/null 2>&1; then \
+		echo "Importing additional repos..."; \
+		for repo in $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/*.repos; do \
+			echo "Importing $$repo"; \
+			vcs import src < $$repo; \
+		done; \
+	fi
 	@$(MAKE_STAMP)
 
 ros2.patch: ros2.unpack

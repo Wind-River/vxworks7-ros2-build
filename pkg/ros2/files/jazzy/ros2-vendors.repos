@@ -1,0 +1,5 @@
+repositories:
+  ros2-vendors/bullet3_vendor:
+    type: git
+    url: https://github.com/ros2-vendors/bullet3_vendor.git
+    version: jazzy
