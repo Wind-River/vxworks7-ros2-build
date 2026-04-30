@@ -82,6 +82,10 @@ define python_fix
 	if [ ! -f $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 ]; then \
 		cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),https://bootstrap.pypa.io/get-pip.py,get-pip.py) ; \
 		$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 $(DOWNLOADS_DIR)/get-pip.py ; \
+		sed -i '1s|^#!.*|#!/usr/bin/env python3|' \
+			$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip \
+			$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 \
+			$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3.9 ; \
 		echo "'pip3' was not found and has been installed." ; \
 	else \
 		echo "'pip3' already exists, no installation needed." ; \
@@ -96,15 +100,17 @@ define sdk_patch
 endef
 
 define sdk_install
-	$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 install -r files/$(WIND_RELEASE_ID)/requirements.txt ;
-	export SSL_CERT_FILE=$(shell $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 -m certifi) ;
-
-	if [ ! -f "$(VIRTUAL_ENV)/bin/activate" ]; then \
-		echo "setup 'crossenv'."; \
-		python3.$(TGT_PYTHON_MINOR) -m crossenv $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/bin/python3 $(VIRTUAL_ENV); \
-	else \
-		echo "'crossenv' already exists."; \
-	fi
+        $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 install -r files/$(WIND_RELEASE_ID)/requirements.txt ; \
+        find $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/ -type f -exec grep -Iq . {} \; -exec sed -i \
+                '1s|^#!.*python[^ ]*|#!/usr/bin/env python3|' {} \; ; \
+        echo "✔ Python shebangs converted to /usr/bin/env python3" ; \
+        export SSL_CERT_FILE="$$( $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 -m certifi )" ; \
+        if [ ! -f "$(VIRTUAL_ENV)/bin/activate" ]; then \
+                echo "setup 'crossenv'."; \
+                python3.$(TGT_PYTHON_MINOR) -m crossenv $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/bin/python3 $(VIRTUAL_ENV); \
+        else \
+                echo "'crossenv' already exists."; \
+        fi
 endef
 
 define sdk_deploy
