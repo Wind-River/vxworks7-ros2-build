@@ -110,7 +110,9 @@ if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
     list(APPEND CMAKE_FIND_ROOT_PATH ${CMAKE_INSTALL_PREFIX})
 endif()
 
-
+add_compile_options(
+    -Xclang -Wno-gnu-include-next
+)
 # CMake find_* commands will look in the sysroot, and the
 # CMAKE_FIND_ROOT_PATH entries by default in all cases, 
 # as well as looking in the host system root prefix
