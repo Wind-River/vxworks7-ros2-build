@@ -80,7 +80,7 @@ define python_fix
 	fi
 
 	if [ ! -f $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 ]; then \
-		cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),https://bootstrap.pypa.io/get-pip.py,get-pip.py) ; \
+		cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),https://bootstrap.pypa.io/pip/3.$(TGT_PYTHON_MINOR)/get-pip.py,get-pip.py) ; \
 		$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 $(DOWNLOADS_DIR)/get-pip.py ; \
 		sed -i '1s|^#!.*|#!/usr/bin/env python3|' \
 			$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip \
