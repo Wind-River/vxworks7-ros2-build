@@ -72,8 +72,7 @@ For the standard build, you must also have:
       * http://www.ros.org/reps/rep-2000.html
    * VxWorks 7 25.09
       * https://docs.windriver.com/bundle/vxworks_release_notes_25_09/page/index-release_notes.html
-   * For ROS 2 Jazzy Jalisco, Ubuntu Noble (25.09) 64-bit LTS is the Tier 1 host
-   * For ROS 2 Rolling Ridley, Ubuntu Noble (25.09) 64-bit LTS is the Tier 1 host
+   * For ROS 2 Jazzy Jalisco, Ubuntu Noble (24.04) 64-bit LTS is the Tier 1 host
 * Docker Engine installed on your Linux host
    * https://docs.docker.com/engine/install/ubuntu/
 
@@ -146,51 +145,44 @@ cd vxworks7-ros2-build
 
 ### Build Docker image
 
-A Docker (Ubuntu 22.04 or 24.04) based build is recommended to avoid the necessity of installing build dependencies.
-
-```bash
-docker build --no-cache -t vxbuild:22.04 Docker/22.04/vxbuild/.
-docker build --no-cache -t vxros2build:humble Docker/22.04/vxros2build/.
-```
+A Docker (Ubuntu 24.04) based build is recommended to avoid the necessity of installing build dependencies.
 
 ```bash
 docker build --no-cache -t vxbuild:24.04 Docker/24.04/vxbuild/.
 docker build --no-cache -t vxros2build:jazzy Docker/24.04/vxros2build/.
-
-docker build --no-cache --build-arg ROS_DISTRO=rolling -t vxros2build:rolling Docker/24.04/vxros2build/.
 ```
 
 ### Download and extract the VxWorks SDK
 
-The 24.03 SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
+The `25.09` SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
 
 ```bash
 cd ~/Downloads 
-wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.14.tar.bz2
+wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.16.1.tar.bz2
 mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
-tar -jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.14.tar.bz2 --strip 1
+tar -jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.16.1.tar.bz2 --strip 1
 ```
 
 The `25.09` SDK for Raspberry Pi 4 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
 
 ```bash
 cd ~/Downloads 
-wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-raspberrypi4b-1.6.tar.bz2
+wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-raspberrypi4b-1.8.1.tar.bz2
 mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
-tar -jxvf ~/Downloads//wrsdk-vxworks7-raspberrypi4b-1.6.tar.bz2 --strip 1
+tar -jxvf ~/Downloads/wrsdk-vxworks7-raspberrypi4b-1.8.1.tar.bz2 --strip 1
 ```
 
-### Run Docker image e.g. `humble`
+### Run Docker image e.g. `jazzy`
 
 ```bash
 cd vxworks7-ros2-build
-docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
+docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:jazzy
 ```
 
 By default it runs as a user ```wruser``` with ```uid=1000(wruser) gid=1000(wruser)```, if you have different ids, run it as
 
 ```bash
-$ docker run -ti -h vxros2 -e UID=`id -u` -e GID=`id -g` -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
+$ docker run -ti -h vxros2 -e UID=`id -u` -e GID=`id -g` -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:jazzy
 ```
 
 See [Dockerfile](Docker/vxbuild/Dockerfile) for the complete list of environment variables
@@ -264,8 +256,8 @@ The VxWorks ROS 2 build is tested with
 ```bash
 $ sudo apt-get install qemu-system
 $ qemu-system-x86_64 --version
-QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.2)
-Copyright (c) 2003-2021 Fabrice Bellard and the QEMU Project developers
+QEMU emulator version 8.2.2 (Debian 1:8.2.2+ds-0ubuntu1.16)
+Copyright (c) 2003-2023 Fabrice Bellard and the QEMU Project developers
 ```
 
 A filesystem with ROS 2 artifacts needs to be prepared to boot with VxWorks.
@@ -330,7 +322,7 @@ telnet 192.168.200.1
 
 ### Raspberry Pi 4
 
-Follow [README](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2309/README_raspberrypi4b.html) to deploy VxWorks on the SDCard.
+Follow [README](https://d13321s3lxgewa.cloudfront.net/downloads/wrsdk-vxworks7-docs/2509/README_raspberrypi4b.html) to deploy VxWorks on the SDCard.
 Copy the content of the `deploy` directory to the '/usr' directory of the SDCard
 
 ```bash
@@ -403,7 +395,7 @@ Process 'python3' (process Id = 0xffff800008269c00) launched.
 Use Docker image to create keystore, keys, and certificates for the talker and listener nodes.
 
 ```bash
-source /opt/ros/humble/setup.sh
+source /opt/ros/jazzy/setup.sh
 
 ros2 security create_keystore demo_keystore
 ros2 security create_enclave demo_keystore /talker_listener/talker
@@ -434,7 +426,7 @@ sudo qemu-system-x86_64 -m 2G -machine q35 -cpu Nehalem -kernel ~/Downloads/wrsd
 [INFO] [1724090593.800000000] [talker]: Publishing: 'Hello World: 2'
 ```
 
-### Run `dummy_robot`, see [this](https://docs.ros.org/en/humble/Tutorials/Demos/dummy-robot-demo.html) tutorial for more details
+### Run `dummy_robot`, see [this](https://docs.ros.org/en/jazzy/Tutorials/Demos/dummy-robot-demo.html) tutorial for more details
 
 On the VxWorks side
 
@@ -460,7 +452,7 @@ Start RViz on your Linux machine to see a robot arm moving, or run
 
 ```bash
 $ cd vxworks7-ros2-build
-$ docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
+$ docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:jazzy
 wruser@vxros2:/work$ source /wrsdk/sdkenv.sh
 
 wruser@vxros2:/work$ git clone https://github.com/ttroy50/cmake-examples.git
@@ -497,7 +489,7 @@ Native ROS 2 is used mostly for fast prototyping during ROS 2 development. Use t
 
 ```bash
 $ cd vxworks7-ros2-build
-$ docker run -ti -h ros2native -v $PWD:/work vxros2build:humble
+$ docker run -ti -h ros2native -v $PWD:/work vxros2build:jazzy
 wruser@ros2native:/work$ mkdir -p ros2_native/src && cd ros2_native
 wruser@ros2native:/work/ros2_native$ vcs import src < /work/output/build/ros2/ros2_ws/ros2.repos
 wruser@ros2native:/work/ros2_native$ colcon build --merge-install --cmake-force-configure --packages-up-to-regex \
@@ -607,7 +599,7 @@ Hello World!
 1. Start docker and copy `my_package` to the VxWorks `ros2_ws` workspace
 
 ```bash
-$ docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:humble
+$ docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:jazzy
 wruser@vxros2:/work$ cp -r ros2_native/src/my_package build/ros2/ros2_ws/src/.
 ```
 
