@@ -2,17 +2,15 @@
 
 ## VxWorks SDK and ROS 2 support
 
-Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `jazzy` and the latest VxWorks SDK is `24.03`.
+Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `jazzy` and the latest VxWorks SDK is `25.09`.
 
 | QEMU x86_64 | Raspberry Pi 4 |
 |---|---|
-| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/humble-24.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/humble-24.03-raspberrypi4b.yaml/badge.svg) |
-| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-24.03-raspberrypi4b.yaml/badge.svg) |
 | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-25.09-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-25.09-raspberrypi4b.yaml/badge.svg) |
 
 ## Prebuilt image
 
-Prebuilt VxWorks ROS 2 images for the `humble` and `jazzy` distributions are available for testing and can be downloaded from their respective GitHub Actions workflows
+Prebuilt VxWorks ROS 2 images for the `jazzy` distributions are available for testing and can be downloaded from their respective GitHub Actions workflows
 
 ## Overview
 
@@ -62,7 +60,7 @@ Subject to the License, you can proceed to download the VxWorks SDK.
 ## Prerequisite(s)
 
 * Download a VxWorks Software Development Kit from Wind River Labs
-   * [24.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43)
+   * [25.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43)
 
 * The build system will need to download source code from github.com and bitbucket.org.  A
   working Internet connection with access to both sites is required.
@@ -72,11 +70,10 @@ For the standard build, you must also have:
 * Supported Linux host for both ROS 2 and VxWorks 7
    * ROS 2 Target Platforms
       * http://www.ros.org/reps/rep-2000.html
-   * VxWorks 7 24.03
-      * https://docs.windriver.com/bundle/vxworks_release_notes_24_03/page/index-release_notes.html
-   * For ROS 2 Humble Hawksbill, Ubuntu Jammy (22.04) 64-bit LTS is the Tier 1 host
-   * For ROS 2 Jazzy Jalisco, Ubuntu Noble (24.04) 64-bit LTS is the Tier 1 host
-   * For ROS 2 Rolling Ridley, Ubuntu Noble (24.04) 64-bit LTS is the Tier 1 host
+   * VxWorks 7 25.09
+      * https://docs.windriver.com/bundle/vxworks_release_notes_25_09/page/index-release_notes.html
+   * For ROS 2 Jazzy Jalisco, Ubuntu Noble (25.09) 64-bit LTS is the Tier 1 host
+   * For ROS 2 Rolling Ridley, Ubuntu Noble (25.09) 64-bit LTS is the Tier 1 host
 * Docker Engine installed on your Linux host
    * https://docs.docker.com/engine/install/ubuntu/
 
@@ -84,7 +81,7 @@ For the standard build, you must also have:
 
 The following branches are active
 
-- [x] `master` - builds ROS2 `humble`, `jazzy`, and `rolling` against VxWorks `24.03` SDK depending on what VxWorks SDK and what Docker image are used
+- [x] `master` - builds ROS2 `jazzy` against VxWorks `25.09` SDK depending on what VxWorks SDK and what Docker image are used
 
 ## Directory Structure
 
@@ -174,7 +171,7 @@ mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
 tar -jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.14.tar.bz2 --strip 1
 ```
 
-The 24.03 SDK for Raspberry Pi 4 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
+The `25.09` SDK for Raspberry Pi 4 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
 
 ```bash
 cd ~/Downloads 
@@ -208,8 +205,8 @@ wruser@vxros2:/work source /wrsdk/sdkenv.sh
 # check environment
 wruser@vxros2:/work$ make info
 DEFAULT_BUILD:      sdk unixextra asio tinyxml2 eigen libxml2 libxslt ros2 pyyaml netifaces lxml
-WIND RELEASE:       24.03
-ROS DISTRO:         humble
+WIND RELEASE:       25.09
+ROS DISTRO:         jazzy
 TARGET ARCH:        x86_64
 TARGET PYTHON:      Python3.9
 HOST PYTHON:        /wrsdk/vxsdk/host/x86_64-linux/bin/python3
