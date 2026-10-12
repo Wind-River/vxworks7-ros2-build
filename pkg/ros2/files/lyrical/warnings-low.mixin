@@ -1,0 +1,10 @@
+{
+    "build": {
+        "warnings-low": {
+            "cmake-args": [
+                "-DCMAKE_CXX_FLAGS=-fwarning-level-low",
+                "-DCMAKE_C_FLAGS=-fwarning-level-low"
+            ]
+        }
+    }
+}

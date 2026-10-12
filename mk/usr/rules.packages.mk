@@ -84,7 +84,7 @@ define fetch_git
 		LANG=C git clone --bare --mirror $(PKG_URL) $(DOWNLOADS_DIR)/$$GIT_DIR_NAME --progress ; \
 	else \
 		cd $(DOWNLOADS_DIR)/$$GIT_DIR_NAME &&  \
-	        LANG=C git fetch -f --prune --progress $(PKG_URL) refs/*:refs/* ; \
+	        LANG=C git fetch -f --progress $(PKG_URL) "refs/heads/*:refs/heads/*" "refs/tags/*:refs/tags/*" --prune-tags ; \
 	fi
 endef
 

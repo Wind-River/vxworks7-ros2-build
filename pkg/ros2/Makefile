@@ -48,6 +48,9 @@ PKG_COMMIT_ID = $(PKG_LAYER_COMMIT_ID)
 PKG_TYPE = git
 
 PKG_REPO_URL = https://raw.githubusercontent.com/ros2/ros2/${PKG_REPO_COMMIT_ID}/${PKG_NAME}.repos
+# The ros2-vendors manifest is fetched from the ros2-vendors org (per-distro branch),
+# NOT kept as a local copy — mirrors how ros2.repos is pulled from ros2/ros2.
+PKG_VENDORS_REPO_URL = https://raw.githubusercontent.com/ros2-vendors/ros2_vendors/$(ROS_DISTRO)/ros2_vendors.repos
 
 PKG_LICENSE = BSD
 
@@ -66,10 +69,13 @@ ros2.unpack: ros2.download
 	curl -o $(PKG_NAME).repos $(PKG_REPO_URL); \
 	mkdir src; \
 	vcs import src < $(PKG_NAME).repos; \
+	echo "Fetching + importing ros2-vendors manifest..."; \
+	curl -o ros2-vendors.repos $(PKG_VENDORS_REPO_URL); \
+	vcs import src < ros2-vendors.repos; \
 	if ls $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/*.repos >/dev/null 2>&1; then \
-		echo "Importing additional repos..."; \
+		echo "Importing additional local repos..."; \
 		for repo in $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/*.repos; do \
-			echo "Importing $$repo"; \
+			echo "Importing $$(basename $$repo)"; \
 			vcs import src < $$repo; \
 		done; \
 	fi
@@ -90,13 +96,24 @@ ros2.configure: ros2.patch
 
 ros2.build: ros2.configure
 	@$(call echo_action,Building,$*)
+	@echo "=== Phase 1: building ROS2_VENDORS before the workspace ==="
+	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
+	[ -f /etc/ssl/certs/ca-certificates.crt ] && export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt; \
+	[ -d /etc/ssl/certs ] && export SSL_CERT_DIR=/etc/ssl/certs; \
+	export COLCON_HOME=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon; \
+	export COLCON_EXTENSION_BLOCKLIST=colcon_core.environment.library_path; \
+	if [ -n "$(ROS2_VENDORS)" ]; then \
+	  colcon build --install-base $(ROOT_DIR) --merge-install \
+	    --mixin $(ROS2_MIXINS) --packages-skip-build-finished --packages-up-to $(ROS2_VENDORS); \
+	fi
+	@echo "=== Phase 2: building the ROS2 workspace (only reached if Phase 1 succeeded) ==="
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
 	[ -f /etc/ssl/certs/ca-certificates.crt ] && export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt; \
 	[ -d /etc/ssl/certs ] && export SSL_CERT_DIR=/etc/ssl/certs; \
 	export COLCON_HOME=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon; \
 	export COLCON_EXTENSION_BLOCKLIST=colcon_core.environment.library_path; \
 	colcon build --install-base $(ROOT_DIR) --merge-install \
-	  --mixin $(ROS2_MIXINS) --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO);
+	  --mixin $(ROS2_MIXINS) --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO)
 	@$(MAKE_STAMP)
 
 ros2.install : ros2.build
@@ -106,7 +123,10 @@ ros2.install : ros2.build
 
 ros2.deploy : ros2.install
 	@$(call echo_action,Installing runtime dependencies,$*)
-	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) setuptools
+	# setuptools>=81 REMOVED the bundled pkg_resources; ROS2 Python entry points
+	# import pkg_resources at runtime. Pin to 58.1.0 (matches the SDK cross-venv,
+	# still ships pkg_resources) so it deploys to the target site-packages.
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) "setuptools==58.1.0"
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) catkin_pkg
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) empy==3.3.4
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyelftools
