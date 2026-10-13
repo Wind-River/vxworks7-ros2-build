@@ -17,7 +17,7 @@ else
 ifeq ($(ROS_DISTRO),dashing)
 DEFAULT_BUILD ?= sdk unixextra asio tinyxml2 colcon ros2 turtlebot3
 else
-DEFAULT_BUILD ?= sdk unixextra asio ros2
+DEFAULT_BUILD ?= sdk unixextra ros2
 endif
 endif
 
