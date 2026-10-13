@@ -74,6 +74,7 @@ ROS2_BASE=action_msgs ament_cmake ament_cmake_auto ament_cmake_copyright \
 	urdfdom urdfdom_headers urdf_parser_plugin visualization_msgs yaml_cpp_vendor zstd_cmake_module
 
 ROS2_PATCH_DIRS=ament/ament_cmake \
+		ros2-vendors/asio_vendor \
 		ros2/rosbag2/mcap_vendor \
 		ros2/ament_cmake_ros \
 		ros2/rcl \
