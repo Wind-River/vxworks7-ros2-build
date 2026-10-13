@@ -26,7 +26,10 @@
 # their consumers reference the libs by SYSTEM/rosdep name (liborocos-kdl, lz4,
 # zstd, ...) rather than a <depend> on the vendor, so colcon can't order them.
 # Built in a dedicated Phase-1 colcon pass in ros2.build (see pkg/ros2/Makefile).
-ROS2_VENDORS=bullet3_vendor eigen_vendor lz4_vendor orocos_kdl_vendor pybind11_vendor python_orocos_kdl_vendor tinyxml2_vendor yamlcpp_vendor zstd_vendor
+# All *_vendor packages (ours + ros2 shipped: libyaml/spdlog/console_bridge/
+# foonathan/mcap/...) build in Phase 1 before the workspace, via regex — so a
+# new vendor (e.g. pyyaml_vendor) is picked up automatically, no list to maintain.
+ROS2_VENDORS=.*_vendor
 
 ROS2_BASE=action_msgs ament_cmake ament_cmake_auto ament_cmake_copyright \
 	ament_cmake_core ament_cmake_cppcheck ament_cmake_cpplint ament_cmake_export_definitions \
@@ -71,6 +74,7 @@ ROS2_BASE=action_msgs ament_cmake ament_cmake_auto ament_cmake_copyright \
 	urdfdom urdfdom_headers urdf_parser_plugin visualization_msgs yaml_cpp_vendor zstd_cmake_module
 
 ROS2_PATCH_DIRS=ament/ament_cmake \
+		ros2/rosbag2/mcap_vendor \
 		ros2/ament_cmake_ros \
 		ros2/rcl \
 		ament/googletest \
@@ -109,6 +113,9 @@ ROS_IGNORE_DIRS=ros-visualization \
 		ros2/rviz \
                 ros-planning \
                 ros2/rmw_zenoh \
+                gazebo-release/gz_cmake_vendor \
+                gazebo-release/gz_math_vendor \
+                gazebo-release/gz_utils_vendor \
 		$(ROS_IGNORE_TESTING_DIRS)
 
 # Ignore Python-specific packages
