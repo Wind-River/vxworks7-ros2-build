@@ -57,6 +57,15 @@ image: fs
 	mkdir -p $(TOP_BUILDDIR)/mount
 	fusefat -o rw+ $(TOP_BUILDDIR)/ros2.img $(TOP_BUILDDIR)/mount
 	find $(TOP_BUILDDIR)/export/deploy -type d -name '__pycache__' -exec rm -rf {} +
+	# Prune build/dev-only artifacts the TARGET never needs at runtime, to cut the
+	# fusefat copy's per-file cost (file count dominates the FUSE write time).
+	# KEEP *.dist-info / *.egg-info (ros2 run entry-point discovery reads them) and
+	# the CPython stdlib test dir ($(TOP_BUILDDIR)/export/deploy/lib/python3.9/test).
+	find $(TOP_BUILDDIR)/export/deploy \( -path '*/cmake/*' -o -name '*.cmake' \) -type f -delete
+	find $(TOP_BUILDDIR)/export/deploy/lib -type d \( -name test -o -name tests \) \
+	    -not -path '*/python3.*/test' -not -path '*/python3.*/test/*' -exec rm -rf {} +
+	find $(TOP_BUILDDIR)/export/deploy/lib -type d -name include -not -path '*/python3.*/*' -exec rm -rf {} +
+	find $(TOP_BUILDDIR)/export/deploy \( -name '*.a' -o -name '*.pc' \) -type f -delete
 	cp --no-preserve=ownership -r -L $(TOP_BUILDDIR)/export/deploy/* $(TOP_BUILDDIR)/mount/. 2>/dev/null
 	fusermount -u $(TOP_BUILDDIR)/mount
 

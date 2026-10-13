@@ -145,10 +145,20 @@ ros2.deploy : ros2.install
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) pyelftools
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) packaging
 	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) lark-parser
+	# rclpy.qos imports typing_extensions (TypeAlias); pure-python, must ship to target.
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) "typing_extensions==4.12.2"
+	# launch_ros imports osrf_pycommon (process utils); pure-python, not in the ws source.
+	pip3 install --ignore-installed --prefix=$(DEPLOY_DIR) "osrf-pycommon==2.0.2"
 	@$(call echo_action,Installing build artifacts,$*)
-	cp -r $(ROOT_DIR)/bin/* $(DEPLOY_DIR)/bin/.
-	cp -r $(ROOT_DIR)/lib/* $(DEPLOY_DIR)/lib/.
-	cp -r $(ROOT_DIR)/share $(DEPLOY_DIR)/.
+	# Dereference symlinks here (-L) so the deploy tree is symlink-free; FAT/mcopy
+	# cannot store symlinks, and doing it once at deploy lets the image step use a
+	# fast one-pass tree->FAT copy (no FUSE). --no-preserve=ownership: no host uid/gid.
+	# Remove any stale symlinks first so a re-run's cp -rL writes real files (cp does
+	# not replace an existing symlink's target).
+	find $(DEPLOY_DIR)/bin $(DEPLOY_DIR)/lib -type l -delete 2>/dev/null || true
+	cp -rL --no-preserve=ownership $(ROOT_DIR)/bin/* $(DEPLOY_DIR)/bin/.
+	cp -rL --no-preserve=ownership $(ROOT_DIR)/lib/* $(DEPLOY_DIR)/lib/.
+	cp -rL --no-preserve=ownership $(ROOT_DIR)/share $(DEPLOY_DIR)/.
 	cp files/$(ROS_DISTRO)/vxscript $(DEPLOY_DIR)/.
 	@$(MAKE_STAMP)
 	
