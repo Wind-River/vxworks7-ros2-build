@@ -10,11 +10,11 @@ on:
       ros_distro:
         required: true
         type: string
-        default: humble
+        default: lyrical
       vxworks:
         required: true
         type: string
-        default: "24.03"
+        default: "26.03"
       sdk:
         required: true
         type: string
@@ -33,11 +33,11 @@ on:
       ros_distro:
         description: "ROS 2 Distribution"
         required: true
-        default: humble
+        default: lyrical
       vxworks:
         description: "VxWorks Release"
         required: true
-        default: "24.03"
+        default: "26.03"
       sdk:
         description: "SDK Name"
         required: true

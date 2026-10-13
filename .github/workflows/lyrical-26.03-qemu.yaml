@@ -1,4 +1,4 @@
-name: "Jazzy 25.09 QEMU Build"
+name: "Lyrical 26.03 QEMU Build"
 
 on:
   schedule:
@@ -7,11 +7,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-jazzy:
+  build-lyrical:
     uses: ./.github/workflows/vxworks-ros2-build.yaml
     with:
-      ros_distro: jazzy
-      vxworks: "25.09"
+      ros_distro: lyrical
+      vxworks: "26.03"
       sdk: qemu
-      test: false
+      test: true
       debug: false

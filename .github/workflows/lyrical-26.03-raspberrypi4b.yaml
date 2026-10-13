@@ -1,17 +1,17 @@
-name: "Jazzy 24.03 Raspberry Pi 4 Build"
+name: "Lyrical 26.03 Raspberry Pi 4B Build"
 
 on:
   schedule:
-    - cron: '0 3 * * 0'  # every Sunday at 03:00 UTC
+    - cron: '0 5 * * 0'  # every Sunday at 05:00 UTC
 
   workflow_dispatch:
 
 jobs:
-  build-jazzy:
+  build-lyrical-rpi4b:
     uses: ./.github/workflows/vxworks-ros2-build.yaml
     with:
-      ros_distro: jazzy
-      vxworks: "24.03"
+      ros_distro: lyrical
+      vxworks: "26.03"
       sdk: raspberrypi4b
       test: false
       debug: false
