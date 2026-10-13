@@ -1,0 +1,29 @@
+# Rust support for ROS 2 (rclrs). Local manifest, imported by ros2.unpack (loops over
+# files/<distro>/*.repos). Lists ONLY the Rust repos the base manifests do NOT already
+# provide:
+#   - ros2_rust         : the rclrs client library (rclrs lives in this repo)
+#   - rosidl_runtime_rs : the Rust message runtime
+# NOTE: rosidl_rust (the IDL->Rust generator, rosidl_generator_rs) is ALREADY pulled by
+# the base ros2.repos (ros2/ros2 @ lyrical pins ros2-rust/rosidl_rust 0.5.0), so it is
+# intentionally NOT listed here — re-listing it would collide with the base checkout.
+# The ros2/* interface repos are likewise provided by ros2.repos.
+#   - examples          : the rclrs demo nodes (separate repo; not in any base manifest)
+#
+# Versions aligned on lyrical: ros2-rust develops the lyrical line on `main`
+# (ros2_rust_lyrical.repos pins the rust deps to main). ament_cargo build type;
+# colcon-cargo/colcon-ros-cargo (SDK host reqs) cross-compile with the SDK Rust
+# toolchain to $(TGT_ARCH)-wrs-vxworks. Source patches live in the layer
+# (rclrs/usr_src/*.patch).
+repositories:
+  ros2-rust/ros2_rust:
+    type: git
+    url: https://github.com/ros2-rust/ros2_rust.git
+    version: main
+  ros2-rust/rosidl_runtime_rs:
+    type: git
+    url: https://github.com/ros2-rust/rosidl_runtime_rs.git
+    version: main
+  ros2-rust/examples:
+    type: git
+    url: https://github.com/ros2-rust/examples.git
+    version: main

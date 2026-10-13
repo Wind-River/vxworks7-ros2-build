@@ -92,6 +92,18 @@ ros2.configure: ros2.patch
 	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default;
 	cp files/$(ROS_DISTRO)/*.mixin $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/.;
 	envsubst < files/$(ROS_DISTRO)/vxworks.mixin.template > $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon/mixin/default/vxworks.mixin
+	# Rust (rclrs) cross-build support (ROS 2 specific). The VxWorks Rust toolchain
+	# fixes (patched libloading under $(WIND_CC_SYSROOT)/usr/rust/vxworks-crates, and
+	# the patched cargo-ament-build) are delivered by pkg/sdk. Here we only generate
+	# the workspace cargo config (points [patch.crates-io] at the SDK's patched
+	# libloading + sets the VxWorks link flags) and stage the host-linker wrapper
+	# that keeps the ROS 2 install libs off the host ld during build-script links.
+	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/.cargo
+	ROOT_DIR=$(ROOT_DIR) ROS2_RUST_CRATES_DIR=$(WIND_CC_SYSROOT)/usr/rust/vxworks-crates \
+	  envsubst < files/$(ROS_DISTRO)/rust-cargo-config.toml.template \
+	  > $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/.cargo/config.toml
+	cp files/$(ROS_DISTRO)/host-cc-clean.sh $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/host-cc-clean.sh
+	chmod +x $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/host-cc-clean.sh
 	@$(MAKE_STAMP)
 
 ros2.build: ros2.configure
@@ -110,6 +122,9 @@ ros2.build: ros2.configure
 	[ -d /etc/ssl/certs ] && export SSL_CERT_DIR=/etc/ssl/certs; \
 	export COLCON_HOME=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon; \
 	export COLCON_EXTENSION_BLOCKLIST=colcon_core.environment.library_path; \
+	export CARGO_BUILD_TARGET=$(ROS2_RUST_TARGET); \
+	export ROS2_INSTALL_LIB=$(ROOT_DIR)/lib; \
+	export CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/host-cc-clean.sh; \
 	colcon build --install-base $(ROOT_DIR) --merge-install \
 	  --mixin $(ROS2_MIXINS) --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO)
 	@$(MAKE_STAMP)

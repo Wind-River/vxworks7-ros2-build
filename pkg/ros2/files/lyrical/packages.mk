@@ -74,6 +74,7 @@ ROS2_BASE=action_msgs ament_cmake ament_cmake_auto ament_cmake_copyright \
 	urdfdom urdfdom_headers urdf_parser_plugin visualization_msgs yaml_cpp_vendor zstd_cmake_module
 
 ROS2_PATCH_DIRS=ament/ament_cmake \
+		ros2-rust/ros2_rust/rclrs \
 		ros2-vendors/asio_vendor \
 		ros2/rosbag2/mcap_vendor \
 		ros2/ament_cmake_ros \
@@ -146,7 +147,18 @@ ROS2_PYTHON_TOOLS=ros2action ros2cli ros2component ros2doctor \
 
 ROS2_UR_DEPS=tf2_geometry_msgs trajectory_msgs yaml_cpp_vendor
 
-PKG_PKGS_UP_TO+= $(ROS2_BASE) $(ROS2_EXAMPLES)
+# Rust client library (ament_cargo). Building up-to rclrs pulls its Rust deps
+# (rosidl_runtime_rs, rosidl_generator_rs). Imported via files/<distro>/rust.repos;
+# built by colcon-cargo/colcon-ros-cargo with the SDK Rust toolchain.
+# VxWorks Rust target triple + where our patched crates live (patched libloading
+# etc.), referenced by the generated src/.cargo/config.toml.
+# Rust target triple built from the established $(TGT_ARCH) convention
+# (defs.vxworks.mk; x86_64/aarch64/... ) so ARM/RISC-V ports work unchanged.
+# Never hardcode the arch here.
+ROS2_RUST_TARGET=$(TGT_ARCH)-wrs-vxworks
+ROS2_RUST=rclrs examples_rclrs_minimal_pub_sub
+
+PKG_PKGS_UP_TO+= $(ROS2_BASE) $(ROS2_EXAMPLES) $(ROS2_RUST)
 
 #	pendulum_control
 
