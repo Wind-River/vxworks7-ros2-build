@@ -1,6 +1,8 @@
 certifi
 colcon-common-extensions
 colcon-mixin
+colcon-cargo
+colcon-ros-cargo
 crossenv
 empy==3.3.4
 lark-parser

@@ -110,6 +110,41 @@ define sdk_install
                 python3.$(TGT_PYTHON_MINOR) -m crossenv $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/bin/python3 $(VIRTUAL_ENV); \
         else \
                 echo "'crossenv' already exists."; \
+        fi ; \
+        $(call sdk_rust_fixups)
+endef
+
+# VxWorks Rust toolchain gap the SDK ships but does not fix: libloading has no
+# VxWorks arm for the dlopen RTLD_* flags. This is a generic Rust-on-VxWorks issue
+# (not ROS 2 specific), so it lives with the SDK: patch upstream 0.8.9 into
+# $(WIND_CC_SYSROOT)/usr/rust/vxworks-crates/libloading, which Rust consumers point
+# [patch.crates-io] at.
+define sdk_rust_fixups
+        RP=$(CURDIR)/files/$(WIND_RELEASE_ID)/rust-patches ; \
+        CRATES=$(WIND_CC_SYSROOT)/usr/rust/vxworks-crates ; \
+        LL="$$CRATES/libloading/src/os/unix/consts.rs" ; \
+        if [ ! -f "$$LL" ] || ! grep -q 'target_os = "vxworks"' "$$LL"; then \
+                rm -rf "$$CRATES/libloading" ; \
+                mkdir -p "$$CRATES" ; cd "$$CRATES" ; \
+                curl -sL "https://crates.io/api/v1/crates/libloading/0.8.9/download" | tar xz ; \
+                mv libloading-0.8.9 libloading ; cd libloading ; \
+                patch -p1 < "$$RP/libloading-vxworks.patch" ; \
+        fi ; \
+        SDKCARGO="$(WIND_CC_SYSROOT)/usr/rust/.cargo/config.toml" ; \
+        if ! grep -q 'target-feature=-crt-static' "$$SDKCARGO" 2>/dev/null; then \
+                sed -e "s#@WIND_CC_SYSROOT@#$(WIND_CC_SYSROOT)#g" \
+                        -e "s#@TGT_TRIPLE@#$(TGT_ARCH)-wrs-vxworks#g" \
+                        "$$RP/sdk-cargo-config-vxworks.toml.template" > "$$SDKCARGO" ; \
+        fi ; \
+        CAB=$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/cargo-ament-build ; \
+        if [ -f "$$CAB" ] && ! grep -q "vxe" "$$CAB"; then \
+                D=$(WIND_CC_SYSROOT)/usr/rust/cargo-ament-build-src ; \
+                rm -rf "$$D" ; mkdir -p "$$D" ; cd "$$D" ; \
+                curl -sL "https://crates.io/api/v1/crates/cargo-ament-build/0.1.11/download" | tar xz ; \
+                cd cargo-ament-build-0.1.11 ; \
+                patch -p1 < "$$RP/cargo-ament-build-vxe.patch" ; \
+                CARGO_HOME="$$D/.cargo" cargo build --release --target x86_64-unknown-linux-gnu ; \
+                cp target/x86_64-unknown-linux-gnu/release/cargo-ament-build "$$CAB" ; \
         fi
 endef
 

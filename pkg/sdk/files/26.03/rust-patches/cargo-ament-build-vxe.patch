@@ -1,0 +1,17 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -286,6 +286,14 @@
+         let dest = dest.with_extension("exe");
+         #[cfg(target_os = "windows")]
+         let src = src.with_extension("exe");
++        // VxWorks RTP executables are produced with a `.vxe` suffix. If the bare
++        // binary is absent but the `.vxe` variant exists, copy from that (keeping
++        // the destination name bare so ROS 2 tooling finds the expected name).
++        let src = if !src.exists() && src.with_extension("vxe").exists() {
++            src.with_extension("vxe")
++        } else {
++            src
++        };
+         // Create destination directory
+         DirBuilder::new().recursive(true).create(&dest_dir)?;
+         std::fs::copy(&src, &dest)

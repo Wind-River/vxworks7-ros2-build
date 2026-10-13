@@ -1,0 +1,41 @@
+Add VxWorks support for the dlopen RTLD_* flags in libloading.
+
+libloading hardcodes RTLD_{LAZY,NOW,GLOBAL,LOCAL} per-OS via cfg_if and has
+no VxWorks arm, so it hits compile_error! on VxWorks. The WR libc defines
+RTLD_LAZY=1, RTLD_NOW=2, RTLD_GLOBAL=0x100, RTLD_LOCAL=0. Add vxworks to the
+matching arms (and a dedicated LOCAL=0 arm).
+--- a/src/os/unix/consts.rs
++++ b/src/os/unix/consts.rs
+@@ -87,6 +87,7 @@
+             target_os = "fuchsia",
+             target_os = "redox",
+             target_os = "nto",
++            target_os = "vxworks",
+             target_os = "hurd",
+             target_os = "cygwin",
+         ))] {
+@@ -127,6 +128,7 @@
+             target_os = "fuchsia",
+             target_os = "redox",
+             target_os = "nto",
++            target_os = "vxworks",
+             target_os = "hurd",
+             target_os = "cygwin",
+         ))] {
+@@ -181,6 +183,7 @@
+             target_os = "fuchsia",
+             target_os = "redox",
+             target_os = "nto",
++            target_os = "vxworks",
+             target_os = "hurd",
+         ))] {
+             pub(super) const RTLD_GLOBAL: c_int = 0x100;
+@@ -197,6 +200,8 @@
+            target_os = "nto",
+         ))] {
+             pub(super) const RTLD_LOCAL: c_int = 0x200;
++        } else if #[cfg(target_os = "vxworks")] {
++            pub(super) const RTLD_LOCAL: c_int = 0;
+         } else if #[cfg(target_os = "aix")] {
+             pub(super) const RTLD_LOCAL: c_int = 0x80000;
+         } else if #[cfg(any(

@@ -1,0 +1,22 @@
+[build]
+target = "@TGT_TRIPLE@"
+
+# VxWorks RTP link alignment (generic — applies to EVERY Rust build for this target).
+# A VxWorks RTP must be a DYNAMIC executable so the loader processes its PLT/GOT
+# relocations; rustc defaults crt-static (static CRT) which breaks cross-.so calls
+# (they resolve to NULL -> SIGSEGV pc=0x0). Mirrors cc-conf/default.conf's RTP link.
+# Package/workspace configs ADD only install-tree paths (-L/-rpath-link) via a
+# [target.<triple>] or cfg(target_os="vxworks") block; cargo MERGES the cfg() and triple blocks.
+[target.'cfg(target_os = "vxworks")']
+rustflags = [
+    "-C", "target-feature=-crt-static",
+    "-C", "link-arg=--sysroot=@WIND_CC_SYSROOT@",
+    "-C", "link-arg=-Wl,-Bstatic,-ldl,-Bdynamic",
+    "-C", "link-arg=-Wl,--export-dynamic",
+    # Rust/cargo passes build-script -l<lib> flags that the Rust object code may not
+    # hard-reference (dlopen-dispatched / plugin / data-only libs); the default
+    # --as-needed would drop them. Keep them. And VxWorks .so's leave loader symbols
+    # (_rtld_*) undefined to be resolved at load — tolerate that like the C/C++ driver.
+    "-C", "link-arg=-Wl,--no-as-needed",
+    "-C", "link-arg=-Wl,--allow-shlib-undefined",
+]
