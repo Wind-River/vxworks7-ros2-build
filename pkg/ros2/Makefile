@@ -78,6 +78,9 @@ ros2.unpack: ros2.download
 			bash $(PACKAGE_DIR)/ros2/files/vcs_import_checked.sh --file "$$repo" src; \
 		done; \
 	fi; \
+	if find $(WIND_CC_SYSROOT) -name 'libsqlite3.so*' 2>/dev/null | grep -q .; then \
+		touch $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/ros2-vendors/sqlite_vendor/COLCON_IGNORE 2>/dev/null || true; \
+	fi; \
 	if [ -f $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/sqlite_vendor_patches/0001-add-vxworks-patches.layer.patch ]; then \
 		echo "Overlaying harness-local sqlite_vendor layer patches (not in upstream layer)..."; \
 		mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/sqlite_vendor/usr_src; \
