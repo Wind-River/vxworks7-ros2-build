@@ -77,6 +77,12 @@ ros2.unpack: ros2.download
 			echo "Importing $$(basename $$repo)"; \
 			bash $(PACKAGE_DIR)/ros2/files/vcs_import_checked.sh --file "$$repo" src; \
 		done; \
+	fi; \
+	if [ -f $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/sqlite_vendor_patches/0001-add-vxworks-patches.layer.patch ]; then \
+		echo "Overlaying harness-local sqlite_vendor layer patches (not in upstream layer)..."; \
+		mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/sqlite_vendor/usr_src; \
+		cp $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/sqlite_vendor_patches/0001-add-vxworks-patches.layer.patch \
+		   $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/sqlite_vendor/usr_src/0001-add-vxworks-patches.patch; \
 	fi
 	@$(MAKE_STAMP)
 
