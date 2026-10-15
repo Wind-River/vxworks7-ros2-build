@@ -1,0 +1,50 @@
+Enable a shared libsqlite3 for the vxworks host.
+
+The bundled libtool (in configure) has no vxworks branch in three
+case $host_os tables, which together force a static-only build:
+  1. dynamic_linker       -> default dynamic_linker=no -> can_build_shared=no
+  2. GNU-ld archive_cmds  -> empty for vxworks -> link falls back to a static .a
+  3. deplibs_check_method -> 'unknown' -> with -no-undefined and a dependent
+                             library (e.g. -lz) libtool downgrades to static
+vxworks is ELF and uses GNU ld, so it behaves like linux: fold vxworks into the
+linux groups and give dynamic_linker a linux-style ELF naming arm. Result: a
+proper versioned shared object (libsqlite3.so.N) with soname, matching how the
+platform ships SQLite elsewhere.
+
+--- a/configure
++++ b/configure
+@@ -6951,7 +6951,7 @@
+   ;;
+ 
+ # This must be glibc/ELF.
+-linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
++linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu* | vxworks*)
+   lt_cv_deplibs_check_method=pass_all
+   ;;
+ 
+@@ -10714,7 +10714,7 @@
+       archive_expsym_cmds='sed "s|^|_|" $export_symbols >$output_objdir/$soname.expsym~$CC -shared $pic_flag $libobjs $deplibs $compiler_flags $wl-h,$soname $wl--retain-symbols-file,$output_objdir/$soname.expsym $wl--image-base,`expr ${RANDOM-$$} % 4096 / 2 \* 262144 + 1342177280` -o $lib'
+       ;;
+ 
+-    gnu* | linux* | tpf* | k*bsd*-gnu | kopensolaris*-gnu)
++    gnu* | linux* | tpf* | k*bsd*-gnu | kopensolaris*-gnu | vxworks*)
+       tmp_diet=no
+       if test linux-dietlibc = "$host_os"; then
+ 	case $cc_basename in
+@@ -12817,6 +12817,16 @@
+   shlibpath_var=LD_LIBRARY_PATH
+   ;;
+ 
++vxworks*)
++  version_type=linux
++  need_lib_prefix=no
++  need_version=no
++  library_names_spec='$libname$release$shared_ext$versuffix $libname$release$shared_ext$major $libname$shared_ext'
++  soname_spec='$libname$release$shared_ext$major'
++  shlibpath_var=LD_LIBRARY_PATH
++  shlibpath_overrides_runpath=no
++  hardcode_into_libs=yes
++  ;;
+ *)
+   dynamic_linker=no
+   ;;

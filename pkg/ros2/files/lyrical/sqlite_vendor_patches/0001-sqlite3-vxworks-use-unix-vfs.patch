@@ -1,0 +1,20 @@
+VxWorks: select the Unix VFS for the SQLite amalgamation.
+
+sqlite3.c's VxWorks block (guarded by __RTP__ / _WRS_KERNEL, which wr-cc defines)
+sets `#define SQLITE_OS_OTHER 0`. With SQLITE_OS_OTHER *defined* (even to 0), the OS
+auto-select at the bottom of the amalgamation skips the default `SQLITE_OS_UNIX 1`
+branch and `#if SQLITE_OS_OTHER+1>1` is false — leaving NO VFS selected on VxWorks.
+Commenting it out leaves SQLITE_OS_OTHER undefined so the Unix VFS is chosen, which
+is correct: VxWorks is POSIX-like. (Equivalent to the Wind River contrib
+sqlite-3.50.4/usr_src/0004 patch, re-based onto the 3.46.1 amalgamation.)
+--- a/sqlite3.c
++++ b/sqlite3.c
+@@ -160,7 +160,7 @@
+ #include <vxWorks.h>
+ #include <pthread.h>  /* amalgamator: dontcache */
+ #define OS_VXWORKS 1
+-#define SQLITE_OS_OTHER 0
++/* #define SQLITE_OS_OTHER 0 */ /* VxWorks: leave undefined so SQLITE_OS_UNIX is selected (POSIX-like) */
+ #define SQLITE_HOMEGROWN_RECURSIVE_MUTEX 1
+ #define SQLITE_OMIT_LOAD_EXTENSION 1
+ #define SQLITE_ENABLE_LOCKING_STYLE 0

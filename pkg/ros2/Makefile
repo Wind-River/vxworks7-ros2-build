@@ -66,17 +66,16 @@ ros2.unpack: ros2.download
 	$(call pkg_unpack,$(PKG_NAME))
 	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
 	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR); \
-	curl -o $(PKG_NAME).repos $(PKG_REPO_URL); \
-	mkdir src; \
-	vcs import src < $(PKG_NAME).repos; \
+	mkdir -p src; \
+	echo "Fetching + importing ros2.repos ($(PKG_REPO_COMMIT_ID))..."; \
+	bash $(PACKAGE_DIR)/ros2/files/vcs_import_checked.sh --url "$(PKG_REPO_URL)" src $(PKG_NAME).repos; \
 	echo "Fetching + importing ros2-vendors manifest..."; \
-	curl -o ros2-vendors.repos $(PKG_VENDORS_REPO_URL); \
-	vcs import src < ros2-vendors.repos; \
+	bash $(PACKAGE_DIR)/ros2/files/vcs_import_checked.sh --url "$(PKG_VENDORS_REPO_URL)" src ros2-vendors.repos; \
 	if ls $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/*.repos >/dev/null 2>&1; then \
 		echo "Importing additional local repos..."; \
 		for repo in $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/*.repos; do \
 			echo "Importing $$(basename $$repo)"; \
-			vcs import src < $$repo; \
+			bash $(PACKAGE_DIR)/ros2/files/vcs_import_checked.sh --file "$$repo" src; \
 		done; \
 	fi
 	@$(MAKE_STAMP)
