@@ -2,15 +2,15 @@
 
 ## VxWorks SDK and ROS 2 support
 
-Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `jazzy` and the latest VxWorks SDK is `25.09`.
+Wind River provides VxWorks ROS 2 build for selected SDKs and ROS 2 releases, see the following table for more details. The latest ROS 2 release is `lyrical` and the latest VxWorks SDK is `26.03`.
 
 | QEMU x86_64 | Raspberry Pi 4 |
 |---|---|
-| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-25.09-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/jazzy-25.09-raspberrypi4b.yaml/badge.svg) |
+| ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/lyrical-26.03-qemu.yaml/badge.svg) | ![ ](https://github.com/Wind-River/vxworks7-ros2-build/actions/workflows/lyrical-26.03-raspberrypi4b.yaml/badge.svg) |
 
 ## Prebuilt image
 
-Prebuilt VxWorks ROS 2 images for the `jazzy` distributions are available for testing and can be downloaded from their respective GitHub Actions workflows
+Prebuilt VxWorks ROS 2 images for the `lyrical` distributions are available for testing and can be downloaded from their respective GitHub Actions workflows
 
 ## Overview
 
@@ -60,7 +60,7 @@ Subject to the License, you can proceed to download the VxWorks SDK.
 ## Prerequisite(s)
 
 * Download a VxWorks Software Development Kit from Wind River Labs
-   * [25.09 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43)
+   * [26.03 SDK](https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43)
 
 * The build system will need to download source code from github.com and bitbucket.org.  A
   working Internet connection with access to both sites is required.
@@ -70,9 +70,9 @@ For the standard build, you must also have:
 * Supported Linux host for both ROS 2 and VxWorks 7
    * ROS 2 Target Platforms
       * http://www.ros.org/reps/rep-2000.html
-   * VxWorks 7 25.09
-      * https://docs.windriver.com/bundle/vxworks_release_notes_25_09/page/index-release_notes.html
-   * For ROS 2 Jazzy Jalisco, Ubuntu Noble (24.04) 64-bit LTS is the Tier 1 host
+   * VxWorks 7 26.03
+      * https://docs.windriver.com/bundle/vxworks_release_notes_26_03/page/index-release_notes.html
+   * For ROS 2 Lyrical Luth, Ubuntu (26.04) 64-bit LTS is the Tier 1 host
 * Docker Engine installed on your Linux host
    * https://docs.docker.com/engine/install/ubuntu/
 
@@ -80,7 +80,7 @@ For the standard build, you must also have:
 
 The following branches are active
 
-- [x] `master` - builds ROS2 `jazzy` against VxWorks `25.09` SDK depending on what VxWorks SDK and what Docker image are used
+- [x] `master` - builds ROS2 `lyrical` against VxWorks `26.03` SDK depending on what VxWorks SDK and what Docker image are used
 
 ## Directory Structure
 
@@ -145,44 +145,44 @@ cd vxworks7-ros2-build
 
 ### Build Docker image
 
-A Docker (Ubuntu 24.04) based build is recommended to avoid the necessity of installing build dependencies.
+A Docker (Ubuntu 26.04) based build is recommended to avoid the necessity of installing build dependencies.
 
 ```bash
-docker build --no-cache -t vxbuild:24.04 Docker/24.04/vxbuild/.
-docker build --no-cache -t vxros2build:jazzy Docker/24.04/vxros2build/.
+docker build --no-cache -t vxbuild:26.04 Docker/26.04/vxbuild/.
+docker build --no-cache -t vxros2build:lyrical Docker/26.04/vxros2build/.
 ```
 
 ### Download and extract the VxWorks SDK
 
-The `25.09` SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
+The `26.03` SDK for IA - QEMU x86_64 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
 
 ```bash
 cd ~/Downloads 
-wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.16.1.tar.bz2
+wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-qemu-1.17.0.tar.bz2
 mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
-tar -jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.16.1.tar.bz2 --strip 1
+tar -jxvf ~/Downloads/wrsdk-vxworks7-qemu-1.17.0.tar.bz2 --strip 1
 ```
 
-The `25.09` SDK for Raspberry Pi 4 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
+The `26.03` SDK for Raspberry Pi 4 shall be used from https://forums.windriver.com/t/vxworks-software-development-kit-sdk/43
 
 ```bash
 cd ~/Downloads 
-wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-raspberrypi4b-1.8.1.tar.bz2
+wget https://d13321s3lxgewa.cloudfront.net/wrsdk-vxworks7-raspberrypi4b-1.9.0.tar.bz2
 mkdir ~/Downloads/wrsdk && cd ~/Downloads/wrsdk
-tar -jxvf ~/Downloads/wrsdk-vxworks7-raspberrypi4b-1.8.1.tar.bz2 --strip 1
+tar -jxvf ~/Downloads/wrsdk-vxworks7-raspberrypi4b-1.9.0.tar.bz2 --strip 1
 ```
 
-### Run Docker image e.g. `jazzy`
+### Run Docker image e.g. `lyrical`
 
 ```bash
 cd vxworks7-ros2-build
-docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:jazzy
+docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:lyrical
 ```
 
 By default it runs as a user ```wruser``` with ```uid=1000(wruser) gid=1000(wruser)```, if you have different ids, run it as
 
 ```bash
-$ docker run -ti -h vxros2 -e UID=`id -u` -e GID=`id -g` -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:jazzy
+$ docker run -ti -h vxros2 -e UID=`id -u` -e GID=`id -g` -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:lyrical
 ```
 
 See [Dockerfile](Docker/vxbuild/Dockerfile) for the complete list of environment variables
@@ -197,8 +197,8 @@ wruser@vxros2:/work source /wrsdk/sdkenv.sh
 # check environment
 wruser@vxros2:/work$ make info
 DEFAULT_BUILD:      sdk unixextra asio tinyxml2 eigen libxml2 libxslt ros2 pyyaml netifaces lxml
-WIND RELEASE:       25.09
-ROS DISTRO:         jazzy
+WIND RELEASE:       26.03
+ROS DISTRO:         lyrical
 TARGET ARCH:        x86_64
 TARGET PYTHON:      Python3.9
 HOST PYTHON:        /wrsdk/vxsdk/host/x86_64-linux/bin/python3
@@ -395,7 +395,7 @@ Process 'python3' (process Id = 0xffff800008269c00) launched.
 Use Docker image to create keystore, keys, and certificates for the talker and listener nodes.
 
 ```bash
-source /opt/ros/jazzy/setup.sh
+source /opt/ros/lyrical/setup.sh
 
 ros2 security create_keystore demo_keystore
 ros2 security create_enclave demo_keystore /talker_listener/talker
@@ -426,7 +426,7 @@ sudo qemu-system-x86_64 -m 2G -machine q35 -cpu Nehalem -kernel ~/Downloads/wrsd
 [INFO] [1724090593.800000000] [talker]: Publishing: 'Hello World: 2'
 ```
 
-### Run `dummy_robot`, see [this](https://docs.ros.org/en/jazzy/Tutorials/Demos/dummy-robot-demo.html) tutorial for more details
+### Run `dummy_robot`, see [this](https://docs.ros.org/en/lyrical/Tutorials/Demos/dummy-robot-demo.html) tutorial for more details
 
 On the VxWorks side
 
@@ -452,7 +452,7 @@ Start RViz on your Linux machine to see a robot arm moving, or run
 
 ```bash
 $ cd vxworks7-ros2-build
-$ docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:jazzy
+$ docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:lyrical
 wruser@vxros2:/work$ source /wrsdk/sdkenv.sh
 
 wruser@vxros2:/work$ git clone https://github.com/ttroy50/cmake-examples.git
@@ -489,7 +489,7 @@ Native ROS 2 is used mostly for fast prototyping during ROS 2 development. Use t
 
 ```bash
 $ cd vxworks7-ros2-build
-$ docker run -ti -h ros2native -v $PWD:/work vxros2build:jazzy
+$ docker run -ti -h ros2native -v $PWD:/work vxros2build:lyrical
 wruser@ros2native:/work$ mkdir -p ros2_native/src && cd ros2_native
 wruser@ros2native:/work/ros2_native$ vcs import src < /work/output/build/ros2/ros2_ws/ros2.repos
 wruser@ros2native:/work/ros2_native$ colcon build --merge-install --cmake-force-configure --packages-up-to-regex \
@@ -599,7 +599,7 @@ Hello World!
 1. Start docker and copy `my_package` to the VxWorks `ros2_ws` workspace
 
 ```bash
-$ docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:jazzy
+$ docker run -ti -h vxros2 -v ~/Downloads/wrsdk:/wrsdk -v $PWD:/work vxros2build:lyrical
 wruser@vxros2:/work$ cp -r ros2_native/src/my_package build/ros2/ros2_ws/src/.
 ```
 

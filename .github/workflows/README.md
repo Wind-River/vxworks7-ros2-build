@@ -11,7 +11,8 @@ The mapping between ROS 2 distributions and Ubuntu versions is maintained in `.g
 ```json
 {
   "humble": { "ubuntu": "22.04" },
-  "jazzy":  { "ubuntu": "24.04" }
+  "jazzy":  { "ubuntu": "24.04" },
+  "lyrical": { "ubuntu": "26.04" }
 }
 ```
 ### Running the Workflow
@@ -20,7 +21,7 @@ The mapping between ROS 2 distributions and Ubuntu versions is maintained in `.g
 
 - Navigate to the Actions tab.
 - Select the Docker build workflow.
-- Click Run workflow, choose the branch, and select the desired `ros_distro` (e.g., `humble` or `jazzy`).
+- Click Run workflow, choose the branch, and select the desired `ros_distro` (e.g., `humble`, `jazzy`, or `lyrical`).
 
 2. Locally using `act`
 

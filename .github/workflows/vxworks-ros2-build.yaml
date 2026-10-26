@@ -55,7 +55,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       registry:
         image: registry:2
@@ -74,6 +74,23 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
+
+      - name: Free up disk space
+        run: |
+          echo "Disk before cleanup:"; df -h /
+          # Remove large preinstalled toolchains the VxWorks ROS 2 build does not need.
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/ghc /usr/local/.ghcup || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          sudo rm -rf /usr/local/graalvm || true
+          sudo rm -rf /usr/local/share/powershell || true
+          sudo rm -rf /usr/local/share/chromium || true
+          sudo rm -rf /usr/local/lib/node_modules || true
+          sudo docker image prune --all --force || true
+          sudo apt-get clean || true
+          echo "Disk after cleanup:"; df -h /
 
       - name: Resolve supported Ubuntu version
         id: version
@@ -207,7 +224,7 @@ jobs:
           echo "ros_distro=${{ env.ros_distro }}" >> $GITHUB_OUTPUT
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     if: ${{ inputs.test }}
     steps:
