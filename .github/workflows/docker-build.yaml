@@ -10,13 +10,14 @@ on:
   workflow_dispatch:
     inputs:
       ros_distro:
-        description: 'ROS 2 Distribution (e.g., humble, jazzy)'
+        description: 'ROS 2 Distribution (e.g., humble, jazzy, lyrical)'
         required: true
-        default: 'humble'
+        default: 'lyrical'
         type: choice
         options:
           - humble
           - jazzy
+          - lyrical
 
 jobs:
   build:
