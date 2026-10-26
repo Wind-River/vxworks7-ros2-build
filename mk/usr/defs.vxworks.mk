@@ -63,11 +63,14 @@ Python3_NumPy_INCLUDE_DIR=$(shell python3 -c "import numpy; print(numpy.get_incl
 Python_INCLUDE_DIR=$(3PP_DEVELOP_DIR)/usr/include/python3.$(TGT_PYTHON_MINOR)
 Python_LIBRARY=$(3PP_DEVELOP_DIR)/usr/lib/libpython3.$(TGT_PYTHON_MINOR).so
 Python_SOABI=cpython-3${TGT_PYTHON_MINOR}-vxworks
+# pybind-specific: names the extension .so (pybind11's PYTHON_MODULE_EXTENSION)
+PYTHON_MODULE_EXTENSION=.$(Python_SOABI).so
 export TGT_PYTHON_MINOR
 export Python3_NumPy_INCLUDE_DIR
 export Python_INCLUDE_DIR
 export Python_LIBRARY
 export Python_SOABI
+export PYTHON_MODULE_EXTENSION
 
 export WIND_RELEASE_ID
 
