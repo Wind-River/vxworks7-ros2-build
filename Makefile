@@ -90,6 +90,7 @@ info:
 	@$(ECHO) "TARGET BSP:         $(TGT_BSP)"
 	@$(ECHO) "TARGET ARCH:        $(TGT_ARCH)"
 	@$(ECHO) "TARGET PYTHON:      Python3.$(TGT_PYTHON_MINOR)"
+	@$(ECHO) "TARGET SOABI:       $(Python_SOABI)"
 	@$(ECHO) "HOST PYTHON:        `which python3`"
 	@$(ECHO) "CMAKE:              `which cmake`"
 	@$(ECHO) "CURDIR:             $(CURDIR)"
