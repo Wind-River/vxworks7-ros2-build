@@ -1,0 +1,49 @@
+# telnet.exp - Expect/Tcl library for the target telnet console (transport only)
+#
+# A second interactive channel to the target (telnetd runs by default),
+# independent of the QEMU serial console. Used by pub/sub tests that need two
+# shells at once: the publisher on serial, the subscriber over telnet.
+#
+# Owns only the telnet transport (spawn + reach the shell). VxWorks shell
+# semantics (prompts, 'cmd', running nodes) live in lib/vxworks.exp; source
+# vxworks.exp first. Each proc takes/returns an explicit spawn id so it never
+# relies on the implicit ::spawn_id, which the serial console also uses.
+
+namespace eval telnet {
+
+    # Open a telnet session to the target and drop to the command shell.
+    # Returns the telnet spawn id, or "" on failure.
+    proc open {{host 192.168.200.1}} {
+        spawn telnet $host
+        set tid $spawn_id
+        puts "telnet_id: $tid"
+        expect {
+            -i $tid -glob "Escape character*" {
+                expect {
+                    -i $tid -re $vxworks::prompt_kernel {
+                        vxworks::enter_cmd_shell $tid
+                    }
+                    timeout {
+                        puts "Timeout: telnet shell prompt not reached."
+                        return ""
+                    }
+                }
+            }
+            timeout {
+                puts "Timeout: telnet did not start."
+                return ""
+            }
+        }
+        return $tid
+    }
+
+    # Stop the running node (Ctrl-C), WAIT for it to actually stop (the command
+    # shell prompt returns), then close the telnet session. The wait matters:
+    # dropping the connection while the node is still in its signal handler /
+    # participant teardown races the shutdown and can segfault it (signal 11).
+    proc close {tid} {
+        send -i $tid "\003"
+        expect -i $tid -exact $vxworks::prompt_cmd
+        send -i $tid "exit\r"
+    }
+}

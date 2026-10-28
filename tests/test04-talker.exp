@@ -1,5 +1,12 @@
 proc test04-talker {} {
-    puts "\nTEST: PUB/SUB"
+    puts "\nTEST: PUB/SUB (rmw_fastrtps_cpp, SHM)"
+
+    # Pin RMW + transport explicitly so the test is deterministic and actually
+    # exercises Fast-DDS shared memory. Env is per-RTP, so set it on BOTH the
+    # serial console (talker) and the telnet console (listener).
+    vxworks::set_env $qemu::spawn_id "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
+    vxworks::set_env $qemu::spawn_id "FASTDDS_BUILTIN_TRANSPORTS=SHM"
+
     send "/usr/lib/demo_nodes_cpp/talker\r"
     expect -exact {Publishing}
     expect -exact {Publishing}
@@ -7,33 +14,14 @@ proc test04-talker {} {
     expect -exact {Publishing}
     expect -exact {Publishing}
 
-    spawn telnet 192.168.200.1
-    set telnet_id $spawn_id
-    puts "telnet_id: $telnet_id"
-    # Expect telnet to start
-    expect {
-        -glob "Escape character*" {
-            # telnet started successfully, wait for the -> symbols
-            expect {
-                -re {->} {
-                    # -> symbol encountered, initiate telnet exit
-                    send -i $telnet_id "cmd\r"
-                    expect -i $telnet_id -exact {[vxWorks}
-                    send -i $telnet_id "/usr/lib/demo_nodes_cpp/listener\r"
-                    expect -i $telnet_id -exact {I heard}
-                    expect -i $telnet_id -exact {I heard}
-                    expect -i $telnet_id -exact {I heard}
-                    expect -i $telnet_id -exact {I heard}
-                    expect -i $telnet_id -exact {I heard}
-                    send -i $telnet_id "\003"
-                    send -i $telnet_id "exit"
-                }
-            }
-        }
-        timeout {
-            # Handle timeout if telnet doesn't start within the specified timeout
-            puts "Timeout: telnet did not start."
-        }
+    # Subscriber over telnet (second console) while the talker runs on serial.
+    set tid [telnet::open]
+    if {$tid ne ""} {
+        vxworks::set_env $tid "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
+        vxworks::set_env $tid "FASTDDS_BUILTIN_TRANSPORTS=SHM"
+        vxworks::run_node $tid "/usr/lib/demo_nodes_cpp/listener" "I heard"
+        telnet::close $tid
     }
+
     send_ctrl_c
 }

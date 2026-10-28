@@ -1,12 +1,20 @@
 proc test03-timer_lambda_py {} {
     puts "\nTEST: TIMER LAMBDA PYTHON"
+    # 'python3 ros2 run' is slow to start on the target: the interpreter scans
+    # pkg_resources metadata off the image before the node runs. Give it room,
+    # and fail loudly instead of falling through to Ctrl-C a half-started python.
+    set timeout 600
     send "python3 ros2 run examples_rclcpp_minimal_timer timer_lambda\r"
-    expect -exact {Hello, world!}
-    expect -exact {Hello, world!}
-    expect -exact {Hello, world!}
-    expect -exact {Hello, world!}
-    expect -exact {Hello, world!}
+    for {set i 0} {$i < 5} {incr i} {
+        expect {
+            -exact {Hello, world!} { }
+            timeout {
+                puts "FAIL test03: timed out waiting for 'Hello, world!' (#[expr {$i + 1}])"
+                send_ctrl_c
+                return
+            }
+        }
+    }
     send_ctrl_c
-    expect -exact {[vxWorks}
     send "rtp delete /usr/lib/examples_rclcpp_minimal_timer/timer_lambda"
 }

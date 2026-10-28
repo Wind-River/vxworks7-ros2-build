@@ -1,5 +1,11 @@
 proc test06-rclrs {} {
-    puts "\nTEST: RCLRS PUB/SUB (Rust)"
+    puts "\nTEST: RCLRS PUB/SUB (Rust, rmw_fastrtps_cpp, SHM)"
+
+    # Pin RMW + transport explicitly (Fast-DDS shared memory), on BOTH the serial
+    # console (publisher) and the telnet console (subscriber) -- env is per-RTP.
+    vxworks::set_env $qemu::spawn_id "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
+    vxworks::set_env $qemu::spawn_id "FASTDDS_BUILTIN_TRANSPORTS=SHM"
+
     send "/usr/lib/examples_rclrs_minimal_pub_sub/minimal_publisher\r"
     expect -exact {Publishing}
     expect -exact {Publishing}
@@ -7,33 +13,14 @@ proc test06-rclrs {} {
     expect -exact {Publishing}
     expect -exact {Publishing}
 
-    spawn telnet 192.168.200.1
-    set telnet_id $spawn_id
-    puts "telnet_id: $telnet_id"
-    # Expect telnet to start
-    expect {
-        -glob "Escape character*" {
-            # telnet started successfully, wait for the -> symbols
-            expect {
-                -re {->} {
-                    # -> symbol encountered, drop to the vxWorks shell
-                    send -i $telnet_id "cmd\r"
-                    expect -i $telnet_id -exact {[vxWorks}
-                    send -i $telnet_id "/usr/lib/examples_rclrs_minimal_pub_sub/minimal_subscriber\r"
-                    expect -i $telnet_id -exact {I heard}
-                    expect -i $telnet_id -exact {I heard}
-                    expect -i $telnet_id -exact {I heard}
-                    expect -i $telnet_id -exact {I heard}
-                    expect -i $telnet_id -exact {I heard}
-                    send -i $telnet_id "\003"
-                    send -i $telnet_id "exit"
-                }
-            }
-        }
-        timeout {
-            # Handle timeout if telnet doesn't start within the specified timeout
-            puts "Timeout: telnet did not start."
-        }
+    # Subscriber over telnet (second console) while the publisher runs on serial.
+    set tid [telnet::open]
+    if {$tid ne ""} {
+        vxworks::set_env $tid "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
+        vxworks::set_env $tid "FASTDDS_BUILTIN_TRANSPORTS=SHM"
+        vxworks::run_node $tid "/usr/lib/examples_rclrs_minimal_pub_sub/minimal_subscriber" "I heard"
+        telnet::close $tid
     }
+
     send_ctrl_c
 }

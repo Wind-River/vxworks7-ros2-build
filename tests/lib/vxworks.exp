@@ -1,0 +1,73 @@
+# vxworks.exp - Expect/Tcl library for VxWorks target shell semantics
+#
+# Console-agnostic: these procs operate on an explicit spawn id, so they work
+# over either the QEMU serial console (lib/qemu.exp) or a telnet console
+# (lib/telnet.exp). Nothing here spawns or transports; it only knows how the
+# VxWorks shells behave.
+#
+# --- The two VxWorks shells (single source of truth) -----------------------
+#
+# The target ALWAYS boots into the kernel shell; the command shell is reached
+# from it by typing 'cmd'. The two shells, in boot order:
+#
+#   1. kernel shell   prompt: "->"          (boot default; the C-interpreter
+#                                            shell. Run kernel routines here,
+#                                            e.g. 'edrShow', 'taskShow'.)
+#   2. command shell  prompt: "[vxWorks *]#" (entered by typing 'cmd' at '->';
+#                                            POSIX-like shell that runs RTPs,
+#                                            'set env', 'rtp exec', etc.)
+#
+# So every console starts at '->' and must 'cmd' into the command shell before
+# running tests.
+#
+# Direction of travel between the two shells:
+#   kernel -> command : type 'cmd'             (see enter_cmd_shell)
+#   command -> kernel : prefix a kernel routine with 'C ', which runs it in the
+#                       kernel interpreter WITHOUT leaving the command shell,
+#                       e.g.  C edrShow  /  C taskShow  (see kernel_cmd).
+#
+# All prompt matching goes through these two variables, so a prompt change is
+# edited in exactly one place. prompt_cmd matches the command-shell prompt TAIL
+# "]# " (the full prompt is "[vxWorks *]# "); matching the tail -- not the
+# "[vxWorks" prefix -- guarantees the shell has finished drawing the prompt and
+# is ready for input, so the first character of the next command is not swallowed.
+# prompt_kernel is a RE.
+
+namespace eval vxworks {
+    variable prompt_kernel {->}
+    variable prompt_cmd    {]# }
+
+    # Enter the command shell from the kernel shell on the given channel.
+    proc enter_cmd_shell {id} {
+        variable prompt_cmd
+        send -i $id "cmd\r"
+        expect -i $id -exact $prompt_cmd
+    }
+
+    # Run a kernel-shell routine from WITHIN the command shell via the 'C'
+    # prefix (e.g. kernel_cmd $id "edrShow"), then wait for the command-shell
+    # prompt to return. No shell switch: this stays in the command shell.
+    proc kernel_cmd {id routine} {
+        variable prompt_cmd
+        send -i $id "C $routine\r"
+        expect -i $id -exact $prompt_cmd
+    }
+
+    # Set an environment variable in the command shell on the given channel
+    # (e.g. set_env $id "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"), then wait for the
+    # prompt. Env is per-RTP, so set it on each channel before launching a node.
+    proc set_env {id assignment} {
+        variable prompt_cmd
+        send -i $id "set env \"$assignment\"\r"
+        expect -i $id -exact $prompt_cmd
+    }
+
+    # Run a node/RTP on the given channel and expect its completion marker
+    # 'count' times (default 5).
+    proc run_node {id cmd marker {count 5}} {
+        send -i $id "$cmd\r"
+        for {set i 0} {$i < $count} {incr i} {
+            expect -i $id -exact $marker
+        }
+    }
+}

@@ -1,16 +1,16 @@
 proc test05-sros2_talker_py {} {
     puts "\nTEST: SROS2"
-    set timeout 60
+    set timeout 600
 
-    # Check for ca.cert.pem, otherwise skip it
+    # Check for ca.cert.pem, otherwise skip. Note: VxWorks 'ls' on a missing
+    # path prints  Can't open "<path>".  (not the Linux "No such file or
+    # directory"), so the skip arm must match the VxWorks wording too, else the
+    # absent-keystore case falls through to timeout.
     send "ls /usr/demo_keystore/public\r"
     expect {
-        -re "No such file or directory" {
-            puts "demo_keystore not found, skipping commands."
-        }
-        -re "ca.cert.pem" {
+        -re {ca\.cert\.pem} {
             send "set env \"ROS_SECURITY_ENABLE=true\"\r"
-            expect -exact {[vxWorks}
+            expect -exact $vxworks::prompt_cmd
             send "python3 ros2 run demo_nodes_cpp talker --ros-args --enclave /talker_listener/talker\r"
             expect -exact {Found security directory}
             expect -exact {Publishing}
@@ -18,13 +18,15 @@ proc test05-sros2_talker_py {} {
             expect -exact {Publishing}
             expect -exact {Publishing}
             send_ctrl_c
-            expect -exact {[vxWorks}
             send "set env \"ROS_SECURITY_ENABLE=false\"\r"
-            expect -exact {[vxWorks}
+            expect -exact $vxworks::prompt_cmd
             send "rtp delete /usr/lib/demo_nodes_cpp/talker"
         }
+        -re {Can't open|No such file or directory} {
+            puts "demo_keystore not found, skipping SROS2 test."
+        }
         timeout {
-            puts "Command timed out"
+            puts "FAIL test05: timed out checking for the demo keystore"
         }
     }
 }
