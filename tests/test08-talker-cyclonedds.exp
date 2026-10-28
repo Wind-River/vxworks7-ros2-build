@@ -1,0 +1,27 @@
+proc test08-talker-cyclonedds {} {
+    puts "\nTEST: PUB/SUB (rmw_cyclonedds_cpp, default transport)"
+
+    # Same talker/listener as test04 but using the CycloneDDS RMW. CycloneDDS
+    # does not use FASTDDS_BUILTIN_TRANSPORTS; its default transport (UDP /
+    # loopback) needs no extra setup (SHM would require the iox-roudi daemon).
+    # Env is per-RTP, so set RMW on BOTH the serial console (talker) and the
+    # telnet console (listener).
+    vxworks::set_env $qemu::spawn_id "RMW_IMPLEMENTATION=rmw_cyclonedds_cpp"
+
+    send "/usr/lib/demo_nodes_cpp/talker\r"
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+
+    # Subscriber over telnet (second console) while the talker runs on serial.
+    set tid [telnet::open]
+    if {$tid ne ""} {
+        vxworks::set_env $tid "RMW_IMPLEMENTATION=rmw_cyclonedds_cpp"
+        vxworks::run_node $tid "/usr/lib/demo_nodes_cpp/listener" "I heard"
+        telnet::close $tid
+    }
+
+    send_ctrl_c
+}
