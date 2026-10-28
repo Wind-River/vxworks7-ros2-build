@@ -1,0 +1,20 @@
+<!--
+  CycloneDDS configuration for ROS 2 on VxWorks.
+
+  Two RTPs on the same target discover each other over the loopback interface.
+  Without this, CycloneDDS binds a non-loopback interface and multicast
+  discovery does not complete between RTPs (talker publishes, listener stays
+  silent). Point CYCLONEDDS_URI at this file on every node, e.g. in vxscript or
+  per-RTP: set env CYCLONEDDS_URI=/usr/cyclonedds.xml
+
+  See VxDocs vxworks/packages/cyclonedds.md.
+-->
+<CycloneDDS>
+  <Domain id="any">
+    <General>
+      <Interfaces>
+        <NetworkInterface address="127.0.0.1"></NetworkInterface>
+      </Interfaces>
+    </General>
+  </Domain>
+</CycloneDDS>
