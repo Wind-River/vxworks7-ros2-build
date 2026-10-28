@@ -1,0 +1,27 @@
+proc test07-talker-udpv4 {} {
+    puts "\nTEST: PUB/SUB (rmw_fastrtps_cpp, UDPv4)"
+
+    # Same talker/listener as test04 but forcing the UDPv4 builtin transport
+    # (no shared memory). Env is per-RTP, so set it on BOTH the serial console
+    # (talker) and the telnet console (listener).
+    vxworks::set_env $qemu::spawn_id "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
+    vxworks::set_env $qemu::spawn_id "FASTDDS_BUILTIN_TRANSPORTS=UDPv4"
+
+    send "/usr/lib/demo_nodes_cpp/talker\r"
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+
+    # Subscriber over telnet (second console) while the talker runs on serial.
+    set tid [telnet::open]
+    if {$tid ne ""} {
+        vxworks::set_env $tid "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
+        vxworks::set_env $tid "FASTDDS_BUILTIN_TRANSPORTS=UDPv4"
+        vxworks::run_node $tid "/usr/lib/demo_nodes_cpp/listener" "I heard"
+        telnet::close $tid
+    }
+
+    send_ctrl_c
+}
