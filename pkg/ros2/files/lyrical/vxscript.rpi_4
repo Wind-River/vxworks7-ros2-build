@@ -1,0 +1,15 @@
+taskDelete(taskNameToId("ipdhcpc"))
+ifconfig "genet0 -dhcp"
+ifconfig "genet0 inet add 192.168.200.1/24"
+xxx="/usr";iosViewPrune iosViewCurrent(), xxx, strlen(xxx)+1
+symlink "/sd0","/usr"
+shellConfigDefaultValueSet "VXE_PATH", "/usr/bin"
+rtpSpStackSize=0x100000
+putgenv "LD_LIBRARY_PATH=/usr/lib"
+putgenv "AMENT_PREFIX_PATH=/usr"
+putgenv "ROS_LOG_DIR=/ram0"
+putgenv "CYCLONEDDS_URI=/usr/cyclonedds.xml"
+putgenv "ROS_SECURITY_KEYSTORE=/usr/demo_keystore"
+putgenv "ROS_SECURITY_ENABLE=false"
+putgenv "ROS_SECURITY_STRATEGY=Enforce"
+cd "/usr/bin"

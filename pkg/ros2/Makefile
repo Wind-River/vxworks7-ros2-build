@@ -167,7 +167,7 @@ ros2.deploy : ros2.install
 	cp -rL --no-preserve=ownership $(ROOT_DIR)/bin/* $(DEPLOY_DIR)/bin/.
 	cp -rL --no-preserve=ownership $(ROOT_DIR)/lib/* $(DEPLOY_DIR)/lib/.
 	cp -rL --no-preserve=ownership $(ROOT_DIR)/share $(DEPLOY_DIR)/.
-	cp files/$(ROS_DISTRO)/vxscript $(DEPLOY_DIR)/.
+	cp files/$(ROS_DISTRO)/vxscript.$(TGT_BSP) $(DEPLOY_DIR)/vxscript
 	cp files/$(ROS_DISTRO)/cyclonedds.xml $(DEPLOY_DIR)/.
 	@$(MAKE_STAMP)
 	
