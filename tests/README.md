@@ -39,9 +39,11 @@ the talker publishes but the listener stays silent.
 
 ## Prerequisites
 
-- QEMU (`qemu-system-x86_64`)
+- QEMU (`qemu-system-x86_64` for x86; a GENET+SD-patched `qemu-system-aarch64` for
+  raspi4b — see *Targets* below)
 - A valid `ros2.img` disk image in the current directory or passed as an argument
-- VxWorks kernel image available at `$WIND_SDK_HOME/vxsdk/bsps/**/vxWorks`
+- VxWorks kernel image available at `$WIND_SDK_HOME/vxsdk/bsps/**/vxWorks` (x86) or
+  `**/uVxWorks` (raspi4b)
 - Expect (`expect` CLI tool)
 - Network interface `tap0` configured and up with IP `192.168.200.254`
 
@@ -76,6 +78,49 @@ To see usage instructions:
 ```
 ./main_script.exp --help
 ```
+
+### Targets: x86_64 and aarch64 (raspi4b)
+
+The suite auto-detects the target from the SDK you have sourced (the BSP dir under
+`$WIND_SDK_HOME/vxsdk/bsps`): `itl_generic*` → x86_64, `rpi_4*` → raspi4b. Behavior is
+tuned per target and controlled by these env vars:
+
+| Var | Default | Purpose |
+|-----|---------|---------|
+| `VX_TARGET` | auto (from SDK BSP) | force `x86` or `rpi4` |
+| `VX_QEMU` | `qemu-system-x86_64` / `qemu-system-aarch64` (PATH) | QEMU binary |
+| `VX_DTB` | `<kernel-dir>/rpi-4b.dtb` (stock SDK dtb) | raspi4 device tree |
+| `VX_BOOTLINE` | `fs(0,0)...o=genet0 f=0x0 s=/sd0/vxscript` | raspi4 boot line (via `-append`) |
+| `VX_TIMEOUT` | `60` (x86) / `300` (raspi4) | per-command Expect timeout (s) |
+
+**x86_64** (default, KVM-accelerated):
+
+```bash
+source /path/to/wrsdk-vxworks7-qemu/sdkenv.sh
+./tests/main_script.exp output/ros2.img
+```
+
+**aarch64 / raspi4b** — needs a QEMU with the BCM2838 GENET + SD→emmc2 model
+(`razr/qemu` branch `genet-rebased-sd`); stock `qemu-system-aarch64` won't work, so
+point `VX_QEMU` at your build. Fully emulated (TCG, no KVM) so it is slow — the 300 s
+default timeout accounts for that.
+
+```bash
+cd <harness>
+source ~/Downloads/wrsdk-vxworks7-raspberrypi4b-1.9.0/sdkenv.sh
+VX_QEMU=/path/to/patched/qemu-system-aarch64 \
+  ./tests/main_script.exp output-rpi-4/ros2.img
+```
+
+Run a single test (recommended on raspi4, since TCG boot is slow):
+
+```bash
+VX_QEMU=/path/to/patched/qemu-system-aarch64 \
+  ./tests/main_script.exp output-rpi-4/ros2.img test02-timer_lambda
+```
+
+The raspi4 boot line is passed via QEMU `-append` (lands in the dtb `/chosen/bootargs`,
+which VxWorks reads via `vxFdtBootargsGet`) — the stock SDK dtb is used unmodified.
 
 ## How It Works
 

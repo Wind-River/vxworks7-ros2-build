@@ -11,19 +11,81 @@
 namespace eval qemu {
     variable spawn_id ""
 
-    # Locate the vxWorks kernel image: prefer the SDK, else the cwd.
-    proc find_kernel {} {
+    # Which target to boot: "x86" (qemu-system-x86_64 / itl_generic) or
+    # "rpi4" (qemu-system-aarch64 / raspi4b). Auto-detected from the active SDK
+    # (the BSP dir name under $WIND_SDK_HOME/vxsdk/bsps), overridable with the
+    # VX_TARGET env var (x86|rpi4).
+    proc target {} {
+        if {[info exists ::env(VX_TARGET)] && $::env(VX_TARGET) ne ""} {
+            return $::env(VX_TARGET)
+        }
         if {[info exists ::env(WIND_SDK_HOME)] && $::env(WIND_SDK_HOME) ne ""} {
-            set path [exec find $::env(WIND_SDK_HOME)/vxsdk/bsps/ -name "vxWorks" -print -quit]
+            if {![catch {exec find $::env(WIND_SDK_HOME)/vxsdk/bsps/ -maxdepth 1 -type d -name "rpi_4*" -print -quit} rpi] && $rpi ne ""} {
+                return rpi4
+            }
+        }
+        return x86
+    }
+
+    # Locate the vxWorks kernel image: prefer the SDK, else the cwd. raspi4 boots
+    # the uncompressed-loader kernel 'uVxWorks' (the SDK ships both uVxWorks and
+    # vxWorks under the rpi BSP); x86 boots 'vxWorks'.
+    proc find_kernel {} {
+        set name [expr {[target] eq "rpi4" ? "uVxWorks" : "vxWorks"}]
+        if {[info exists ::env(WIND_SDK_HOME)] && $::env(WIND_SDK_HOME) ne ""} {
+            set path [exec find $::env(WIND_SDK_HOME)/vxsdk/bsps/ -name $name -print -quit]
         } else {
-            set path [exec find . -maxdepth 1 -name "vxWorks" -print -quit]
+            set path [exec find . -maxdepth 1 -name $name -print -quit]
         }
         if {$path eq ""} {
-            puts "vxWorks kernel image file not found."
+            puts "vxWorks kernel image ($name) not found."
             exit 1
         }
         puts "vxWorks kernel image file found at: $path"
         return $path
+    }
+
+    # raspi4 boots the stock SDK dtb; the bootline is passed via QEMU -append
+    # (like x86), which lands in the dtb's /chosen/bootargs and VxWorks copies it
+    # to the boot line (vxFdtBootargsGet). No custom dtb needed. The dtb sits next
+    # to the kernel in the SDK BSP dir; override with VX_DTB.
+    proc find_dtb {kernel} {
+        if {[info exists ::env(VX_DTB)] && $::env(VX_DTB) ne ""} {
+            return $::env(VX_DTB)
+        }
+        set default [file join [file dirname $kernel] "rpi-4b.dtb"]
+        if {![file exists $default]} {
+            puts "stock raspi4 dtb not found at $default (set VX_DTB)."
+            exit 1
+        }
+        return $default
+    }
+
+    # The raspi4 VxWorks boot line, passed via -append (same mechanism as x86).
+    # fs(0,0) = boot from SD; 192.168.200.x = tap0 subnet; f=0x0 = static;
+    # s=/sd0/vxscript = run the startup script. MUST be a single line (an embedded
+    # newline truncates the boot line and yields "Error in boot line"). Override
+    # with VX_BOOTLINE.
+    proc rpi_bootline {} {
+        if {[info exists ::env(VX_BOOTLINE)] && $::env(VX_BOOTLINE) ne ""} {
+            return $::env(VX_BOOTLINE)
+        }
+        return "fs(0,0)host:vxWorks h=192.168.200.254 e=192.168.200.1:ffffff00 g=192.168.200.254 u=target pw=vxTarget o=genet0 f=0x0 s=/sd0/vxscript"
+    }
+
+    # The QEMU binary. Defaults to the system emulator on PATH
+    # (qemu-system-x86_64 / qemu-system-aarch64); override with VX_QEMU.
+    # NOTE: raspi4b REQUIRES a QEMU with the BCM2838 GENET + SD->emmc2 model
+    # (e.g. razr/qemu branch genet-rebased-sd). A stock qemu-system-aarch64
+    # lacks those, so point VX_QEMU at your patched build for raspi4.
+    proc qemu_bin {} {
+        if {[info exists ::env(VX_QEMU)] && $::env(VX_QEMU) ne ""} {
+            return $::env(VX_QEMU)
+        }
+        if {[target] eq "rpi4"} {
+            return "qemu-system-aarch64"
+        }
+        return "qemu-system-x86_64"
     }
 
     # Spawn QEMU with the given ros2 disk image, wait for the boot to reach the
@@ -32,14 +94,33 @@ namespace eval qemu {
     proc boot {img_path} {
         variable spawn_id
         set kernel [find_kernel]
+        set qemu [qemu_bin]
 
-        spawn qemu-system-x86_64 -enable-kvm -smp 8 -m 2G -machine q35 -cpu Nehalem -kernel $kernel \
-            -net nic -net tap,ifname=tap0,script=no,downscript=no \
-            -display none -serial mon:stdio \
-            -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata0/vxscript" \
-            -device ich9-ahci,id=ahci \
-            -drive file=$img_path,if=none,id=ros2disk,format=raw \
-            -device ide-hd,drive=ros2disk,bus=ahci.0
+        if {[target] eq "rpi4"} {
+            # aarch64 raspi4b: stock SDK dtb + bootline via -append (-> /chosen/bootargs
+            # -> vxFdtBootargsGet, same as x86). SD via -sd; GENET on tap0; console on
+            # serial1 (-serial null -serial mon:stdio). Fully emulated (TCG, no KVM on
+            # x86 host) -> slow; see timeout note.
+            set dtb [find_dtb $kernel]
+            set bootline [rpi_bootline]
+            puts "Booting raspi4b (aarch64, TCG) qemu=$qemu kernel=$kernel dtb=$dtb"
+            spawn $qemu -M raspi4b -smp 4 -m 2G -nographic \
+                -kernel $kernel -dtb $dtb \
+                -append "$bootline" \
+                -nic tap,ifname=tap0,model=bcm2838-genet,script=no,downscript=no \
+                -sd $img_path \
+                -serial null -serial mon:stdio
+        } else {
+            # x86_64 q35: KVM-accelerated; bootline via -append; SD image as AHCI disk.
+            puts "Booting x86_64 (q35, KVM) qemu=$qemu kernel=$kernel"
+            spawn $qemu -enable-kvm -smp 8 -m 2G -machine q35 -cpu Nehalem -kernel $kernel \
+                -net nic -net tap,ifname=tap0,script=no,downscript=no \
+                -display none -serial mon:stdio \
+                -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata0/vxscript" \
+                -device ich9-ahci,id=ahci \
+                -drive file=$img_path,if=none,id=ros2disk,format=raw \
+                -device ide-hd,drive=ros2disk,bus=ahci.0
+        }
         # 'variable spawn_id' above aliases the local name to the namespace var,
         # so 'spawn' writes the id straight into ::qemu::spawn_id.
 

@@ -93,8 +93,18 @@ if {[llength $selectors] == 0} {
 }
 puts "\nExecuting: $test_scripts"
 
-# Set timeout for Expect commands (in seconds)
-set timeout 60
+# Set timeout for Expect commands (in seconds). raspi4 is fully emulated (TCG,
+# no KVM on an x86 host) so boot + node start-up are much slower than the
+# KVM-accelerated x86 target; give it a far larger budget. Overridable with
+# VX_TIMEOUT.
+if {[info exists ::env(VX_TIMEOUT)] && $::env(VX_TIMEOUT) ne ""} {
+    set timeout $::env(VX_TIMEOUT)
+} elseif {[qemu::target] eq "rpi4"} {
+    set timeout 300
+} else {
+    set timeout 60
+}
+puts "Target: [qemu::target]  (expect timeout ${timeout}s)"
 
 # Boot QEMU + VxWorks and drop to the command shell.
 qemu::boot $img_path
