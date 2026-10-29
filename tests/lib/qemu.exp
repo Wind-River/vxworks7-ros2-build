@@ -96,6 +96,19 @@ namespace eval qemu {
         set kernel [find_kernel]
         set qemu [qemu_bin]
 
+        # Optional: attach an extra host directory as a USB mass-storage disk
+        # (appears on the target as /bd0a). Set VX_USB_DIR to the directory whose
+        # files you want on the target (e.g. a locally built RTP). No-op when
+        # unset, so existing runs are unaffected.
+        set usb_args {}
+        if {[info exists ::env(VX_USB_DIR)] && $::env(VX_USB_DIR) ne ""} {
+            set usbdir $::env(VX_USB_DIR)
+            puts "Attaching USB disk from VX_USB_DIR=$usbdir (-> /bd0a on target)"
+            set usb_args [list \
+                -usb -device usb-ehci,id=ehci -device usb-storage,drive=fat32 \
+                -drive file=fat:rw:$usbdir,id=fat32,format=raw,if=none]
+        }
+
         if {[target] eq "rpi4"} {
             # aarch64 raspi4b: stock SDK dtb + bootline via -append (-> /chosen/bootargs
             # -> vxFdtBootargsGet, same as x86). SD via -sd; GENET on tap0; console on
@@ -104,22 +117,24 @@ namespace eval qemu {
             set dtb [find_dtb $kernel]
             set bootline [rpi_bootline]
             puts "Booting raspi4b (aarch64, TCG) qemu=$qemu kernel=$kernel dtb=$dtb"
-            spawn $qemu -M raspi4b -smp 4 -m 2G -nographic \
+            eval spawn $qemu -M raspi4b -smp 4 -m 2G -nographic \
                 -kernel $kernel -dtb $dtb \
-                -append "$bootline" \
+                -append [list $bootline] \
                 -nic tap,ifname=tap0,model=bcm2838-genet,script=no,downscript=no \
                 -sd $img_path \
-                -serial null -serial mon:stdio
+                -serial null -serial mon:stdio \
+                $usb_args
         } else {
             # x86_64 q35: KVM-accelerated; bootline via -append; SD image as AHCI disk.
             puts "Booting x86_64 (q35, KVM) qemu=$qemu kernel=$kernel"
-            spawn $qemu -enable-kvm -smp 8 -m 2G -machine q35 -cpu Nehalem -kernel $kernel \
+            eval spawn $qemu -enable-kvm -smp 8 -m 2G -machine q35 -cpu Nehalem -kernel $kernel \
                 -net nic -net tap,ifname=tap0,script=no,downscript=no \
                 -display none -serial mon:stdio \
-                -append "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata0/vxscript" \
+                -append [list "bootline:fs(0,0)host:/vxWorks h=192.168.200.254 e=192.168.200.1 g=192.168.200.254 u=ftp pw=ftp123 o=gei0 s=/ata0/vxscript"] \
                 -device ich9-ahci,id=ahci \
                 -drive file=$img_path,if=none,id=ros2disk,format=raw \
-                -device ide-hd,drive=ros2disk,bus=ahci.0
+                -device ide-hd,drive=ros2disk,bus=ahci.0 \
+                $usb_args
         }
         # 'variable spawn_id' above aliases the local name to the namespace var,
         # so 'spawn' writes the id straight into ::qemu::spawn_id.

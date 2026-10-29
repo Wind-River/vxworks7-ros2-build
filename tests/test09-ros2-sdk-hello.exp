@@ -1,0 +1,34 @@
+#!/usr/bin/expect
+# test09-ros2-sdk-hello.exp
+#
+# ROS 2 SDK on-target test: run the Hello World RTP that was built against the
+# produced ROS 2 SDK (by tests/ros2-sdk/test-ros2-hello-world.sh, "part 1") and
+# confirm it logs "Hello, world!".
+#
+# The binary is delivered to the target as a USB mass-storage disk: run the suite
+# with VX_USB_DIR pointing at the directory that holds hello_world_node, e.g.
+#
+#   ./tests/ros2-sdk/test-ros2-hello-world.sh         # part 1: build -> /tmp/ros2-sdk-usb
+#   VX_USB_DIR=/tmp/ros2-sdk-usb \
+#     ./tests/main_script.exp output/ros2.img test09-ros2-sdk-hello
+#
+# qemu.exp attaches VX_USB_DIR as /bd0a at boot; this test runs /bd0a/hello_world_node.
+# Skips cleanly (no failure) if VX_USB_DIR was not set, since then /bd0a is absent.
+
+proc test09-ros2_sdk_hello {} {
+    puts "\nTEST: ROS 2 SDK HELLO WORLD (RTP built against the SDK, run from USB /bd0a)"
+
+    if {![info exists ::env(VX_USB_DIR)] || $::env(VX_USB_DIR) eq ""} {
+        puts "SKIP: VX_USB_DIR not set; the hello_world_node USB disk was not attached."
+        return
+    }
+
+    # The ROS 2 environment (LD_LIBRARY_PATH=/usr/lib, AMENT_PREFIX_PATH=/usr,
+    # rtpSpStackSize, ...) is set by the image's /ata0/vxscript at boot, so we
+    # just launch the RTP by its path on the USB disk and wait for its log line.
+    send "/bd0a/hello_world_node\r"
+    expect -exact {Hello, world!}
+    expect -exact {Hello, world!}
+    expect -exact {Hello, world!}
+    send_ctrl_c
+}

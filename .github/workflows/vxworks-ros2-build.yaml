@@ -166,6 +166,30 @@ jobs:
             vxros2build:${{ env.ros_distro }} \
             /bin/bash -c 'set -- /wrsdk/sdkenv.sh; . /wrsdk/sdkenv.sh && make fs -C /work'
 
+      - name: Test ROS 2 SDK - build a Hello World app against it
+        if: ${{ inputs.test }}
+        run: |
+          # Part 1 of the ROS 2 SDK test: create + cross-build a hello_world
+          # rclcpp app against the produced SDK (output/export/root). Runs in the
+          # same Docker container (SDK sourced, export/root present). Stages the
+          # resulting VxWorks RTP into ros2-sdk-usb/ for the test job to attach.
+          docker run --rm \
+            -e UID=$(id -u) -e GID=$(id -g) \
+            -v /tmp/wrsdk:/wrsdk \
+            -v ${{ github.workspace }}:/work \
+            vxros2build:${{ env.ros_distro }} \
+            /bin/bash -c 'set -- /wrsdk/sdkenv.sh; . /wrsdk/sdkenv.sh && \
+              VX_WS=/work/ros2-sdk-ws VX_USB_DIR=/work/ros2-sdk-usb \
+              /work/tests/ros2-sdk/test-ros2-hello-world.sh'
+
+      - name: Upload the Hello World RTP artifact
+        if: ${{ inputs.test }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: hello_world ${{ env.sdk }} ${{ env.ros_distro }}
+          path: ${{ github.workspace }}/ros2-sdk-usb/hello_world_node
+          if-no-files-found: error
+
       - name: Create an SROS2 script
         run: |
           cat << 'EOF' > /tmp/sros2_script.sh
@@ -243,6 +267,12 @@ jobs:
         with:
           name: HDD image ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
 
+      - name: Download the Hello World RTP (ROS 2 SDK test)
+        uses: actions/download-artifact@v4
+        with:
+          name: hello_world ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          path: ${{ github.workspace }}/ros2-sdk-usb
+
       - name: Install QEMU and expect
         run: |
           # Update apt and install dependencies
@@ -262,6 +292,11 @@ jobs:
           # Change directory to GitHub workspace
           cd ${{ github.workspace }}
 
+          # Attach the Hello World RTP (from the build job) as a USB disk so the
+          # ROS 2 SDK on-target test (test09-ros2-sdk-hello) can run it as
+          # /bd0a/hello_world_node. The whole suite (test01..test09) runs.
+          chmod +x ros2-sdk-usb/hello_world_node || true
+
           # Run tests
           echo "Running tests..."
-          ./tests/main_script.exp
+          VX_USB_DIR=${{ github.workspace }}/ros2-sdk-usb ./tests/main_script.exp

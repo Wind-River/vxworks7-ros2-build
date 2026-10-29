@@ -14,7 +14,8 @@ This directory contains automated Expect-based test scripts for verifying ROS 2 
 ├── test05-sros2.exp # Test: SROS 2 security functionality (skips if no keystore)
 ├── test06-rclrs.exp # Test: Rust rclrs pub/sub (Fast-DDS, shared memory)
 ├── test07-talker-udpv4.exp # Test: C++ talker/listener (Fast-DDS, UDPv4 transport)
-└── test08-talker-cyclonedds.exp # Test: C++ talker/listener (CycloneDDS RMW, loopback)
+├── test08-talker-cyclonedds.exp # Test: C++ talker/listener (CycloneDDS RMW, loopback)
+└── test09-ros2-sdk-hello.exp # Test: run a Hello World RTP built against the ROS 2 SDK (from USB /bd0a)
 ```
 
 ## Tests
@@ -29,6 +30,7 @@ This directory contains automated Expect-based test scripts for verifying ROS 2 
 | `test06-rclrs` | Rust `examples_rclrs_minimal_pub_sub` publisher/subscriber (`Publishing`) | `rmw_fastrtps_cpp` / SHM |
 | `test07-talker-udpv4` | Same talker/listener as test04 but forcing the UDPv4 builtin transport (no shared memory) | `rmw_fastrtps_cpp` / UDPv4 |
 | `test08-talker-cyclonedds` | Same talker/listener as test04 under CycloneDDS; points `CYCLONEDDS_URI` at the shipped `/usr/cyclonedds.xml` (loopback `127.0.0.1`) so the two RTPs discover each other | `rmw_cyclonedds_cpp` / loopback |
+| `test09-ros2-sdk-hello` | Runs a Hello World RTP **built against the produced ROS 2 SDK** (delivered via USB `/bd0a`, set `VX_USB_DIR`); expects `Hello, world!`. Skips if `VX_USB_DIR` unset. See [ROS 2 SDK test](#ros-2-sdk-test--build--run-a-hello-world-app-testsros2-sdk) | — |
 
 Transport env is set **per-RTP**, so pub/sub tests set `RMW_IMPLEMENTATION` (and the
 transport knob) on **both** consoles — the serial console (publisher/talker) and the
@@ -92,6 +94,7 @@ tuned per target and controlled by these env vars:
 | `VX_DTB` | `<kernel-dir>/rpi-4b.dtb` (stock SDK dtb) | raspi4 device tree |
 | `VX_BOOTLINE` | `fs(0,0)...o=genet0 f=0x0 s=/sd0/vxscript` | raspi4 boot line (via `-append`) |
 | `VX_TIMEOUT` | `60` (x86) / `300` (raspi4) | per-command Expect timeout (s) |
+| `VX_USB_DIR` | *(unset)* | host dir to attach as a USB mass-storage disk (appears on target as `/bd0a`); used by `test09-ros2-sdk-hello` |
 
 **x86_64** (default, KVM-accelerated):
 
@@ -133,3 +136,28 @@ which VxWorks reads via `vxFdtBootargsGet`) — the stock SDK dtb is used unmodi
 
 Each test script defines one or more `test*` procedures that are called in order.
 
+
+---
+
+# ROS 2 SDK test — build + run a Hello World app (`tests/ros2-sdk/`)
+
+This verifies the **produced ROS 2 SDK** (`output/export/root`, built by
+`make ros2`) is usable: that a developer can create a new ROS 2 package, build it
+against the SDK, and run it on VxWorks. It is a **two-part** test:
+
+- **Part 1 — build (host):** `tests/ros2-sdk/test-ros2-hello-world.sh` creates an
+  `ament_cmake` package (`ros2 pkg create`), adds a minimal `rclcpp` node, and
+  `colcon build --mixin vxworks` → a VxWorks RTP linking the SDK's `librclcpp`.
+- **Part 2 — run (normal harness):** `test09-ros2-sdk-hello.exp` runs through
+  `main_script.exp`; the built binary is attached as a USB disk (`VX_USB_DIR` →
+  `/bd0a`) and launched as `/bd0a/hello_world_node`, expecting `Hello, world!`.
+
+```bash
+source ~/Downloads/wrsdk-vxworks7-qemu-<ver>/sdkenv.sh
+./tests/ros2-sdk/test-ros2-hello-world.sh                       # part 1
+VX_USB_DIR=/tmp/ros2-sdk-usb \
+  ./tests/main_script.exp output/ros2.img test09-ros2-sdk-hello # part 2
+```
+
+See **[`tests/ros2-sdk/README.md`](ros2-sdk/README.md)** for why a ROS 2 SDK,
+how the host/target split works, and the full requirements/notes.
