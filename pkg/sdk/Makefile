@@ -64,6 +64,11 @@ sdk.deploy : sdk.install
 	$(call sdk_deploy,$*)
 	@$(MAKE_STAMP)
 
+# sdk.get-pip-url - print python_fix's pip bootstrap URL (mk/usr/make-sdk-overlay.sh)
+.PHONY: sdk.get-pip-url
+sdk.get-pip-url:
+	@echo $(GET_PIP_URL)
+
 sdk.clean:
 	@$(call echo_action,Cleaning,$*)
 	@$(CLEAN_STAMP)

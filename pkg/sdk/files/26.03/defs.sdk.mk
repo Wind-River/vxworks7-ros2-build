@@ -92,6 +92,10 @@ define vxworks_fix
         fi
 endef
 
+# pip bootstrap used by python_fix (also read by mk/usr/make-sdk-overlay.sh via
+# `make -C pkg/sdk sdk.get-pip-url`, so the overlay installs pip the same way)
+GET_PIP_URL ?= https://bootstrap.pypa.io/pip/3.$(TGT_PYTHON_MINOR)/get-pip.py
+
 define python_fix
 	if [ ! -L $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 ]; then \
 		ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.$(TGT_PYTHON_MINOR) $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3; \
@@ -108,7 +112,7 @@ define python_fix
 	fi
 
 	if [ ! -f $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 ]; then \
-		cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),https://bootstrap.pypa.io/pip/3.$(TGT_PYTHON_MINOR)/get-pip.py,get-pip.py) ; \
+		cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),$(GET_PIP_URL),get-pip.py) ; \
 		$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 $(DOWNLOADS_DIR)/get-pip.py ; \
 		sed -i '1s|^#!.*|#!/usr/bin/env python3|' \
 			$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip \
@@ -141,7 +145,7 @@ define sdk_install
         fi ; \
         install -D -m0755 files/optimize-python-startup.py $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/optimize-python-startup ; \
         echo "✔ optimize-python-startup installed" ; \
-        $(call sdk_rust_fixups)
+        $(call rust_fix)
 endef
 
 # VxWorks Rust toolchain gap the SDK ships but does not fix: libloading has no
@@ -149,7 +153,7 @@ endef
 # (not ROS 2 specific), so it lives with the SDK: patch upstream 0.8.9 into
 # $(WIND_CC_SYSROOT)/usr/rust/vxworks-crates/libloading, which Rust consumers point
 # [patch.crates-io] at.
-define sdk_rust_fixups
+define rust_fix
         RP=$(CURDIR)/files/$(WIND_RELEASE_ID)/rust-patches ; \
         CRATES=$(WIND_CC_SYSROOT)/usr/rust/vxworks-crates ; \
         LL="$$CRATES/libloading/src/os/unix/consts.rs" ; \

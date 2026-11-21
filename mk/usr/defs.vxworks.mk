@@ -22,8 +22,32 @@
 ifeq ($(__vxworks_defs),)
 __vxworks_defs = TRUE
 
-# WIND_SDK_HOME must be in the environment
 WIND_SDK_HOME ?= $(shell echo $$WIND_SDK_HOME)
+
+# Goals that need no SDK: `make toolkit` only packs build outputs. Without a
+# sourced SDK they take the SDK identity (release, arch, name) from the SDK
+# overlay in $(TOP_BUILDDIR)/sdk-overlay-build/ (made by `make sdk-overlay`).
+SDK_LESS_GOALS := toolkit toolkit-info
+ifeq ($(WIND_SDK_HOME),)
+ifneq ($(MAKECMDGOALS),)
+ifeq ($(filter-out $(SDK_LESS_GOALS),$(MAKECMDGOALS)),)
+  SDK_FROM_OVERLAY := $(wildcard $(TOP_BUILDDIR)/sdk-overlay-build/sdk-overlay-*/sdk_overlay.json)
+  ifneq ($(words $(SDK_FROM_OVERLAY)),1)
+    $(error no SDK sourced and not exactly one SDK overlay in $(TOP_BUILDDIR)/sdk-overlay-build/ (found: $(SDK_FROM_OVERLAY)))
+  endif
+endif
+endif
+endif
+
+ifneq ($(SDK_FROM_OVERLAY),)
+sdk_overlay_id = $(shell python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["sdk"][sys.argv[2]])' $(SDK_FROM_OVERLAY) $(1))
+export WIND_RELEASE_ID := $(call sdk_overlay_id,release)
+export TGT_ARCH        := $(call sdk_overlay_id,arch)
+export SDK_NAME        := $(call sdk_overlay_id,name)
+$(info SDK identity from the SDK overlay: $(WIND_RELEASE_ID) $(TGT_ARCH) $(SDK_NAME))
+else
+
+# WIND_SDK_HOME must be in the environment
 ifeq ($(WIND_SDK_HOME),)
   $(error WIND_SDK_HOME is not set, please export it before running make)
 endif
@@ -73,6 +97,11 @@ export Python_SOABI
 export PYTHON_MODULE_EXTENSION
 
 export WIND_RELEASE_ID
+
+# the SDK's own name (sdk.version, e.g. wrsdk-vxworks7-qemu-1.17.0; falls back to
+# its directory name): recorded in the SDK overlay and the toolkit manifest
+export SDK_NAME := $(or $(shell cat $(WIND_SDK_HOME)/sdk.version 2>/dev/null),$(notdir $(WIND_SDK_HOME)))
+endif
 
 wind_release_id = $(shell echo $(1) | sed 's/\.//g')
 
