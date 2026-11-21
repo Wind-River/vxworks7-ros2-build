@@ -5,7 +5,7 @@
 #
 #   TOP_BUILDDIR EXPORT_DIR ROOT_DIR PACKAGE_DIR BUILDSPECS_DIR
 #   ROS_DISTRO WIND_RELEASE_ID TGT_ARCH SDK_NAME
-#   SDK_OVERLAY_STAGE TOOLKIT_SRC_DIR TOOLKIT_STAGE TOOLKIT_TARBALL
+#   SDK_OVERLAY_STAGE TOOLKIT_SRC_DIR TOOLKIT_TESTS_DIR TOOLKIT_STAGE TOOLKIT_TARBALL
 #
 # It reads no SDK files: everything SDK-specific comes from the SDK overlay.
 #
@@ -15,7 +15,8 @@
 #   export/root       - the prebuilt ROS 2 SDK (build apps against this)
 #   ros2.img          - bootable VxWorks target image (CONTAINS the target rootfs
 #                       that would otherwise be export/deploy; not shipped loose)
-#   scripts/ host-shims/ .devcontainer/ .vscode/ README.md  - committed tooling
+#   scripts/ host-shims/ .vscode/ README.md  - committed tooling
+#   tests/            - the harness on-target tests (main_script.exp, lib/, suites)
 #   manifest.json     - build recipe (keys == Makefile vars) + layer pin
 # then tars it to $TOOLKIT_TARBALL.
 set -euo pipefail
@@ -26,7 +27,7 @@ need() { [ -n "${!1:-}" ] || die "env var $1 is required (run via 'make toolkit'
 
 for v in TOP_BUILDDIR EXPORT_DIR ROOT_DIR PACKAGE_DIR BUILDSPECS_DIR \
          ROS_DISTRO SDK_NAME SDK_OVERLAY_STAGE \
-         TOOLKIT_SRC_DIR TOOLKIT_STAGE TOOLKIT_TARBALL; do need "$v"; done
+         TOOLKIT_SRC_DIR TOOLKIT_TESTS_DIR TOOLKIT_STAGE TOOLKIT_TARBALL; do need "$v"; done
 
 STAGE="$TOOLKIT_STAGE"
 
@@ -52,12 +53,13 @@ mkdir -p "$STAGE/export"
 cp -a "$ROOT_DIR"   "$STAGE/export/root"
 cp -a "$TOP_BUILDDIR/ros2.img" "$STAGE/ros2.img"
 
-# --- 3) committed tooling (scripts, shims, devcontainer, vscode, README) ----
-log "3) scripts/ host-shims/ .devcontainer/ .vscode/ README.md"
+# --- 3) committed tooling (scripts, shims, vscode, README) + the tests --------
+log "3) scripts/ host-shims/ .vscode/ README.md tests/"
 cp -a "$TOOLKIT_SRC_DIR/scripts"       "$STAGE/scripts"
 cp -a "$TOOLKIT_SRC_DIR/host-shims"    "$STAGE/host-shims"
-cp -a "$TOOLKIT_SRC_DIR/.devcontainer" "$STAGE/.devcontainer"
 cp -a "$TOOLKIT_SRC_DIR/.vscode"       "$STAGE/.vscode"
+# the harness on-target tests: selftest-build.sh runs tests/toolkit from here
+cp -a "$TOOLKIT_TESTS_DIR"             "$STAGE/tests"
 install -m0644 "$TOOLKIT_SRC_DIR/README.md" "$STAGE/README.md"
 find "$STAGE/host-shims" -name __pycache__ -type d -exec rm -rf {} + 2>/dev/null || true
 
@@ -79,7 +81,19 @@ GENMANIFEST="$TOOLKIT_SRC_DIR/scripts/generate-manifest.py"
 # tree. A '-dirty' suffix flags uncommitted changes at build time.
 REPO_DIR="$(cd "$PACKAGE_DIR/.." && pwd)"
 BUILD_COMMIT="$(git -C "$REPO_DIR" rev-parse HEAD 2>/dev/null || true)"
-BUILD_DESCRIBE="$(git -C "$REPO_DIR" describe --tags --always --dirty 2>/dev/null || true)"
+# describe against this distro/release's release tags only (<distro>-<rel>-v<major>.<minor>);
+# without one it is the commit hash, never an unrelated older tag
+BUILD_DESCRIBE="$(git -C "$REPO_DIR" describe --tags --match "$ROS_DISTRO-${WIND_RELEASE_ID:-}-v*" \
+                  --always --dirty 2>/dev/null || true)"
+# the layer the ROS 2 SDK was built from: recorded by pkg/ros2 (ros2.unpack) in
+# export/root; it overrides the PKG_LAYER_* defaults from the environment
+LAYER_ENV="$ROOT_DIR/share/vxworks7-layer-for-ros2.env"
+if [ -f "$LAYER_ENV" ]; then
+  # shellcheck disable=SC1090
+  . "$LAYER_ENV"
+else
+  log "   WARN: $LAYER_ENV missing (ROS 2 SDK built before it was recorded): layer commit unpinned"
+fi
 if [ -f "$PKGMK" ] && [ -f "$GENMANIFEST" ]; then
   # generate-manifest.py positional args:
   #   mk ros_distro vx_rel vx_sdk arch layer_url layer_branch layer_commit \

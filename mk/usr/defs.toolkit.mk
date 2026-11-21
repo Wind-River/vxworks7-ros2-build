@@ -14,9 +14,11 @@
 
 # --- toolkit layout / naming ------------------------------------------------
 # TOOLKIT_SRC_DIR = the committed kit tooling in the repo (scripts, host-shims,
-#                   devcontainer, vscode, README, make-toolkit.sh).
+#                   vscode, README, make-toolkit.sh).
+# TOOLKIT_TESTS_DIR = the harness on-target tests, shipped in the kit as tests/.
 # TOOLKIT_BUILD   = where the kit is staged + tarred (under output/).
 TOOLKIT_SRC_DIR ?= $(CURDIR)/toolkit
+TOOLKIT_TESTS_DIR ?= $(CURDIR)/tests
 TOOLKIT_BUILD   ?= $(TOP_BUILDDIR)/toolkit-build
 TOOLKIT_NAME    ?= toolkit-$(WIND_RELEASE_ID)-$(ROS_DISTRO)-$(TGT_ARCH)
 TOOLKIT_STAGE   ?= $(TOOLKIT_BUILD)/$(TOOLKIT_NAME)
@@ -57,7 +59,8 @@ define build_toolkit
 	PKG_LAYER_URL="$(TOOLKIT_LAYER_URL)" \
 	PKG_LAYER_COMMIT_ID="$(TOOLKIT_LAYER_COMMIT_ID)" \
 	PKG_LAYER_COMMIT="$(TOOLKIT_LAYER_COMMIT)" \
-	TOOLKIT_SRC_DIR="$(TOOLKIT_SRC_DIR)" TOOLKIT_STAGE="$(TOOLKIT_STAGE)" \
+	TOOLKIT_SRC_DIR="$(TOOLKIT_SRC_DIR)" TOOLKIT_TESTS_DIR="$(TOOLKIT_TESTS_DIR)" \
+	TOOLKIT_STAGE="$(TOOLKIT_STAGE)" \
 	TOOLKIT_TARBALL="$(TOOLKIT_TARBALL)" \
 	    bash "$(TOOLKIT_ASSEMBLE)"
 	@$(ECHO) "✅ toolkit: $(TOOLKIT_TARBALL)"

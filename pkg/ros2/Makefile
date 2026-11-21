@@ -109,6 +109,14 @@ ros2.unpack: ros2.download
 	if ! ls $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/sqlite_vendor/usr_src/0001-* >/dev/null 2>&1; then \
 		touch $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/ros2-vendors/sqlite_vendor/COLCON_IGNORE 2>/dev/null || true; \
 	fi
+	# Record the layer this build checked out (url, branch, commit) with the ROS 2
+	# SDK, so its consumers (make toolkit: manifest + release notes) pin the commit,
+	# not just the moving branch.
+	mkdir -p $(ROOT_DIR)/share
+	printf 'PKG_LAYER_URL=%s\nPKG_LAYER_COMMIT_ID=%s\nPKG_LAYER_COMMIT=%s\n' \
+	  "$(PKG_LAYER_URL)" "$(PKG_LAYER_COMMIT_ID)" \
+	  "$$(git -C $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR) rev-parse HEAD)" \
+	  > $(ROOT_DIR)/share/vxworks7-layer-for-ros2.env
 	@$(MAKE_STAMP)
 
 ros2.patch: ros2.unpack
