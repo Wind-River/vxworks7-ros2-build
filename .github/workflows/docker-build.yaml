@@ -40,7 +40,7 @@ jobs:
           - 5000:5000
     steps:
       - name: Checks-out a branch ${{ github.ref_name }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.ref }}
 
@@ -60,12 +60,12 @@ jobs:
           echo "ubuntu=$UBUNTU_VER" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         with:
           driver-opts: network=host
 
       - name: Build vxbuild:${{ steps.version.outputs.ubuntu }} docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: Docker/${{ steps.version.outputs.ubuntu }}/vxbuild/.
           push: true
@@ -77,7 +77,7 @@ jobs:
           DOCKER_BUILD_RECORD_UPLOAD: false
 
       - name: Build vxros2build:${{ inputs.ros_distro }} docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: Docker/${{ steps.version.outputs.ubuntu }}/vxros2build/.
           push: false
@@ -98,7 +98,7 @@ jobs:
           ls -l ${{ github.workspace }}/vxros2build.${{ inputs.ros_distro }}.tar.gz
 
       - name: Upload vxros2build:${{ inputs.ros_distro }} Docker Image
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: docker-image-vxros2build-${{ inputs.ros_distro }}
           path: |

@@ -84,7 +84,7 @@ jobs:
 
     steps:
       - name: Checks-out a branch ${{ github.ref }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.ref }}
 
@@ -115,7 +115,7 @@ jobs:
           sdkenv: false
 
       - name: Download the vxros2build container
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: docker-image-vxros2build-${{ env.ros_distro }}
           path: /tmp/docker-image
@@ -127,7 +127,7 @@ jobs:
           docker images vxros2build:${{ env.ros_distro }}
 
       - name: Restore ccache (ROS 2 C/C++ compile cache)
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /tmp/ccache
           # key on SDK + distro; restore-keys warm-starts from the latest prior
@@ -199,7 +199,7 @@ jobs:
           cp /tmp/wrsdk/vxsdk/bsps/*/*.dtb ${{ github.workspace }} 2>/dev/null || true
 
       - name: Upload VxWorks and the HDD image
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: hdd-image-${{ env.sdk }}-${{ env.ros_distro }}
           path: |
@@ -215,13 +215,13 @@ jobs:
           ls -l ros2-sdk.tar.zst
 
       - name: Upload the ROS 2 SDK (export/root)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ros2-sdk-${{ env.sdk }}-${{ env.ros_distro }}
           path: ${{ github.workspace }}/output/ros2-sdk.tar.zst
 
       - name: Upload the SDK overlay
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sdk-overlay-${{ env.sdk }}-${{ env.ros_distro }}
           # make sdk-overlay's archive (files/ + sdk_overlay.json + install-sdk-overlay.sh)
@@ -247,25 +247,25 @@ jobs:
       ROS_DISTRO: ${{ needs.build.outputs.ros_distro }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.ref }}
 
       # No SDK here: make toolkit reads no SDK files, and the SDK identity
       # (release id, arch, SDK name) comes from the SDK overlay's sdk_overlay.json.
       - name: Download the HDD image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: hdd-image-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
 
       - name: Download the ROS 2 SDK (export/root)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ros2-sdk-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
           path: ${{ github.workspace }}/output
 
       - name: Download the SDK overlay
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: sdk-overlay-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
           path: ${{ github.workspace }}/output
@@ -281,7 +281,7 @@ jobs:
           cd ${{ github.workspace }} && make toolkit
 
       - name: Upload the ROS 2 SDK toolkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ros2-vxworks-toolkit-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
           path: ${{ github.workspace }}/output/toolkit-*.tar.*
@@ -293,7 +293,7 @@ jobs:
     if: ${{ inputs.test }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.ref }}
 
@@ -303,7 +303,7 @@ jobs:
           echo "ROS Distro: ${{ needs.build.outputs.ros_distro }}"
 
       - name: Download HDD image and VxWorks artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: hdd-image-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
 
@@ -336,12 +336,12 @@ jobs:
     if: ${{ inputs.test && inputs.toolkit }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.ref }}
 
       - name: Download the ROS 2 SDK toolkit
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ros2-vxworks-toolkit-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
           path: ${{ github.workspace }}/toolkit-dl
@@ -359,7 +359,7 @@ jobs:
           sdkenv: false
 
       - name: Download the vxros2build container
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: docker-image-vxros2build-${{ needs.build.outputs.ros_distro }}
           path: /tmp/docker-image
@@ -405,7 +405,7 @@ jobs:
           ls -l ../toolkit-selftest.tar.zst
 
       - name: Upload the USB stage and the toolkit image
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: toolkit-selftest-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
           path: ${{ github.workspace }}/toolkit-selftest.tar.zst
@@ -417,18 +417,18 @@ jobs:
     if: ${{ inputs.test && inputs.toolkit }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.ref }}
 
       # the VxWorks kernel the tests boot ships with the HDD image artifact
       - name: Download HDD image and VxWorks artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: hdd-image-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
 
       - name: Download the USB stage and the toolkit image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: toolkit-selftest-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
           path: ${{ github.workspace }}
