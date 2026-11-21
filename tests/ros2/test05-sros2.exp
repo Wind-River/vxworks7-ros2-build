@@ -1,0 +1,56 @@
+# test05-sros2 - SROS 2 secure pub/sub: a talker (serial) and a listener
+# (telnet), each with its own enclave from /usr/demo_keystore. The CI build
+# creates the keystore and both enclaves (/talker_listener/talker and
+# /talker_listener/listener); without the keystore the test SKIPs.
+#
+# ROS_SECURITY_STRATEGY=Enforce makes a node refuse to start without valid
+# security files instead of falling back to an unsecured participant, and the
+# listener only hears the talker once the DDS security handshake between the
+# two participants succeeded. So "I heard" proves secure communication.
+proc test05-sros2 {} {
+    test_header "SROS2 secure pub/sub (talker + listener)"
+    set timeout 600
+
+    # Check for ca.cert.pem, otherwise skip. Note: VxWorks 'ls' on a missing
+    # path prints  Can't open "<path>".  (not the Linux "No such file or
+    # directory"), so the skip arm must match the VxWorks wording too, else the
+    # absent-keystore case falls through to timeout.
+    vxworks::send_cmd $qemu::spawn_id "ls /usr/demo_keystore/public"
+    expect {
+        -re {ca\.cert\.pem} {}
+        -re {Can't open|No such file or directory} {
+            test_skip "demo_keystore not found"
+        }
+        timeout {
+            test_fail "timed out checking for the demo keystore"
+        }
+    }
+
+    # Talker on the serial console. Security env is per-RTP: set it on both
+    # consoles.
+    vxworks::set_env $qemu::spawn_id "ROS_SECURITY_ENABLE=true"
+    vxworks::set_env $qemu::spawn_id "ROS_SECURITY_STRATEGY=Enforce"
+    vxworks::run_node $qemu::spawn_id \
+        "python3 ros2 run demo_nodes_cpp talker --ros-args --enclave /talker_listener/talker" \
+        "Found security directory" 1
+    vxworks::run_node_wait $qemu::spawn_id "Publishing" 4
+
+    # Listener on the telnet console while the talker runs.
+    set tid [telnet::open]
+    if {$tid eq ""} {
+        send_ctrl_c
+        test_fail "telnet console not reachable for the listener"
+    }
+    vxworks::set_env $tid "ROS_SECURITY_ENABLE=true"
+    vxworks::set_env $tid "ROS_SECURITY_STRATEGY=Enforce"
+    vxworks::run_node $tid \
+        "/usr/lib/demo_nodes_cpp/listener --ros-args --enclave /talker_listener/listener" \
+        "Found security directory" 1
+    vxworks::run_node_wait $tid "I heard" 3
+    telnet::close $tid
+
+    # Stop the talker (the RTP is gone after Ctrl-C; nothing to delete).
+    send_ctrl_c
+    vxworks::set_env $qemu::spawn_id "ROS_SECURITY_ENABLE=false"
+    vxworks::set_env $qemu::spawn_id "ROS_SECURITY_STRATEGY="
+}

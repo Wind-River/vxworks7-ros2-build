@@ -1,5 +1,5 @@
 proc test07-talker-udpv4 {} {
-    puts "\nTEST: PUB/SUB (rmw_fastrtps_cpp, UDPv4)"
+    test_header "PUB/SUB (rmw_fastrtps_cpp, UDPv4)"
 
     # Same talker/listener as test04 but forcing the UDPv4 builtin transport
     # (no shared memory). Env is per-RTP, so set it on BOTH the serial console
@@ -7,7 +7,7 @@ proc test07-talker-udpv4 {} {
     vxworks::set_env $qemu::spawn_id "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
     vxworks::set_env $qemu::spawn_id "FASTDDS_BUILTIN_TRANSPORTS=UDPv4"
 
-    send "/usr/lib/demo_nodes_cpp/talker\r"
+    vxworks::send_cmd $qemu::spawn_id "/usr/lib/demo_nodes_cpp/talker"
     expect -exact {Publishing}
     expect -exact {Publishing}
     expect -exact {Publishing}

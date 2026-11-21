@@ -1,0 +1,29 @@
+# test02-rust-hello - on-target half of the SDK-toolkit self-test (Rust).
+#
+# The HOST half (toolkit/scripts/selftest-build.sh --lang rust) cross-built an
+# ament_cargo rclrs node for VxWorks and staged it on a USB dir attached as /bd0a
+# (via VX_USB) -- ros2.img is NOT modified. The node creates an rclrs Context +
+# Node (exercising the real Rust client library), prints the marker, exits 0.
+# Merged install puts the binary at /bd0a/lib/hello_rust/hello_rust.
+#
+# If the USB dir was not attached, the binary is absent; we SKIP rather than hang.
+proc test02-rust-hello {} {
+    test_header "SDK-toolkit Rust hello (rclrs toolkit self-test)"
+
+    # Point the loader + ament index at /bd0a (plus the baked /usr base). The rclrs
+    # RTP links ROS 2 .so deps that live under /bd0a/lib; keep /usr so base libs
+    # still resolve. (Same env contract as the C++/Python self-tests.)
+    vxworks::set_env $qemu::spawn_id "AMENT_PREFIX_PATH=/usr:/bd0a"
+    vxworks::set_env $qemu::spawn_id "LD_LIBRARY_PATH=/usr/lib:/bd0a/lib"
+    vxworks::send_cmd $qemu::spawn_id "/bd0a/lib/hello_rust/hello_rust"
+    expect {
+        -exact {Hello from Rust, world!} {
+        }
+        -re {Can't open file|No such file or directory|INSTANTIATE_FAILED|Cmd: '[^']*' not found} {
+            test_fail "/bd0a/lib/hello_rust/hello_rust not found on the target (is the VX_USB dir mounted as /bd0a?)"
+        }
+        timeout {
+            test_fail "timed out waiting for the marker from hello_rust"
+        }
+    }
+}

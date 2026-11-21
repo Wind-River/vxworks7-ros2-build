@@ -1,12 +1,12 @@
 proc test06-rclrs {} {
-    puts "\nTEST: RCLRS PUB/SUB (Rust, rmw_fastrtps_cpp, SHM)"
+    test_header "RCLRS PUB/SUB (Rust, rmw_fastrtps_cpp, SHM)"
 
     # Pin RMW + transport explicitly (Fast-DDS shared memory), on BOTH the serial
     # console (publisher) and the telnet console (subscriber) -- env is per-RTP.
     vxworks::set_env $qemu::spawn_id "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
     vxworks::set_env $qemu::spawn_id "FASTDDS_BUILTIN_TRANSPORTS=SHM"
 
-    send "/usr/lib/examples_rclrs_minimal_pub_sub/minimal_publisher\r"
+    vxworks::send_cmd $qemu::spawn_id "/usr/lib/examples_rclrs_minimal_pub_sub/minimal_publisher"
     expect -exact {Publishing}
     expect -exact {Publishing}
     expect -exact {Publishing}

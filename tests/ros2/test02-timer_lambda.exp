@@ -1,6 +1,6 @@
 proc test02-timer_lambda {} {
-    puts "\nTEST: TIMER LAMBDA BINARY"
-    send "/usr/lib/examples_rclcpp_minimal_timer/timer_lambda\r"
+    test_header "TIMER LAMBDA BINARY"
+    vxworks::send_cmd $qemu::spawn_id "/usr/lib/examples_rclcpp_minimal_timer/timer_lambda"
     expect -exact {Hello, world!}
     expect -exact {Hello, world!}
     expect -exact {Hello, world!}

@@ -1,5 +1,5 @@
 proc test04-talker {} {
-    puts "\nTEST: PUB/SUB (rmw_fastrtps_cpp, SHM)"
+    test_header "PUB/SUB (rmw_fastrtps_cpp, SHM)"
 
     # Pin RMW + transport explicitly so the test is deterministic and actually
     # exercises Fast-DDS shared memory. Env is per-RTP, so set it on BOTH the
@@ -7,7 +7,7 @@ proc test04-talker {} {
     vxworks::set_env $qemu::spawn_id "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
     vxworks::set_env $qemu::spawn_id "FASTDDS_BUILTIN_TRANSPORTS=SHM"
 
-    send "/usr/lib/demo_nodes_cpp/talker\r"
+    vxworks::send_cmd $qemu::spawn_id "/usr/lib/demo_nodes_cpp/talker"
     expect -exact {Publishing}
     expect -exact {Publishing}
     expect -exact {Publishing}

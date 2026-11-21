@@ -1,0 +1,55 @@
+# test03-python-hello - on-target half of the SDK-toolkit self-test (Python).
+#
+# The HOST half (toolkit/scripts/selftest-build.sh --lang python) built an
+# ament_python package (hello_python), converted its console-script shim with
+# convert_console_scripts.py (pkg_resources -> importlib.metadata, the same fixup
+# the main build applies), and staged the merged install tree on a USB dir
+# attached as /bd0a (via VX_USB) -- ros2.img is NOT modified.
+#
+# We run it via `ros2 run` (like the baked-in Python tests, e.g. ros2/test03). The
+# converted wrapper uses importlib.metadata, which re-scans sys.path live. Three
+# env vars make a /bd0a-relocated package resolvable (verified on target):
+#   AMENT_PREFIX_PATH=/usr:/bd0a                 (/usr FIRST: base ROS 2 ament index)
+#   LD_LIBRARY_PATH=/usr/lib:/bd0a/lib           (so the node's .so deps load)
+#   PYTHONPATH=/bd0a/lib/python3.9/site-packages (/usr is python's default site already)
+# The node does rclpy.init() + create_node(), prints the marker, shuts down.
+#
+# Python startup on the target is slow, so use a long timeout. If ros2 run can't
+# find the package, /bd0a was not mounted on the target: FAIL.
+proc test03-python-hello {} {
+    test_header "SDK-toolkit Python hello (ament_python / rclpy self-test)"
+
+    set timeout 600
+    # Add /bd0a to the target defaults. AMENT_PREFIX_PATH keeps /usr FIRST so the
+    # base ROS 2 ament index resolves; LD_LIBRARY_PATH adds /bd0a/lib for the
+    # node's shared-lib deps; PYTHONPATH only needs /bd0a (python's default site is
+    # already /usr/lib/python3.9/site-packages). Replacing (not adding) /usr would
+    # drop rclpy/rosidl/rmw -> SIGSEGV.
+    vxworks::set_env $qemu::spawn_id "AMENT_PREFIX_PATH=/usr:/bd0a"
+    vxworks::set_env $qemu::spawn_id "LD_LIBRARY_PATH=/usr/lib:/bd0a/lib"
+    vxworks::set_env $qemu::spawn_id "PYTHONPATH=/bd0a/lib/python3.9/site-packages"
+    vxworks::send_cmd $qemu::spawn_id "python3 ros2 run hello_python hello_python"
+    # Anchor to THIS run: wait for the launch line first, so a stale marker from an
+    # earlier run can't produce a false PASS.
+    expect {
+        -re {Process 'python3'.*launched\.} { }
+        -re {Package '?hello_python'? not found|No executable found for package|unable to find executable} {
+            test_fail "hello_python not found on the target (is the VX_USB dir mounted as /bd0a?)"
+        }
+        timeout {
+            send_ctrl_c
+            test_fail "ros2 run did not launch python3"
+        }
+    }
+    expect {
+        -exact {Hello from Python, world!} {
+        }
+        -re {Segmentation violation|signal 11|Traceback|DistributionNotFound|Error} {
+            test_fail "node crashed/errored before printing the marker"
+        }
+        timeout {
+            send_ctrl_c
+            test_fail "timed out waiting for the marker from ros2 run hello_python"
+        }
+    }
+}
