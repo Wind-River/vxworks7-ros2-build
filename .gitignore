@@ -3,3 +3,6 @@ output*
 .cproject
 .project
 .settings/
+
+# agent profile, deployed from an external repo (not part of this tree)
+.kiro/
