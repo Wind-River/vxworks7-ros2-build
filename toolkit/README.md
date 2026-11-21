@@ -43,6 +43,7 @@ All paths in this document are relative to that toolkit root.
 | `tests/` | the on-target tests (Expect, on QEMU): `main_script.exp`, `lib/`, suites `ros2` (the image), `toolkit` (the self-test nodes), `unixextra` |
 | `.vscode/tasks.json` | VS Code tasks: colcon build, run on QEMU |
 | `manifest.json` | what was built: distro, VxWorks release, arch, layer pin, package/patch/ignore lists |
+| `AGENTS.md` | instructions for AI coding assistants (Codex, Copilot, Cursor, Claude Code, Kiro, …) |
 
 ## Quick start
 

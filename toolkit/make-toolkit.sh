@@ -15,7 +15,7 @@
 #   export/root       - the prebuilt ROS 2 SDK (build apps against this)
 #   ros2.img          - bootable VxWorks target image (CONTAINS the target rootfs
 #                       that would otherwise be export/deploy; not shipped loose)
-#   scripts/ host-shims/ .vscode/ README.md  - committed tooling
+#   scripts/ host-shims/ .vscode/ README.md AGENTS.md - committed tooling
 #   tests/            - the harness on-target tests (main_script.exp, lib/, suites)
 #   manifest.json     - build recipe (keys == Makefile vars) + layer pin
 # then tars it to $TOOLKIT_TARBALL.
@@ -53,14 +53,16 @@ mkdir -p "$STAGE/export"
 cp -a "$ROOT_DIR"   "$STAGE/export/root"
 cp -a "$TOP_BUILDDIR/ros2.img" "$STAGE/ros2.img"
 
-# --- 3) committed tooling (scripts, shims, vscode, README) + the tests --------
-log "3) scripts/ host-shims/ .vscode/ README.md tests/"
+# --- 3) committed tooling (scripts, shims, vscode, README, AGENTS) + the tests
+log "3) scripts/ host-shims/ .vscode/ README.md AGENTS.md tests/"
 cp -a "$TOOLKIT_SRC_DIR/scripts"       "$STAGE/scripts"
 cp -a "$TOOLKIT_SRC_DIR/host-shims"    "$STAGE/host-shims"
 cp -a "$TOOLKIT_SRC_DIR/.vscode"       "$STAGE/.vscode"
 # the harness on-target tests: selftest-build.sh runs tests/toolkit from here
 cp -a "$TOOLKIT_TESTS_DIR"             "$STAGE/tests"
 install -m0644 "$TOOLKIT_SRC_DIR/README.md" "$STAGE/README.md"
+# instructions for the user's AI coding assistant (read from the toolkit root)
+install -m0644 "$TOOLKIT_SRC_DIR/AGENTS.md" "$STAGE/AGENTS.md"
 find "$STAGE/host-shims" -name __pycache__ -type d -exec rm -rf {} + 2>/dev/null || true
 
 # Rust (rclrs) workspace cargo-config template: ros2sdk-prepare.sh renders it to
