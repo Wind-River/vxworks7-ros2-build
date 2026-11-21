@@ -6,8 +6,6 @@
   discovery does not complete between RTPs (talker publishes, listener stays
   silent). Point CYCLONEDDS_URI at this file on every node, e.g. in vxscript or
   per-RTP: set env CYCLONEDDS_URI=/usr/cyclonedds.xml
-
-  See VxDocs vxworks/packages/cyclonedds.md.
 -->
 <CycloneDDS>
   <Domain id="any">
