@@ -1,12 +1,23 @@
 # This is a workflow for the vxros2build docker build.
-# It builds docker containers for the ROS 2 VxWorks builds
+# It builds docker containers for the ROS 2 VxWorks builds: vxbuild:<ubuntu>
+# (the base, via a job-local registry) and vxros2build:<ros_distro>, with the GHA
+# layer cache (scopes vxbuild-<ubuntu>, vxros2build-<ros_distro>), and uploads
+# vxros2build as the artifact "Docker Image vxros2build <ros_distro>"
+# (vxros2build.<ros_distro>.tar.gz, `docker load -i` it).
 #
 # The workflow can be started
 #  - manually
+#  - from another workflow (workflow_call), which then downloads the artifact
 
 name: 'Docker build'
 
 on:
+  workflow_call:
+    inputs:
+      ros_distro:
+        description: 'ROS 2 Distribution (e.g., humble, jazzy, lyrical)'
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       ros_distro:
@@ -22,11 +33,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     steps:
       - name: Checks-out a branch ${{ github.ref_name }}
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.ref }}
 
       - name: Resolve supported Ubuntu version
         id: version
@@ -34,37 +50,56 @@ jobs:
           sudo apt-get update && sudo apt-get install -y jq
 
           # Look up the ubuntu version for the selected distro in ros2.json
-          UBUNTU_VER=$(jq -r ".[\"${{ github.event.inputs.ros_distro }}\"].ubuntu" .github/workflows/ros2.json)
-          
+          UBUNTU_VER=$(jq -r ".[\"${{ inputs.ros_distro }}\"].ubuntu" .github/workflows/ros2.json)
+
           if [ "$UBUNTU_VER" == "null" ]; then
-            echo "Error: Distro ${{ github.event.inputs.ros_distro }} not found in ros2.json"
+            echo "Error: Distro ${{ inputs.ros_distro }} not found in ros2.json"
             exit 1
           fi
-          
+
           echo "ubuntu=$UBUNTU_VER" >> $GITHUB_OUTPUT
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+
       - name: Build vxbuild:${{ steps.version.outputs.ubuntu }} docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: Docker/${{ steps.version.outputs.ubuntu }}/vxbuild/.
-          push: false
-          tags: vxbuild:${{ steps.version.outputs.ubuntu }}
+          push: true
+          tags: localhost:5000/local/vxbuild:${{ steps.version.outputs.ubuntu }}
+          cache-from: type=gha,scope=vxbuild-${{ steps.version.outputs.ubuntu }}
+          cache-to: type=gha,mode=max,scope=vxbuild-${{ steps.version.outputs.ubuntu }}
+        env:
+          DOCKER_BUILD_SUMMARY: false
+          DOCKER_BUILD_RECORD_UPLOAD: false
 
-      - name: Build vxros2build:${{ github.event.inputs.ros_distro }} docker image
-        uses: docker/build-push-action@v5
+      - name: Build vxros2build:${{ inputs.ros_distro }} docker image
+        uses: docker/build-push-action@v6
         with:
           context: Docker/${{ steps.version.outputs.ubuntu }}/vxros2build/.
           push: false
-          build-args: ROS_DISTRO=${{ github.event.inputs.ros_distro }}
-          tags: vxros2build:${{ github.event.inputs.ros_distro }}
+          load: true
+          build-args: |
+            ROS_DISTRO=${{ inputs.ros_distro }}
+            BASE_IMAGE=localhost:5000/local/vxbuild:${{ steps.version.outputs.ubuntu }}
+          tags: vxros2build:${{ inputs.ros_distro }}
+          cache-from: type=gha,scope=vxros2build-${{ inputs.ros_distro }}
+          cache-to: type=gha,mode=max,scope=vxros2build-${{ inputs.ros_distro }}
+        env:
+          DOCKER_BUILD_SUMMARY: false
+          DOCKER_BUILD_RECORD_UPLOAD: false
 
-      - name: Save vxros2build:${{ github.event.inputs.ros_distro }} Docker Image
+      - name: Save vxros2build:${{ inputs.ros_distro }} Docker Image
         run: |
-          docker save vxros2build:${{ github.event.inputs.ros_distro }} | gzip > ${{ github.workspace }}/vxros2build.${{ github.event.inputs.ros_distro }}.tar.gz
+          docker save vxros2build:${{ inputs.ros_distro }} | gzip > ${{ github.workspace }}/vxros2build.${{ inputs.ros_distro }}.tar.gz
+          ls -l ${{ github.workspace }}/vxros2build.${{ inputs.ros_distro }}.tar.gz
 
-      - name: Upload vxros2build:${{ github.event.inputs.ros_distro }} Docker Image
+      - name: Upload vxros2build:${{ inputs.ros_distro }} Docker Image
         uses: actions/upload-artifact@v4
         with:
-          name: Docker Image vxros2build ${{ github.event.inputs.ros_distro }}
+          name: Docker Image vxros2build ${{ inputs.ros_distro }}
           path: |
-            ${{ github.workspace }}/vxros2build.${{ github.event.inputs.ros_distro }}.tar.gz
+            ${{ github.workspace }}/vxros2build.${{ inputs.ros_distro }}.tar.gz

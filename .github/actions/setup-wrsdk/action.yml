@@ -30,6 +30,15 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    # sdkenv.sh refuses to run with /bin/sh = dash (Ubuntu's default): use bash,
+    # as the build containers do (Docker/*/vxbuild: dpkg-reconfigure dash)
+    - name: Use bash as /bin/sh (required by sdkenv.sh)
+      run: |
+        echo "dash dash/sh boolean false" | sudo debconf-set-selections
+        sudo DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
+        ls -l /bin/sh
+      shell: bash
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -44,23 +53,30 @@ runs:
     - name: Calculate SDK URL
       id: calculate-url
       run: |
+        mkdir -p ${{ inputs.directory }}
         cd $GITHUB_ACTION_PATH
         python ./parse_wrsdks.py ${{ inputs.sdks_list }} ${{ inputs.sdk }} ${{ inputs.vxworks }} > ${{ inputs.directory }}/sdk-url.txt
         cd ${{ inputs.directory }}
         echo SDK_URL=$(cat sdk-url.txt) >> $GITHUB_ENV
         echo FILENAME=$(basename $(cat sdk-url.txt)) >> $GITHUB_ENV
+        # One tarball path for every caller, whatever 'directory' is: the cache
+        # entry is matched on key AND path, so a per-directory path made each
+        # caller (build: /tmp, toolkit-selftest: /tmp/vanilla) miss and re-download.
+        echo SDK_TARBALL=/tmp/wrsdk-dl/$(basename $(cat sdk-url.txt)) >> $GITHUB_ENV
       shell: bash
 
     - name: Cache SDK tarball
       id: cache-sdk-tarball
       uses: actions/cache@v4
       with:
-        path: ${{ inputs.directory }}/${{ env.FILENAME }}
+        path: ${{ env.SDK_TARBALL }}
         key: ${{ runner.os }}-sdk-tarball-${{ env.FILENAME }}
 
     - name: Download SDK
       if: steps.cache-sdk-tarball.outputs.cache-hit != 'true'
-      run: wget --no-check-certificate ${{ env.SDK_URL }} -P ${{ inputs.directory }}
+      run: |
+        mkdir -p $(dirname ${{ env.SDK_TARBALL }})
+        wget --no-check-certificate ${{ env.SDK_URL }} -O ${{ env.SDK_TARBALL }}
       shell: bash
 
     - name: Cache extracted SDK
@@ -75,7 +91,7 @@ runs:
       run: |
         mkdir -p ${{ inputs.directory }}/wrsdk
         cd  ${{ inputs.directory }}/wrsdk
-        tar xvfj ${{ inputs.directory }}/${{ env.FILENAME }} --strip 1
+        tar xvfj ${{ env.SDK_TARBALL }} --strip 1
       shell: bash
 
     - name: Source SDK environment
