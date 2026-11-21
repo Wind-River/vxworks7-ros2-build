@@ -76,7 +76,7 @@ namespace eval qemu {
     # The QEMU binary. Defaults to the system emulator on PATH
     # (qemu-system-x86_64 / qemu-system-aarch64); override with VX_QEMU.
     # NOTE: raspi4b REQUIRES a QEMU with the BCM2838 GENET + SD->emmc2 model
-    # (e.g. razr/qemu branch genet-rebased-sd). A stock qemu-system-aarch64
+    # (e.g. razr/qemu branch raspi4b-vxworks). A stock qemu-system-aarch64
     # lacks those, so point VX_QEMU at your patched build for raspi4.
     proc qemu_bin {} {
         if {[info exists ::env(VX_QEMU)] && $::env(VX_QEMU) ne ""} {
@@ -92,6 +92,8 @@ namespace eval qemu {
     # FAT USB disk (-> /bd0a on target) via QEMU's file=fat:rw:<dir>. This lets a
     # caller run binaries from the USB dir WITHOUT modifying ros2.img (keeps the
     # image pristine -- used by the toolkit self-test). Mirrors run-qemu.sh --usb.
+    # x86: EHCI. raspi4b: xHCI behind the PCIe root port (bus pcie.1, like the
+    # board's VL805), INTx only: the raspi4b PCIe model delivers no MSI/MSI-X.
     proc usb_args {} {
         if {![info exists ::env(VX_USB)] || $::env(VX_USB) eq ""} { return {} }
         set dir $::env(VX_USB)
@@ -100,8 +102,13 @@ namespace eval qemu {
             return {}
         }
         puts "Attaching VX_USB $dir as USB mass storage -> /bd0a on target"
+        set drive [list -drive "file=fat:rw:$dir,id=fat32,format=raw,if=none"]
+        if {[target] eq "rpi4"} {
+            return [list -device qemu-xhci,id=xhci,bus=pcie.1,msi=off,msix=off \
+                         -device usb-storage,bus=xhci.0,drive=fat32 {*}$drive]
+        }
         return [list -usb -device usb-ehci,id=ehci -device usb-storage,drive=fat32 \
-                     -drive "file=fat:rw:$dir,id=fat32,format=raw,if=none"]
+                     {*}$drive]
     }
 
     # Spawn QEMU with the given ros2 disk image, wait for the boot to reach the

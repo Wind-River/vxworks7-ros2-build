@@ -11,9 +11,13 @@
 
 namespace eval telnet {
 
+    # Spawn ids of the sessions open() opened and close() has not closed yet
+    variable open_ids {}
+
     # Open a telnet session to the target and drop to the command shell.
     # Returns the telnet spawn id, or "" on failure.
     proc open {{host 192.168.200.1}} {
+        variable open_ids
         spawn telnet $host
         set tid $spawn_id
         puts "telnet_id: $tid"
@@ -34,6 +38,7 @@ namespace eval telnet {
                 return ""
             }
         }
+        lappend open_ids $tid
         return $tid
     }
 
@@ -42,8 +47,21 @@ namespace eval telnet {
     # dropping the connection while the node is still in its signal handler /
     # participant teardown races the shutdown and can segfault it (signal 11).
     proc close {tid} {
+        variable open_ids
+        set open_ids [lsearch -all -inline -not -exact $open_ids $tid]
         send -i $tid "\003"
         expect -i $tid -exact $vxworks::prompt_cmd
         send -i $tid "exit\r"
+    }
+
+    # Close every session still open, e.g. left by a test that failed before
+    # its own close (its node is still running there).
+    proc close_all {} {
+        variable open_ids
+        foreach tid $open_ids {
+            puts "\nClosing telnet session $tid left open by the test."
+            # the connection may already be gone: never let that abort the run
+            catch {close $tid}
+        }
     }
 }

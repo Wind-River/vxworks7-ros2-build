@@ -1,6 +1,6 @@
 # Set up the QEMU test host for the VxWorks ROS 2 on-target tests: expect, the
 # x86_64 QEMU, the patched aarch64 QEMU for raspi4b (razr/qemu-raspi4-deb), KVM
-# access and the tap0 NIC. Used by the test and toolkit-test jobs.
+# access and the tap0 NIC. Used by the ros2-test and toolkit-test jobs.
 name: 'Setup QEMU test host'
 description: 'Install QEMU + expect, enable KVM, create tap0 for the VxWorks tests'
 
@@ -14,7 +14,7 @@ runs:
       run: |
         sudo apt-get update
         # x86_64 (distro) + aarch64. For aarch64 we use the PATCHED qemu from
-        # razr/qemu-raspi4-deb (BCM2838 GENET + SD->emmc2 routing that VxWorks
+        # razr/qemu-raspi4-deb (BCM2838 GENET, PCIe for USB, SD->emmc2 routing that VxWorks
         # raspi4b needs; distro qemu-system-aarch64 lacks these). The .deb
         # installs /usr/bin/qemu-system-aarch64-raspi4; symlink it to the normal
         # qemu-system-aarch64 name so the harness (qemu_bin) finds it.
@@ -22,7 +22,7 @@ runs:
 
         # the patched QEMU from the pinned qemu-raspi4-deb release, for this host's
         # architecture (amd64 on ubuntu-24.04, arm64 on ubuntu-24.04-arm)
-        release=v11.0.90-raspi4genet3
+        release=v11.1.91-raspi4genet4
         arch=$(dpkg --print-architecture)
         # authenticated download (gh + the job token): the anonymous GitHub API
         # rate limit on shared runners returns 403
@@ -33,6 +33,7 @@ runs:
         echo "qemu-raspi4 deb: $deb"
         sudo apt-get install -y "$deb"
         sudo ln -sf /usr/bin/qemu-system-aarch64-raspi4 /usr/local/bin/qemu-system-aarch64
+        qemu-system-x86_64 --version | head -1
         qemu-system-aarch64 --version | head -1
 
         # KVM for the x86 target: /dev/kvm is crw-rw---- root:kvm and

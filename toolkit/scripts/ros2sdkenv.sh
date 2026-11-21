@@ -10,7 +10,7 @@
 # location, so the toolkit works wherever it is unpacked.
 
 # --- locate the toolkit + the VxWorks SDK ---------------------------------------
-# Kit dir: honor $TOOLKIT or $KIT (dev container), else derive from this script.
+# Kit dir: honor $TOOLKIT or $KIT, else derive from this script.
 _src="${BASH_SOURCE[0]:-$0}"
 TOOLKIT_DIR="${TOOLKIT:-${KIT:-$(cd "$(dirname "$_src")/.." && pwd)}}"
 export ROS2SDK_TOOLKIT="$TOOLKIT_DIR"
@@ -20,7 +20,7 @@ _err() { echo "ros2sdkenv: $*" >&2; }
 [ -d "$TOOLKIT_DIR/export/root" ] || { _err "no root/ in $TOOLKIT_DIR (the ROS 2 SDK)"; return 1 2>/dev/null || exit 1; }
 
 # The vanilla Wind River SDK is provided by the USER. Resolve it from, in order:
-#   $WRSDK (dev container mount / explicit), $WIND_SDK_HOME (already sourced),
+#   $WRSDK (explicit), $WIND_SDK_HOME (already sourced),
 #   or a bundled $TOOLKIT_DIR/wrsdk (standalone toolkits that choose to include it).
 SDK_DIR="${WRSDK:-${WIND_SDK_HOME:-$TOOLKIT_DIR/wrsdk}}"
 [ -f "$SDK_DIR/sdkenv.sh" ] || { _err "no VxWorks SDK at '$SDK_DIR' (set WRSDK to your SDK, or mount it)"; return 1 2>/dev/null || exit 1; }

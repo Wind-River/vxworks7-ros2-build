@@ -1,4 +1,4 @@
-proc test07-talker-udpv4 {} {
+proc test06-talker-udpv4 {} {
     test_header "PUB/SUB (rmw_fastrtps_cpp, UDPv4)"
 
     # Same talker/listener as test04 but forcing the UDPv4 builtin transport

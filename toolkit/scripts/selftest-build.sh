@@ -33,8 +33,8 @@
 #            image next with main_script.exp)
 #
 # After this succeeds, boot the image and run the on-target assertion (the script
-# prints the exact command, with the absolute path to tests/main_script.exp):
-#   expect <build-tree>/tests/main_script.exp <ros2.img> toolkit/test01-cpp-hello
+# prints the exact command, with the absolute path to the toolkit's tests/main_script.exp):
+#   VX_USB=<usb> expect <toolkit>/tests/main_script.exp <ros2.img> toolkit/test01-cpp-hello
 #
 # Exit 0 = toolkit built a VxWorks RTP and it is now in the image.
 set -euo pipefail
@@ -326,17 +326,19 @@ esac
 say "7) stage merged install/ -> USB dir $USB_DIR (-> /bd0a; ros2.img untouched)"
 cp -a "$INSTALL/." "$USB_DIR/" || die "staging merged install/ to USB failed"
 
-# Map lang -> on-target test by naming (tests/toolkit/test*-<lang>-*.exp), as the
-# selector main_script.exp takes: toolkit/<test>.
+# The on-target tests ship in the toolkit (tests/). Map lang -> test by naming
+# (tests/toolkit/test*-<lang>-*.exp), as the selector main_script.exp takes:
+# toolkit/<test>.
+TESTS_DIR="$TOOLKIT_ROOT/tests"
 test_for() {
-  local t; t="$(ls "$BUILD_TREE"/tests/toolkit/test*-"$1"-*.exp 2>/dev/null | head -1)"
+  local t; t="$(ls "$TESTS_DIR"/toolkit/test*-"$1"-*.exp 2>/dev/null | head -1)"
   [ -n "$t" ] || die "no on-target test tests/toolkit/test*-$1-*.exp for --lang $1"
   echo "toolkit/$(basename "$t" .exp)"
 }
 
 # Print the copy-pasteable on-target command. The harness attaches the USB dir via
 # VX_USB (-> /bd0a); ros2.img is booted read-only/unmodified.
-MAIN_SCRIPT="$BUILD_TREE/tests/main_script.exp"
+MAIN_SCRIPT="$TESTS_DIR/main_script.exp"
 TESTS=""; for lang in $LANGS; do TESTS="$TESTS $(test_for "$lang")"; done
 TESTS="${TESTS# }"   # trim leading space
 pass "selected languages ($LANGS) built (merge-install) + staged to USB $USB_DIR"

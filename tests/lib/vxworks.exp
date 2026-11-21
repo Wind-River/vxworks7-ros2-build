@@ -83,6 +83,39 @@ namespace eval vxworks {
         expect -i $id -exact $prompt_cmd
     }
 
+    # The command shell's environment on the given channel, as a dict
+    # NAME -> VALUE, read from `set env` (lines "<n>: NAME=VALUE").
+    proc env_get {id} {
+        variable prompt_cmd
+        send_cmd $id "set env"
+        expect -i $id -exact $prompt_cmd
+        set env [dict create]
+        foreach line [split $expect_out(buffer) "\n"] {
+            # value stops at the CR: a lazy `(.*?)\r?$` still swallows it (Tcl
+            # takes the whole RE's greediness from its first quantifier)
+            if {[regexp {^\s*\d+: ([^=\s]+)=([^\r]*)} $line -> name value]} {
+                dict set env $name $value
+            }
+        }
+        return $env
+    }
+
+    # Restore the shell environment on the given channel to `base` (a dict from
+    # env_get): variables added since are removed (C unsetenv; `set env X=`
+    # would leave X set to ""), changed ones get their base value back.
+    # Unchanged variables are not touched.
+    proc env_restore {id base} {
+        variable prompt_cmd
+        dict for {name value} [env_get $id] {
+            if {![dict exists $base $name]} {
+                send_cmd $id "C unsetenv \"$name\""
+                expect -i $id -exact $prompt_cmd
+            } elseif {[dict get $base $name] ne $value} {
+                set_env $id "$name=[dict get $base $name]"
+            }
+        }
+    }
+
     # Run a node/RTP on the given channel and expect its completion marker
     # 'count' times (default 5). Raises a Tcl error (the test fails) on a
     # timeout, a closed console, or the node aborting/crashing (signal 6/11)

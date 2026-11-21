@@ -10,3 +10,6 @@ output*
 
 # agent profile, deployed from an external repo (not part of this tree)
 .kiro/
+
+# filled-in release notes (from RELEASE_NOTES.in.md), attached to the GitHub release
+RELEASE_NOTES-*.md

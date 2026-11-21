@@ -1,4 +1,4 @@
-proc test06-rclrs {} {
+proc test05-rclrs {} {
     test_header "RCLRS PUB/SUB (Rust, rmw_fastrtps_cpp, SHM)"
 
     # Pin RMW + transport explicitly (Fast-DDS shared memory), on BOTH the serial

@@ -5,8 +5,8 @@
   //     "colcon build (vxworks)"  - cross-build the workspace for VxWorks
   //     "run on QEMU"             - boot ros2.img and attach your built RTP as /bd0a
   //
-  // Assumes the build env is sourced (the dev container does this via ~/.bashrc:
-  // `source /kit/scripts/ros2sdkenv.sh`). Outside the container, source it first.
+  // Assumes the build env is sourced in your login shell (e.g. in ~/.bashrc:
+  // `source <toolkit>/scripts/ros2sdkenv.sh`, which exports ROS2SDK_TOOLKIT).
   "version": "2.0.0",
   "options": {
     // run tasks through a login shell so ros2sdkenv.sh (in ~/.bashrc) is applied
@@ -26,7 +26,7 @@
       // Override the node path via the "ros2 node path" input.
       "label": "run on QEMU",
       "type": "shell",
-      "command": "rm -rf /tmp/vx-usb && mkdir -p /tmp/vx-usb && cp '${input:nodeBinary}' /tmp/vx-usb/ && \"${KIT:-/kit}/scripts/run-qemu.sh\" --usb /tmp/vx-usb",
+      "command": "rm -rf /tmp/vx-usb && mkdir -p /tmp/vx-usb && cp '${input:nodeBinary}' /tmp/vx-usb/ && \"${ROS2SDK_TOOLKIT:?source the toolkit ros2sdkenv.sh}/scripts/run-qemu.sh\" --usb /tmp/vx-usb",
       "dependsOn": ["colcon build (vxworks)"],
       "problemMatcher": [],
       "detail": "Boot ros2.img on QEMU with the built RTP attached as /bd0a; then on the target:  cmd  then  /bd0a/<node>"

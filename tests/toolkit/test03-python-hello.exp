@@ -19,7 +19,8 @@
 proc test03-python-hello {} {
     test_header "SDK-toolkit Python hello (ament_python / rclpy self-test)"
 
-    set timeout 600
+    # Python startup is slow; raspi4b (TCG, Python from the USB disk) took ~12 min
+    set timeout [expr {[qemu::target] eq "rpi4" ? 1800 : 600}]
     # Add /bd0a to the target defaults. AMENT_PREFIX_PATH keeps /usr FIRST so the
     # base ROS 2 ament index resolves; LD_LIBRARY_PATH adds /bd0a/lib for the
     # node's shared-lib deps; PYTHONPATH only needs /bd0a (python's default site is
