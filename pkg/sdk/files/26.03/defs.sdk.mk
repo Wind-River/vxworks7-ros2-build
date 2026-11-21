@@ -111,6 +111,8 @@ define sdk_install
         else \
                 echo "'crossenv' already exists."; \
         fi ; \
+        install -D -m0755 files/optimize-python-startup.py $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/optimize-python-startup ; \
+        echo "✔ optimize-python-startup installed" ; \
         $(call sdk_rust_fixups)
 endef
 

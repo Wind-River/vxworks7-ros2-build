@@ -30,23 +30,24 @@ PKG_PYTHON_BUILD_VAR ?= CFLAGS="-I $(WIND_CC_SYSROOT)/usr/3pp/develop/usr/includ
 # Host interpreter matching the target (same major.minor), on PATH via the SDK.
 PYTHON_HOST ?= python3.$(TGT_PYTHON_MINOR)
 
-# Console-script fixer: rewrites setuptools EASY-INSTALL shims (which import
-# pkg_resources and scan all *.dist-info at startup) into importlib.metadata
-# wrappers. Lives with the other ros2 helper scripts under pkg/ros2/files.
-PYTHON_FIX_SCRIPTS_PY ?= $(PACKAGE_DIR)/ros2/files/convert_console_scripts.py
+# Python fast-start host tool, installed into the SDK host bin by pkg/sdk
+# (sdk.install) from pkg/sdk/files/optimize-python-startup.py; the toolkit ships
+# the same binary in its SDK overlay.
+PYTHON_OPTIMIZE_STARTUP ?= $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/optimize-python-startup
 
-# Prepare a deployed python tree for the TARGET, so nothing is compiled on the
-# (slow) target FS at runtime:
-#   1. compileall with unchecked-hash .pyc -> target loads bytecode, never
-#      recompiles (no source mtime/size revalidation after the image copy).
-#   2. rewrite the setuptools EASY-INSTALL console-script shims in <dir>/bin to
-#      importlib.metadata wrappers (pkg_resources scan at startup = minutes on
-#      the target FS). Each CLI (ros2 run, etc.) is unchanged. Idempotent.
-# $(1) = deploy dir (expects a bin/ subdir). Best-effort (|| true) so a single
-# odd file cannot abort the image build.
+# Prepare a deployed python tree for the TARGET so ros2 run starts fast
+# (details in pkg/sdk/files/optimize-python-startup.py):
+#   1. strip __pycache__, then compile unchecked-hash .pyc -> target loads
+#      bytecode, never recompiles (no mtime/size revalidation after the copy).
+#   2. rewrite the setuptools EASY-INSTALL launchers in <dir>/bin and every
+#      <dir>/lib/<pkg>/ to importlib.metadata wrappers (the pkg_resources scan
+#      at startup = minutes on the target FS). Each CLI is unchanged. Idempotent.
+# $(1) = deploy dir. The tool is best-effort internally (a file that fails to
+# compile is reported, not fatal); a MISSING tool is fatal, so a stale sdk.install
+# stamp cannot silently ship slow launchers.
 define python_prepare_deploy
-	$(PYTHON_HOST) -m compileall -q -f --invalidation-mode unchecked-hash $(1) || true
-	$(PYTHON_HOST) $(PYTHON_FIX_SCRIPTS_PY) $(1)/bin || true
+	@[ -x $(PYTHON_OPTIMIZE_STARTUP) ] || { echo "ERROR: $(PYTHON_OPTIMIZE_STARTUP) missing: re-run the sdk install step (remove the sdk.install stamp)"; exit 1; }
+	$(PYTHON_HOST) $(PYTHON_OPTIMIZE_STARTUP) $(1)
 endef
 
 
