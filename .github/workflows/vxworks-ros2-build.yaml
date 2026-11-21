@@ -64,7 +64,7 @@ on:
 
 jobs:
   # The build container, built once per run (docker-build.yaml) and uploaded as
-  # the artifact "Docker Image vxros2build <ros_distro>"; the jobs that run in it
+  # the artifact "docker-image-vxros2build-<ros_distro>"; the jobs that run in it
   # (build, toolkit-selftest) download and docker-load it.
   docker:
     uses: ./.github/workflows/docker-build.yaml
@@ -117,7 +117,7 @@ jobs:
       - name: Download the vxros2build container
         uses: actions/download-artifact@v4
         with:
-          name: Docker Image vxros2build ${{ env.ros_distro }}
+          name: docker-image-vxros2build-${{ env.ros_distro }}
           path: /tmp/docker-image
 
       - name: Load the vxros2build container
@@ -201,7 +201,7 @@ jobs:
       - name: Upload VxWorks and the HDD image
         uses: actions/upload-artifact@v4
         with:
-          name: HDD image ${{ env.sdk }} ${{ env.ros_distro }}
+          name: hdd-image-${{ env.sdk }}-${{ env.ros_distro }}
           path: |
             ${{ github.workspace }}/output/ros2.img
             ${{ github.workspace }}/*xWorks*
@@ -217,13 +217,13 @@ jobs:
       - name: Upload the ROS 2 SDK (export/root)
         uses: actions/upload-artifact@v4
         with:
-          name: ROS 2 SDK ${{ env.sdk }} ${{ env.ros_distro }}
+          name: ros2-sdk-${{ env.sdk }}-${{ env.ros_distro }}
           path: ${{ github.workspace }}/output/ros2-sdk.tar.zst
 
       - name: Upload the SDK overlay
         uses: actions/upload-artifact@v4
         with:
-          name: SDK overlay ${{ env.sdk }} ${{ env.ros_distro }}
+          name: sdk-overlay-${{ env.sdk }}-${{ env.ros_distro }}
           # make sdk-overlay's archive (files/ + sdk_overlay.json + install-sdk-overlay.sh)
           path: ${{ github.workspace }}/output/sdk-overlay-*.tar.*
 
@@ -256,18 +256,18 @@ jobs:
       - name: Download the HDD image
         uses: actions/download-artifact@v4
         with:
-          name: HDD image ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          name: hdd-image-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
 
       - name: Download the ROS 2 SDK (export/root)
         uses: actions/download-artifact@v4
         with:
-          name: ROS 2 SDK ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          name: ros2-sdk-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
           path: ${{ github.workspace }}/output
 
       - name: Download the SDK overlay
         uses: actions/download-artifact@v4
         with:
-          name: SDK overlay ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          name: sdk-overlay-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
           path: ${{ github.workspace }}/output
 
       - name: Assemble the ROS 2 SDK toolkit
@@ -283,10 +283,10 @@ jobs:
       - name: Upload the ROS 2 SDK toolkit
         uses: actions/upload-artifact@v4
         with:
-          name: ros2-vxworks-toolkit ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          name: ros2-vxworks-toolkit-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
           path: ${{ github.workspace }}/output/toolkit-*.tar.*
 
-  test:
+  ros2-test:
     # raspberrypi4b: boot the aarch64 target on an arm64 host; x86 SDKs on amd64
     runs-on: ${{ needs.build.outputs.sdk == 'raspberrypi4b' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     needs: build
@@ -305,7 +305,7 @@ jobs:
       - name: Download HDD image and VxWorks artifacts
         uses: actions/download-artifact@v4
         with:
-          name: HDD image ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          name: hdd-image-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
 
       - name: Set up the QEMU test host
         uses: ./.github/actions/setup-qemu
@@ -329,7 +329,7 @@ jobs:
 
   # The toolkit self-test, split by host: the samples are built with the SDK's
   # host tools (vxsdk/host/x86_64-linux), so on x86; they are run on QEMU on the
-  # runner that matches the target (aarch64 raspi4b on arm64, like the test job).
+  # runner that matches the target (aarch64 raspi4b on arm64, like the ros2-test job).
   toolkit-selftest:
     runs-on: ubuntu-24.04
     needs: [build, toolkit]
@@ -343,7 +343,7 @@ jobs:
       - name: Download the ROS 2 SDK toolkit
         uses: actions/download-artifact@v4
         with:
-          name: ros2-vxworks-toolkit ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          name: ros2-vxworks-toolkit-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
           path: ${{ github.workspace }}/toolkit-dl
 
       - name: Get a vanilla VxWorks SDK for the toolkit self-test
@@ -361,7 +361,7 @@ jobs:
       - name: Download the vxros2build container
         uses: actions/download-artifact@v4
         with:
-          name: Docker Image vxros2build ${{ needs.build.outputs.ros_distro }}
+          name: docker-image-vxros2build-${{ needs.build.outputs.ros_distro }}
           path: /tmp/docker-image
 
       - name: Load the vxros2build container
@@ -407,11 +407,11 @@ jobs:
       - name: Upload the USB stage and the toolkit image
         uses: actions/upload-artifact@v4
         with:
-          name: toolkit-selftest ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          name: toolkit-selftest-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
           path: ${{ github.workspace }}/toolkit-selftest.tar.zst
 
   toolkit-test:
-    # same host choice as the test job
+    # same host choice as the ros2-test job
     runs-on: ${{ needs.build.outputs.sdk == 'raspberrypi4b' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     needs: [build, toolkit-selftest]
     if: ${{ inputs.test && inputs.toolkit }}
@@ -425,12 +425,12 @@ jobs:
       - name: Download HDD image and VxWorks artifacts
         uses: actions/download-artifact@v4
         with:
-          name: HDD image ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          name: hdd-image-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
 
       - name: Download the USB stage and the toolkit image
         uses: actions/download-artifact@v4
         with:
-          name: toolkit-selftest ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          name: toolkit-selftest-${{ needs.build.outputs.sdk }}-${{ needs.build.outputs.ros_distro }}
           path: ${{ github.workspace }}
 
       - name: Set up the QEMU test host

@@ -1,6 +1,6 @@
 # Set up the QEMU test host for the VxWorks ROS 2 on-target tests: expect, the
 # x86_64 QEMU, the patched aarch64 QEMU for raspi4b (razr/qemu-raspi4-deb), KVM
-# access and the tap0 NIC. Used by the test and toolkit-test jobs.
+# access and the tap0 NIC. Used by the ros2-test and toolkit-test jobs.
 name: 'Setup QEMU test host'
 description: 'Install QEMU + expect, enable KVM, create tap0 for the VxWorks tests'
 

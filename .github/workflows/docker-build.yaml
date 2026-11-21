@@ -2,7 +2,7 @@
 # It builds docker containers for the ROS 2 VxWorks builds: vxbuild:<ubuntu>
 # (the base, via a job-local registry) and vxros2build:<ros_distro>, with the GHA
 # layer cache (scopes vxbuild-<ubuntu>, vxros2build-<ros_distro>), and uploads
-# vxros2build as the artifact "Docker Image vxros2build <ros_distro>"
+# vxros2build as the artifact "docker-image-vxros2build-<ros_distro>"
 # (vxros2build.<ros_distro>.tar.gz, `docker load -i` it).
 #
 # The workflow can be started
@@ -31,7 +31,7 @@ on:
           - lyrical
 
 jobs:
-  build:
+  vxros2build:
     runs-on: ubuntu-24.04
     services:
       registry:
@@ -100,6 +100,6 @@ jobs:
       - name: Upload vxros2build:${{ inputs.ros_distro }} Docker Image
         uses: actions/upload-artifact@v4
         with:
-          name: Docker Image vxros2build ${{ inputs.ros_distro }}
+          name: docker-image-vxros2build-${{ inputs.ros_distro }}
           path: |
             ${{ github.workspace }}/vxros2build.${{ inputs.ros_distro }}.tar.gz
