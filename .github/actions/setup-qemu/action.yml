@@ -33,6 +33,7 @@ runs:
         echo "qemu-raspi4 deb: $deb"
         sudo apt-get install -y "$deb"
         sudo ln -sf /usr/bin/qemu-system-aarch64-raspi4 /usr/local/bin/qemu-system-aarch64
+        qemu-system-x86_64 --version | head -1
         qemu-system-aarch64 --version | head -1
 
         # KVM for the x86 target: /dev/kvm is crw-rw---- root:kvm and
