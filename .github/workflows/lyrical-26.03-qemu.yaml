@@ -27,7 +27,7 @@ jobs:
       vxworks: "26.03"
       sdk: qemu
       # On manual dispatch use the checkbox values; on schedule inputs.* is empty
-      # so fall back to: test on, toolkit off. (Compare to 'true' as a string to
+      # so fall back to: test on, toolkit on. (Compare to 'true' as a string to
       # avoid the `false || true` short-circuit gotcha with boolean inputs.)
       test: ${{ github.event_name != 'workflow_dispatch' || inputs.test == true }}
       toolkit: ${{ github.event_name != 'workflow_dispatch' || inputs.toolkit == true }}
