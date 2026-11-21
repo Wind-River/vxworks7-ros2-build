@@ -55,6 +55,12 @@ define sdk_fix
 			done; \
 		done; \
 	done
+
+	# SDK file edits, as patches (files/<rel>/sdk-patches/*.patch, paths relative to
+	# the SDK root), applied by the same script the SDK overlay's sdk_fix_install
+	# runs. 26.03: functional-bind-lvalue.patch (std::bind moved its bound arguments
+	# out on every call). Idempotent.
+	$(CURDIR)/files/apply-sdk-patches.sh $(CURDIR)/files/$(WIND_RELEASE_ID)/sdk-patches $(WIND_SDK_HOME)
 endef
 
 define vxworks_fix

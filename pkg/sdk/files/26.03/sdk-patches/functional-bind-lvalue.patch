@@ -1,0 +1,41 @@
+SDK 26.03 defect: std::bind moves its bound arguments and callable out on every
+call (sysroot/usr/h/public/functional, Dinkum).
+
+The identity fixer returned std::forward<_Cv_TiD>(_Tid) by value. _Cv_TiD is the
+bound argument's (non-reference) type, so that is a std::move: each call moved the
+bound argument out of the bind object, and a second call got a moved-from value,
+e.g. an empty shared_ptr. [func.bind.bind]/10 passes bound arguments as lvalues.
+_Call_binder likewise moved the stored callable (std::forward<_Cv_FD>(_Obj)).
+
+Seen as: every rclcpp_components node executable (demo_nodes_cpp talker, listener,
+...) SIGSEGVs at shutdown in rclcpp::Node::get_node_base_interface() with this ==
+NULL: node_main.cpp calls the getter std::bind(&NodeT::get_node_base_interface,
+node) a second time (remove_node after spin) and the bound node is gone.
+
+Paths relative to the SDK root; applied by pkg/sdk/files/apply-sdk-patches.sh
+(pkg/sdk sdk_fix, and the SDK overlay's sdk_fix_install).
+
+--- a/vxsdk/sysroot/usr/h/public/functional
++++ b/vxsdk/sysroot/usr/h/public/functional
+@@ -834,9 +834,9 @@
+ 	struct _Select_fixer<_Cv_TiD, false, false, 0>
+ 	{	// identity fixer
+ 	template<class _Untuple>
+-		static _Cv_TiD _Fix(_Cv_TiD& _Tid, _Untuple&&)
+-		{	// pass a bound argument
+-		return std::forward<_Cv_TiD>(_Tid);
++		static _Cv_TiD& _Fix(_Cv_TiD& _Tid, _Untuple&&)
++		{	// pass a bound argument (as an lvalue, [func.bind.bind]/10)
++		return (_Tid);
+ 		}
+ 	};
+ 
+@@ -873,7 +873,7 @@
+ 	-> decltype(_Invoke_ret(_Fr, _Obj, _Fix_arg(
+ 		_STD get<_Ix>(_Tpl), _STD move(_Ut))...))
+ 	{	// bind() and bind<R>() invocation
+-	return (_Invoke_ret(_Fr,std::forward<_Cv_FD>(_Obj),_Fix_arg(
++	return (_Invoke_ret(_Fr, _Obj, _Fix_arg(
+ 		_STD get<_Ix>(_Tpl), _STD move(_Ut))...));
+ 	}
+ 
