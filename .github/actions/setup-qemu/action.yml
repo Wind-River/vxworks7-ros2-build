@@ -14,7 +14,7 @@ runs:
       run: |
         sudo apt-get update
         # x86_64 (distro) + aarch64. For aarch64 we use the PATCHED qemu from
-        # razr/qemu-raspi4-deb (BCM2838 GENET + SD->emmc2 routing that VxWorks
+        # razr/qemu-raspi4-deb (BCM2838 GENET, PCIe for USB, SD->emmc2 routing that VxWorks
         # raspi4b needs; distro qemu-system-aarch64 lacks these). The .deb
         # installs /usr/bin/qemu-system-aarch64-raspi4; symlink it to the normal
         # qemu-system-aarch64 name so the harness (qemu_bin) finds it.
@@ -22,7 +22,7 @@ runs:
 
         # the patched QEMU from the pinned qemu-raspi4-deb release, for this host's
         # architecture (amd64 on ubuntu-24.04, arm64 on ubuntu-24.04-arm)
-        release=v11.0.90-raspi4genet3
+        release=v11.1.91-raspi4genet4
         arch=$(dpkg --print-architecture)
         # authenticated download (gh + the job token): the anonymous GitHub API
         # rate limit on shared runners returns 403

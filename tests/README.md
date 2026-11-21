@@ -77,7 +77,8 @@ sudo ip link set tap0 up
 - `<suite>` — a directory under `tests/` (`ros2` is the default); runs all its tests.
 - `<suite>/<test>` — one test, with or without `.exp`. Anything else is the image path.
 - `toolkit` and `unixextra` need `VX_USB=<dir>`, a host dir attached as `/bd0a`
-  that holds the binaries; without it the script exits with an error.
+  that holds the binaries; without it the script exits with an error. The dir
+  is a USB disk: EHCI on x86, xHCI behind the PCIe root port on raspi4b.
 
 ```bash
 ./main_script.exp ros2.img                               # the ros2 suite
@@ -114,7 +115,7 @@ source /path/to/wrsdk-vxworks7-qemu/sdkenv.sh
 ```
 
 **aarch64 / raspi4b** — needs a QEMU with the BCM2838 GENET + SD→emmc2 model
-(`razr/qemu` branch `genet-rebased-sd`); stock `qemu-system-aarch64` won't work, so
+(`razr/qemu` branch `raspi4b-vxworks`); stock `qemu-system-aarch64` won't work, so
 point `VX_QEMU` at your build. Fully emulated (TCG, no KVM) so it is slow — the 300 s
 default timeout accounts for that.
 
