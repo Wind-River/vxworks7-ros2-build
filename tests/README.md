@@ -13,10 +13,10 @@ This directory contains automated Expect-based test scripts for verifying ROS 2 
 │   ├── test02-timer_lambda.exp       # C++ timer lambda execution
 │   ├── test03-timer_lambda_py.exp    # Python timer lambda execution
 │   ├── test04-talker.exp             # C++ talker/listener (Fast-DDS, shared memory)
-│   ├── test05-sros2.exp              # SROS 2 secure talker/listener (skips if no keystore)
-│   ├── test06-rclrs.exp              # Rust rclrs pub/sub (Fast-DDS, shared memory)
-│   ├── test07-talker-udpv4.exp       # C++ talker/listener (Fast-DDS, UDPv4)
-│   └── test08-talker-cyclonedds.exp  # C++ talker/listener (CycloneDDS, loopback)
+│   ├── test05-rclrs.exp              # Rust rclrs pub/sub (Fast-DDS, shared memory)
+│   ├── test06-talker-udpv4.exp       # C++ talker/listener (Fast-DDS, UDPv4)
+│   ├── test07-talker-cyclonedds.exp  # C++ talker/listener (CycloneDDS, loopback)
+│   └── test99-sros2.exp              # SROS 2 secure talker/listener (skips if no keystore)
 ├── toolkit/          # suite: nodes the SDK toolkit built (needs VX_USB, /bd0a)
 │   ├── test01-cpp-hello.exp
 │   ├── test02-rust-hello.exp
@@ -37,10 +37,10 @@ Each suite numbers its tests from 01. The tables below describe the `ros2` suite
 | `test02-timer_lambda` | C++ timer lambda node (`Hello, world!`) | — |
 | `test03-timer_lambda_py` | Python timer lambda node (`Hello, world!`) | — |
 | `test04-talker` | C++ `demo_nodes_cpp` talker (`Publishing`) + telnet listener (`I heard`) | `rmw_fastrtps_cpp` / SHM |
-| `test05-sros2` | SROS 2 secure pub/sub: talker (`Publishing`) + telnet listener (`I heard`), each with its enclave, `ROS_SECURITY_STRATEGY=Enforce`; **skips** if `/usr/demo_keystore/public` has no `ca.cert.pem` | `rmw_fastrtps_cpp` |
-| `test06-rclrs` | Rust `examples_rclrs_minimal_pub_sub` publisher/subscriber (`Publishing`) | `rmw_fastrtps_cpp` / SHM |
-| `test07-talker-udpv4` | Same talker/listener as test04 but forcing the UDPv4 builtin transport (no shared memory) | `rmw_fastrtps_cpp` / UDPv4 |
-| `test08-talker-cyclonedds` | Same talker/listener as test04 under CycloneDDS; points `CYCLONEDDS_URI` at the shipped `/usr/cyclonedds.xml` (loopback `127.0.0.1`) so the two RTPs discover each other | `rmw_cyclonedds_cpp` / loopback |
+| `test05-rclrs` | Rust `examples_rclrs_minimal_pub_sub` publisher/subscriber (`Publishing`) | `rmw_fastrtps_cpp` / SHM |
+| `test06-talker-udpv4` | Same talker/listener as test04 but forcing the UDPv4 builtin transport (no shared memory) | `rmw_fastrtps_cpp` / UDPv4 |
+| `test07-talker-cyclonedds` | Same talker/listener as test04 under CycloneDDS; points `CYCLONEDDS_URI` at the shipped `/usr/cyclonedds.xml` (loopback `127.0.0.1`) so the two RTPs discover each other | `rmw_cyclonedds_cpp` / loopback |
+| `test99-sros2` | SROS 2 secure pub/sub: talker (`Publishing`) + telnet listener (`I heard`), each with its enclave, `ROS_SECURITY_STRATEGY=Enforce`; **skips** if `/usr/demo_keystore/public` has no `ca.cert.pem` | `rmw_fastrtps_cpp` / UDPv4 |
 
 Transport env is set **per-RTP**, so pub/sub tests set `RMW_IMPLEMENTATION` (and the
 transport knob) on **both** consoles — the serial console (publisher/talker) and the
@@ -82,8 +82,8 @@ sudo ip link set tap0 up
 
 ```bash
 ./main_script.exp ros2.img                               # the ros2 suite
-./main_script.exp ros2.img ros2/test06-rclrs             # just one test
-./main_script.exp ros2.img ros2/test04-talker ros2/test06-rclrs   # a subset
+./main_script.exp ros2.img ros2/test05-rclrs             # just one test
+./main_script.exp ros2.img ros2/test04-talker ros2/test05-rclrs   # a subset
 VX_USB=<dir> ./main_script.exp ros2.img unixextra        # the unixextra suite
 ```
 

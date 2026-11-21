@@ -1,4 +1,4 @@
-proc test08-talker-cyclonedds {} {
+proc test07-talker-cyclonedds {} {
     test_header "PUB/SUB (rmw_cyclonedds_cpp, loopback via CYCLONEDDS_URI)"
 
     # Same talker/listener as test04 but using the CycloneDDS RMW. CycloneDDS

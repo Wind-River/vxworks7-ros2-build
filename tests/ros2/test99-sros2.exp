@@ -1,4 +1,5 @@
-# test05-sros2 - SROS 2 secure pub/sub: a talker (serial) and a listener
+# test99-sros2 - SROS 2 secure pub/sub, numbered 99 so it always runs last in
+# the ros2 suite (it is the slowest: the secure handshake). A talker (serial) and a listener
 # (telnet), each with its own enclave from /usr/demo_keystore. The CI build
 # creates the keystore and both enclaves (/talker_listener/talker and
 # /talker_listener/listener); without the keystore the test SKIPs.
@@ -7,9 +8,8 @@
 # security files instead of falling back to an unsecured participant, and the
 # listener only hears the talker once the DDS security handshake between the
 # two participants succeeded. So "I heard" proves secure communication.
-proc test05-sros2 {} {
+proc test99-sros2 {} {
     test_header "SROS2 secure pub/sub (talker + listener)"
-    set timeout 600
 
     # Check for ca.cert.pem, otherwise skip. Note: VxWorks 'ls' on a missing
     # path prints  Can't open "<path>".  (not the Linux "No such file or
@@ -26,10 +26,25 @@ proc test05-sros2 {} {
         }
     }
 
-    # Talker on the serial console. Security env is per-RTP: set it on both
-    # consoles.
+    # Talker on the serial console. Security env is per shell: set it on both
+    # consoles (main_script restores the serial console's env after the test).
     vxworks::set_env $qemu::spawn_id "ROS_SECURITY_ENABLE=true"
     vxworks::set_env $qemu::spawn_id "ROS_SECURITY_STRATEGY=Enforce"
+    # Python node start-up and the secure DDS handshake (RSA/ECDSA) are slow
+    # under TCG: on raspi4b each took ~5 min. vxworks::run_node* wait with the
+    # global timeout, so raise that one for the pub/sub on rpi4 only.
+    set saved $::timeout
+    if {[qemu::target] eq "rpi4"} { set ::timeout 900 }
+    set code [catch {sros2_pubsub} err opts]
+    set ::timeout $saved
+    return -options $opts $err
+}
+
+# The secure talker (serial) + listener (telnet) of test99-sros2. Its name
+# does not start with "test", so main_script does not run it as a test.
+proc sros2_pubsub {} {
+    # Same RMW and transports on both consoles (env is per shell)
+    sros2_rmw_env $qemu::spawn_id
     vxworks::run_node $qemu::spawn_id \
         "python3 ros2 run demo_nodes_cpp talker --ros-args --enclave /talker_listener/talker" \
         "Found security directory" 1
@@ -43,14 +58,22 @@ proc test05-sros2 {} {
     }
     vxworks::set_env $tid "ROS_SECURITY_ENABLE=true"
     vxworks::set_env $tid "ROS_SECURITY_STRATEGY=Enforce"
+    sros2_rmw_env $tid
     vxworks::run_node $tid \
         "/usr/lib/demo_nodes_cpp/listener --ros-args --enclave /talker_listener/listener" \
         "Found security directory" 1
-    vxworks::run_node_wait $tid "I heard" 3
+    set code [catch {vxworks::run_node_wait $tid "I heard" 3} err opts]
+    # stops the listener (Ctrl-C) and leaves the telnet shell, pass or fail
     telnet::close $tid
+    if {$code} { return -options $opts $err }
 
     # Stop the talker (the RTP is gone after Ctrl-C; nothing to delete).
     send_ctrl_c
-    vxworks::set_env $qemu::spawn_id "ROS_SECURITY_ENABLE=false"
-    vxworks::set_env $qemu::spawn_id "ROS_SECURITY_STRATEGY="
+}
+
+# Fast-DDS over UDPv4 only, on one console. Not shared memory: after the SHM
+# tests (test04/05) the second secure participant hung in node creation.
+proc sros2_rmw_env {id} {
+    vxworks::set_env $id "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
+    vxworks::set_env $id "FASTDDS_BUILTIN_TRANSPORTS=UDPv4"
 }

@@ -52,6 +52,9 @@ proc run_tests {test_scripts} {
                 # running in the foreground of the serial console.
                 qemu::send_ctrl_c
             }
+            # Close the telnet sessions a failed test left open (with its node
+            # still running there), so the next test starts with none.
+            telnet::close_all
             # Back to the serial console: a test may have left the telnet spawn
             # as the implicit channel.
             set spawn_id $qemu::spawn_id
@@ -61,6 +64,9 @@ proc run_tests {test_scripts} {
             vxworks::drain $qemu::spawn_id
             send "\r"
             expect -exact $vxworks::prompt_cmd
+            # Give the next test the environment the target booted with: tests
+            # set RMW, transport and security variables on the serial console.
+            vxworks::env_restore $qemu::spawn_id $::boot_env
             rename $test_function ""
         }
     }
@@ -111,7 +117,7 @@ proc show_usage {} {
     puts "             toolkit and unixextra need VX_USB=<dir> (attached as /bd0a)"
     puts "  test     - one test of a suite, with or without the .exp suffix, e.g."
     puts "               main_script ros2.img ros2"
-    puts "               main_script ros2.img ros2/test04-talker ros2/test06-rclrs"
+    puts "               main_script ros2.img ros2/test04-talker ros2/test05-rclrs"
     puts "               VX_USB=<dir> main_script ros2.img unixextra"
     exit 0
 }
@@ -186,6 +192,9 @@ qemu::boot $img_path
 # Make the serial console the default channel for bare send/expect (tests that
 # don't pass an explicit -i, e.g. ros2/test01/02/03/05 and run_tests).
 set spawn_id $qemu::spawn_id
+
+# The environment the target booted with (vxscript); restored after each test.
+set boot_env [vxworks::env_get $qemu::spawn_id]
 
 # Run the tests, then quit QEMU.
 run_tests $test_scripts
