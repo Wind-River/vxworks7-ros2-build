@@ -77,6 +77,8 @@ ROS2_PATCH_DIRS=ament/ament_cmake \
 		ros2-rust/ros2_rust/rclrs \
 		ros2-vendors/asio_vendor \
 		ros2-vendors/sqlite_vendor \
+		ros2-vendors/pyyaml_vendor \
+		ros2/libyaml_vendor \
 		ros2/rosbag2/mcap_vendor \
 		ros2/ament_cmake_ros \
 		ros2/rcl \

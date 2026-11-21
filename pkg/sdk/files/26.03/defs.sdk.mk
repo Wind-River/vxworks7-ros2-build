@@ -33,6 +33,28 @@ define sdk_fix
 	else \
 		echo "'defs.autotools.mk' already exists, do not copy."; \
 	fi
+
+	# SDK 26.03 defects: libsqlite3.so* ship with NO DT_SONAME and libyaml.so with the
+	# unversioned SONAME "libyaml.so" (libyaml's CMake sets no SOVERSION). Neither can
+	# be fixed in place: patchelf appends a 3rd PT_LOAD and the VxWorks ldso accepts
+	# exactly 2 ("wrong number of segments (3 != 2)", ldso_7x/libdl/map_object.c).
+	# ROS 2 builds both from source instead (sqlite_vendor, libyaml_vendor; patches in
+	# vxworks7-layer-for-ros2), so move the SDK copies, plus libcyaml which links the
+	# SDK libyaml, out of both 3pp trees into 3pp/.removed/<tree>/, where
+	# find_package/pkg-config/-l cannot see them. Reversible; idempotent.
+	for T in develop deploy; do \
+		S=$(3PP_DIR)/$$T/usr; R=$(3PP_DIR)/.removed/$$T/usr; \
+		for p in lib/libsqlite3.* include/sqlite3.h include/sqlite3ext.h lib/pkgconfig/sqlite3.pc \
+		         lib/libyaml.* include/yaml.h cmake/yamlConfig.cmake cmake/yamlConfigVersion.cmake \
+		         cmake/yamlTargets.cmake cmake/yamlTargets-*.cmake \
+		         lib/libcyaml.* include/cyaml lib/pkgconfig/libcyaml.pc; do \
+			for f in $$S/$$p; do \
+				[ -e "$$f" ] || [ -L "$$f" ] || continue; \
+				d=$$R/$${f#$$S/}; mkdir -p "$$(dirname "$$d")"; rm -rf "$$d"; mv "$$f" "$$d"; \
+				echo "moved $$f -> $$d"; \
+			done; \
+		done; \
+	done
 endef
 
 define vxworks_fix
@@ -150,14 +172,15 @@ define sdk_rust_fixups
         fi
 endef
 
+# Target runtime from the SDK 3pp DEPLOY tree (the set Wind River intends for the
+# target; develop adds only Boost, which nothing in the ROS 2 image links).
+# From deploy/usr/bin only the Python interpreter is needed on the target: the
+# other entries are host/dev tools or scripts VxWorks cannot exec by shebang.
 define sdk_deploy
 	cp $(WIND_CC_SYSROOT)/usr/lib/common/lib*.so.[0-9] $(DEPLOY_DIR)/lib/. ; \
-	cp $(3PP_DEVELOP_DIR)/usr/bin/* $(DEPLOY_DIR)/bin/. ; \
-	cp $(3PP_DEVELOP_DIR)/usr/lib/lib*.so* $(DEPLOY_DIR)/lib/. ; \
-	cp -r $(3PP_DEVELOP_DIR)/usr/lib/python3.* $(DEPLOY_DIR)/lib/. ; \
-	if [ -d $(3PP_DEPLOY_DIR)/usr/lib/python3.$(TGT_PYTHON_MINOR)/site-packages ]; then \
-		cp -r $(3PP_DEPLOY_DIR)/usr/lib/python3.$(TGT_PYTHON_MINOR)/site-packages $(3PP_DEVELOP_DIR)/usr/lib/python3.$(TGT_PYTHON_MINOR)/. ; \
-	fi
+	cp $(3PP_DEPLOY_DIR)/usr/bin/python3 $(3PP_DEPLOY_DIR)/usr/bin/python3.$(TGT_PYTHON_MINOR) $(DEPLOY_DIR)/bin/. ; \
+	cp $(3PP_DEPLOY_DIR)/usr/lib/lib*.so* $(DEPLOY_DIR)/lib/. ; \
+	cp -r $(3PP_DEPLOY_DIR)/usr/lib/python3.* $(DEPLOY_DIR)/lib/.
 endef
 
 endif
