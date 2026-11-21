@@ -61,6 +61,32 @@ PKG_BUILD_TYPE := Debug
 
 include $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/packages.mk
 
+# ccache (opt-in): if CCACHE_DIR is set in the environment, wrap the compiler with
+# ccache for faster rebuilds via CMAKE_<LANG>_COMPILER_LAUNCHER. Empty unless
+# CCACHE_DIR is set, so default builds are unchanged. Set CCACHE_DIR (e.g.
+# $HOME/.ccache-vxros2) to enable.
+ifneq ($(CCACHE_DIR),)
+ROS2_CCACHE_ENV = export CMAKE_C_COMPILER_LAUNCHER=ccache; \
+	export CMAKE_CXX_COMPILER_LAUNCHER=ccache;
+else
+ROS2_CCACHE_ENV =
+endif
+
+# Drop empty elements from LD_LIBRARY_PATH (leading/trailing/duplicate ':') so the
+# dynamic loader never falls back to the current working directory.
+#
+# Why this is needed: sdkenv.sh builds LD_LIBRARY_PATH as "<dir>:${LD_LIBRARY_PATH}"
+# starting from an unset LD_LIBRARY_PATH, leaving a trailing ':' -- an empty path
+# element, which the loader treats as the current directory. During the build make
+# runs the compiler with CWD inside each package's build dir; for zstd_vendor that
+# dir holds the freshly-built *VxWorks* libzstd.so.1. The host ccache links
+# libzstd.so.1, so its loader would resolve that dependency from '.' = the VxWorks
+# libzstd, which NEEDs libc.so.1 -> ccache dies with
+# "libc.so.1: cannot open shared object file". (Only zstd_vendor builds a libzstd,
+# which is why it was the only package to fail.) Applied in the build subshells
+# below so colcon and every compiler it spawns get a clean path.
+LD_PATH_SANITIZE = export LD_LIBRARY_PATH="$$(printf '%s' "$$LD_LIBRARY_PATH" | sed -E 's/::+/:/g; s/^://; s/:$$//')";
+
 ros2.unpack: ros2.download
 	@$(call echo_action,Unpacking,$*)
 	$(call pkg_unpack,$(PKG_NAME))
@@ -77,15 +103,11 @@ ros2.unpack: ros2.download
 			echo "Importing $$(basename $$repo)"; \
 			bash $(PACKAGE_DIR)/ros2/files/vcs_import_checked.sh --file "$$repo" src; \
 		done; \
-	fi; \
-	if find $(WIND_CC_SYSROOT) -name 'libsqlite3.so*' 2>/dev/null | grep -q .; then \
+	fi
+	# sqlite_vendor needs the VxWorks SQLite patches from the layer
+	# (sqlite_vendor/usr_src). Layer branches without them keep the SDK sqlite.
+	if ! ls $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/sqlite_vendor/usr_src/0001-* >/dev/null 2>&1; then \
 		touch $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/ros2-vendors/sqlite_vendor/COLCON_IGNORE 2>/dev/null || true; \
-	fi; \
-	if [ -f $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/sqlite_vendor_patches/0001-add-vxworks-patches.layer.patch ]; then \
-		echo "Overlaying harness-local sqlite_vendor layer patches (not in upstream layer)..."; \
-		mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/sqlite_vendor/usr_src; \
-		cp $(PACKAGE_DIR)/ros2/files/$(ROS_DISTRO)/sqlite_vendor_patches/0001-add-vxworks-patches.layer.patch \
-		   $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/sqlite_vendor/usr_src/0001-add-vxworks-patches.patch; \
 	fi
 	@$(MAKE_STAMP)
 
@@ -104,14 +126,14 @@ ros2.configure: ros2.patch
 	# fixes (patched libloading under $(WIND_CC_SYSROOT)/usr/rust/vxworks-crates, and
 	# the patched cargo-ament-build) are delivered by pkg/sdk. Here we only generate
 	# the workspace cargo config (points [patch.crates-io] at the SDK's patched
-	# libloading + sets the VxWorks link flags) and stage the host-linker wrapper
-	# that keeps the ROS 2 install libs off the host ld during build-script links.
+	# libloading + sets the VxWorks link flags). The ROS 2 install libs no longer
+	# land on the host LD_LIBRARY_PATH during the build (the ament library_path env
+	# hook is suppressed for cross-builds -- see the ament_cmake CMAKE_CROSSCOMPILING
+	# patch), so no host-linker strip wrapper is needed for cargo's build scripts.
 	mkdir -p $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/.cargo
 	ROOT_DIR=$(ROOT_DIR) ROS2_RUST_CRATES_DIR=$(WIND_CC_SYSROOT)/usr/rust/vxworks-crates \
 	  envsubst < files/$(ROS_DISTRO)/rust-cargo-config.toml.template \
 	  > $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/src/.cargo/config.toml
-	cp files/$(ROS_DISTRO)/host-cc-clean.sh $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/host-cc-clean.sh
-	chmod +x $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/host-cc-clean.sh
 	@$(MAKE_STAMP)
 
 ros2.build: ros2.configure
@@ -122,6 +144,8 @@ ros2.build: ros2.configure
 	[ -d /etc/ssl/certs ] && export SSL_CERT_DIR=/etc/ssl/certs; \
 	export COLCON_HOME=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon; \
 	export COLCON_EXTENSION_BLOCKLIST=colcon_core.environment.library_path; \
+	$(LD_PATH_SANITIZE) \
+	$(ROS2_CCACHE_ENV) \
 	colcon build --install-base $(ROOT_DIR) --merge-install \
 	  --mixin $(ROS2_MIXINS) --packages-skip-build-finished --packages-up-to-regex $(ROS2_VENDORS)
 	@echo "=== Phase 2: building the ROS2 workspace (only reached if Phase 1 succeeded) ==="
@@ -131,8 +155,8 @@ ros2.build: ros2.configure
 	export COLCON_HOME=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/.colcon; \
 	export COLCON_EXTENSION_BLOCKLIST=colcon_core.environment.library_path; \
 	export CARGO_BUILD_TARGET=$(ROS2_RUST_TARGET); \
-	export ROS2_INSTALL_LIB=$(ROOT_DIR)/lib; \
-	export CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=$(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR)/host-cc-clean.sh; \
+	$(LD_PATH_SANITIZE) \
+	$(ROS2_CCACHE_ENV) \
 	colcon build --install-base $(ROOT_DIR) --merge-install \
 	  --mixin $(ROS2_MIXINS) --packages-skip-build-finished --packages-up-to-regex $(PKG_PKGS_UP_TO)
 	@$(MAKE_STAMP)

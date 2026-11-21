@@ -37,10 +37,31 @@ namespace eval vxworks {
     variable prompt_kernel {->}
     variable prompt_cmd    {]# }
 
+    # Drain any pending output on a channel until it is quiet for `quiet` seconds.
+    # The VxWorks serial console drops the leading characters of a command that is
+    # typed while the shell is still emitting the previous command's output (a
+    # prompt can be drawn mid-scroll). Draining to a quiet window before sending
+    # guarantees the console is idle and ready, so no characters are swallowed
+    # (observed: "/usr/lib/.../timer_lambda" arriving as "r/lib/.../timer_lambda").
+    proc drain {id {quiet 1}} {
+        expect -i $id -timeout $quiet {
+            -re {.+} { exp_continue }
+            timeout {}
+        }
+    }
+
+    # Send a command on a channel the safe way: drain to a quiet console first,
+    # then send. Use this instead of a bare `send` for anything typed at a shell
+    # prompt. Does NOT wait for a result -- the caller expects its own marker.
+    proc send_cmd {id cmd} {
+        drain $id
+        send -i $id "$cmd\r"
+    }
+
     # Enter the command shell from the kernel shell on the given channel.
     proc enter_cmd_shell {id} {
         variable prompt_cmd
-        send -i $id "cmd\r"
+        send_cmd $id "cmd"
         expect -i $id -exact $prompt_cmd
     }
 
@@ -49,7 +70,7 @@ namespace eval vxworks {
     # prompt to return. No shell switch: this stays in the command shell.
     proc kernel_cmd {id routine} {
         variable prompt_cmd
-        send -i $id "C $routine\r"
+        send_cmd $id "C $routine"
         expect -i $id -exact $prompt_cmd
     }
 
@@ -58,16 +79,64 @@ namespace eval vxworks {
     # prompt. Env is per-RTP, so set it on each channel before launching a node.
     proc set_env {id assignment} {
         variable prompt_cmd
-        send -i $id "set env \"$assignment\"\r"
+        send_cmd $id "set env \"$assignment\""
         expect -i $id -exact $prompt_cmd
     }
 
     # Run a node/RTP on the given channel and expect its completion marker
-    # 'count' times (default 5).
+    # 'count' times (default 5). Raises a Tcl error (the test fails) on a
+    # timeout, a closed console, or the node aborting/crashing (signal 6/11)
+    # before the marker was seen 'count' times.
     proc run_node {id cmd marker {count 5}} {
-        send -i $id "$cmd\r"
+        send_cmd $id "$cmd"
+        run_node_wait $id $marker $count
+    }
+
+    # Wait for a running node's marker 'count' more times, with the same failure
+    # rules as run_node (timeout, closed console, abort/crash). Use it to check a
+    # second marker of a node run_node already started.
+    proc run_node_wait {id marker {count 5}} {
         for {set i 0} {$i < $count} {incr i} {
-            expect -i $id -exact $marker
+            expect -i $id \
+                -exact $marker {} \
+                -re {terminating due to uncaught exception[^\r\n]*} {
+                    error "node aborted: $expect_out(0,string)"
+                } \
+                -re {has been deleted due to signal (6|11)} {
+                    error "node crashed: $expect_out(0,string)"
+                } \
+                timeout {
+                    error "timed out waiting for '$marker' ($i of $count seen)"
+                } \
+                eof {
+                    error "console closed waiting for '$marker' ($i of $count seen)"
+                }
+        }
+    }
+
+    # Ensure the target wall clock is set. QEMU has no RTC, so VxWorks boots with
+    # an unset clock (epoch -> "... 1970"). A 1970 clock breaks time-sensitive
+    # features -- notably SROS2/Fast-DDS X.509 validation, which rejects the CA
+    # cert as "certificate is not yet valid" because its notBefore is far in the
+    # future relative to 1970. Read 'date'; only if it reports 1970 (i.e. unset)
+    # set the target date + time from the host via the command-shell setters
+    #   date "YYYY-MM-DD"   /   time "HH:MM:SS"
+    # If the clock already has a real year (e.g. an RTC-backed board), leave it.
+    proc set_clock {id} {
+        variable prompt_cmd
+        send_cmd $id "date"
+        expect -i $id -exact $prompt_cmd
+        if {[string match "*1970*" $expect_out(buffer)]} {
+            set now [clock seconds]
+            set d [clock format $now -format "%Y-%m-%d"]
+            set t [clock format $now -format "%H:%M:%S"]
+            puts "target clock unset (1970); setting from host: $d $t"
+            send_cmd $id "date \"$d\""
+            expect -i $id -exact $prompt_cmd
+            send_cmd $id "time \"$t\""
+            expect -i $id -exact $prompt_cmd
+        } else {
+            puts "target clock already set; leaving it"
         }
     }
 }

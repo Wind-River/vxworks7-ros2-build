@@ -1,0 +1,36 @@
+# test01-functions - on-target tests of the C functions pkg/unixextra adds to
+# the SDK (flock, posix_fallocate, socketpair, vdprintf).
+#
+# The HOST side builds one *_test binary per function (pkg/unixextra/files/tests)
+# and stages them in the VX_USB dir, attached as /bd0a. The list of tests is that
+# dir's *_test files, so the build is the only place that names them. Each test
+# prints "UNIXEXTRA <name>: PASS|FAIL" as its verdict; a crash or a missing
+# verdict fails too. Every test runs, then the failures are reported together.
+proc test01-functions {} {
+    test_header "unixextra C functions"
+
+    set tests {}
+    foreach f [lsort [glob -nocomplain -directory $::env(VX_USB) *_test]] {
+        lappend tests [file tail $f]
+    }
+    if {[llength $tests] == 0} {
+        test_fail "no *_test binaries in VX_USB ($::env(VX_USB))"
+    }
+
+    set failed {}
+    foreach t $tests {
+        puts "\n--- $t"
+        vxworks::send_cmd $qemu::spawn_id "/bd0a/$t"
+        expect {
+            -re {UNIXEXTRA [a-z_]+: PASS} {}
+            -re {UNIXEXTRA [a-z_]+: FAIL} { lappend failed "$t: FAIL" }
+            -re {has been deleted due to signal [0-9]+} { lappend failed "$t: crashed" }
+            -re {Can't open file|No such file or directory|INSTANTIATE_FAILED|Cmd: '[^']*' not found} { lappend failed "$t: not runnable" }
+            timeout { lappend failed "$t: no verdict (timeout)" }
+        }
+        vxworks::drain $qemu::spawn_id 2
+    }
+    if {[llength $failed] > 0} {
+        test_fail [join $failed "; "]
+    }
+}

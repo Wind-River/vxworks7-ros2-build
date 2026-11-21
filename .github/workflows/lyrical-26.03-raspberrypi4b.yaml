@@ -5,6 +5,19 @@ on:
     - cron: '0 5 * * 0'  # every Sunday at 05:00 UTC
 
   workflow_dispatch:
+    inputs:
+      test:
+        description: "run tests"
+        type: boolean
+        default: true
+      toolkit:
+        description: "build toolkit"
+        type: boolean
+        default: true
+      debug:
+        description: "enable debug mode"
+        type: boolean
+        default: false
 
 jobs:
   build-lyrical-rpi4b:
@@ -13,5 +26,9 @@ jobs:
       ros_distro: lyrical
       vxworks: "26.03"
       sdk: raspberrypi4b
-      test: false
-      debug: false
+      # On manual dispatch use the checkbox values; on schedule inputs.* is empty
+      # so fall back to: test on, toolkit off. (Compare to 'true' as a string to
+      # avoid the `false || true` short-circuit gotcha with boolean inputs.)
+      test: ${{ github.event_name != 'workflow_dispatch' || inputs.test == true }}
+      toolkit: ${{ github.event_name != 'workflow_dispatch' || inputs.toolkit == true }}
+      debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug == true }}

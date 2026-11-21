@@ -1,0 +1,49 @@
+# Set up the QEMU test host for the VxWorks ROS 2 on-target tests: expect, the
+# x86_64 QEMU, the patched aarch64 QEMU for raspi4b (razr/qemu-raspi4-deb), KVM
+# access and the tap0 NIC. Used by the test and toolkit-test jobs.
+name: 'Setup QEMU test host'
+description: 'Install QEMU + expect, enable KVM, create tap0 for the VxWorks tests'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install QEMU and expect
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        sudo apt-get update
+        # x86_64 (distro) + aarch64. For aarch64 we use the PATCHED qemu from
+        # razr/qemu-raspi4-deb (BCM2838 GENET + SD->emmc2 routing that VxWorks
+        # raspi4b needs; distro qemu-system-aarch64 lacks these). The .deb
+        # installs /usr/bin/qemu-system-aarch64-raspi4; symlink it to the normal
+        # qemu-system-aarch64 name so the harness (qemu_bin) finds it.
+        sudo apt-get install -y expect uml-utilities qemu-system-x86
+
+        # the patched QEMU from the pinned qemu-raspi4-deb release, for this host's
+        # architecture (amd64 on ubuntu-24.04, arm64 on ubuntu-24.04-arm)
+        release=v11.0.90-raspi4genet3
+        arch=$(dpkg --print-architecture)
+        # authenticated download (gh + the job token): the anonymous GitHub API
+        # rate limit on shared runners returns 403
+        rm -rf /tmp/qemu-raspi4 && mkdir -p /tmp/qemu-raspi4
+        gh release download "$release" -R razr/qemu-raspi4-deb -p "*_${arch}.deb" -D /tmp/qemu-raspi4
+        deb="$(ls /tmp/qemu-raspi4/*_${arch}.deb 2>/dev/null | head -1)"
+        [ -n "$deb" ] || { echo "no qemu-raspi4 .deb for $arch in release $release"; exit 1; }
+        echo "qemu-raspi4 deb: $deb"
+        sudo apt-get install -y "$deb"
+        sudo ln -sf /usr/bin/qemu-system-aarch64-raspi4 /usr/local/bin/qemu-system-aarch64
+        qemu-system-aarch64 --version | head -1
+
+        # KVM for the x86 target: /dev/kvm is crw-rw---- root:kvm and
+        # `usermod -aG kvm` does not apply to the running job shell, so
+        # -enable-kvm fails with "Permission denied". Make the device accessible
+        # now (qemu.exp falls back to TCG if it still is not writable; aarch64
+        # always runs TCG).
+        sudo usermod -aG kvm "$USER" || true
+        if [ -e /dev/kvm ]; then sudo chmod 0666 /dev/kvm || true; fi
+        ls -l /dev/kvm || echo "no /dev/kvm on this runner (x86 tests run under TCG)"
+
+        # tap0 for the target NIC (both targets use 192.168.200.254 on the host)
+        sudo tunctl -u $USER -t tap0
+        sudo ifconfig tap0 192.168.200.254 up

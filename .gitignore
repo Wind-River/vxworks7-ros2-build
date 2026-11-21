@@ -3,3 +3,10 @@ output*
 .cproject
 .project
 .settings/
+
+# the kit ships its own VS Code tasks (build + run-on-QEMU) as a deliverable
+!toolkit/.vscode/
+!toolkit/.vscode/*
+
+# agent profile, deployed from an external repo (not part of this tree)
+.kiro/

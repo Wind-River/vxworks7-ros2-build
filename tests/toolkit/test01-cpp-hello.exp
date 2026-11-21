@@ -1,0 +1,29 @@
+# test01-cpp-hello - on-target half of the SDK-toolkit self-test (C++).
+#
+# The HOST half (toolkit/scripts/selftest-build.sh --lang cpp) cross-built an
+# ament_cmake node for VxWorks and staged it on a USB dir attached as /bd0a (via
+# VX_USB) -- so ros2.img is NOT modified. The merged install tree puts the binary
+# at /bd0a/lib/hello_cpp/hello_cpp. This runs it and asserts the marker.
+#
+# main_script.exp refuses the toolkit suite without VX_USB, so a missing binary
+# means /bd0a was not mounted on the target: FAIL.
+proc test01-cpp-hello {} {
+    test_header "SDK-toolkit C++ hello (toolkit self-test)"
+
+    # Point the loader + ament index at /bd0a (plus the baked /usr base). A
+    # toolkit-built RTP links ROS 2 .so deps that live under /bd0a/lib; keep /usr
+    # so base libs still resolve. (Same env contract as the Rust/Python self-tests.)
+    vxworks::set_env $qemu::spawn_id "AMENT_PREFIX_PATH=/usr:/bd0a"
+    vxworks::set_env $qemu::spawn_id "LD_LIBRARY_PATH=/usr/lib:/bd0a/lib"
+    vxworks::send_cmd $qemu::spawn_id "/bd0a/lib/hello_cpp/hello_cpp"
+    expect {
+        -exact {Hello from C++, world!} {
+        }
+        -re {Can't open file|No such file or directory|INSTANTIATE_FAILED|Cmd: '[^']*' not found} {
+            test_fail "/bd0a/lib/hello_cpp/hello_cpp not found on the target (is the VX_USB dir mounted as /bd0a?)"
+        }
+        timeout {
+            test_fail "timed out waiting for the marker from hello_cpp"
+        }
+    }
+}

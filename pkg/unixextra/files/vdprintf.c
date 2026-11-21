@@ -11,6 +11,9 @@
 /*
 modification history
 --------------------
+20nov26, akh  prout: return the descriptor, not write()'s byte count: _Printf
+              passes the callback's result back as its argument (NULL = error),
+              so every format with more than one output piece crashed
 14mar20, akh  created
 */
 
@@ -21,9 +24,11 @@ modification history
 #include <stdarg.h>
 #endif
 
+/* _Printf output function: write a piece to the descriptor at *fd; return the
+ * argument for the next piece (fd itself), or NULL on error */
 static void *prout(void *fd , const char *buf, size_t n)
 {
-	return ((void *)write(*(int*)fd, buf, n));
+	return (write(*(int *)fd, buf, n) == (ssize_t)n ? fd : NULL);
 }
 
 int vdprintf(int fd, const char *restrict fmt, va_list ap)

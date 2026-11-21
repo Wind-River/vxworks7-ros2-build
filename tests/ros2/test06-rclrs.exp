@@ -1,0 +1,26 @@
+proc test06-rclrs {} {
+    test_header "RCLRS PUB/SUB (Rust, rmw_fastrtps_cpp, SHM)"
+
+    # Pin RMW + transport explicitly (Fast-DDS shared memory), on BOTH the serial
+    # console (publisher) and the telnet console (subscriber) -- env is per-RTP.
+    vxworks::set_env $qemu::spawn_id "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
+    vxworks::set_env $qemu::spawn_id "FASTDDS_BUILTIN_TRANSPORTS=SHM"
+
+    vxworks::send_cmd $qemu::spawn_id "/usr/lib/examples_rclrs_minimal_pub_sub/minimal_publisher"
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+    expect -exact {Publishing}
+
+    # Subscriber over telnet (second console) while the publisher runs on serial.
+    set tid [telnet::open]
+    if {$tid ne ""} {
+        vxworks::set_env $tid "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
+        vxworks::set_env $tid "FASTDDS_BUILTIN_TRANSPORTS=SHM"
+        vxworks::run_node $tid "/usr/lib/examples_rclrs_minimal_pub_sub/minimal_subscriber" "I heard"
+        telnet::close $tid
+    }
+
+    send_ctrl_c
+}

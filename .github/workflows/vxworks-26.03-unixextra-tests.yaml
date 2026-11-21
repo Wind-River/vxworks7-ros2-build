@@ -1,0 +1,62 @@
+# Manual run of the unixextra on-target tests: the C functions pkg/unixextra
+# adds to the SDK (flock, posix_fallocate, socketpair, vdprintf), built against
+# the pure VxWorks 26.03 qemu SDK and run on QEMU x86. Nothing of ROS 2 is
+# involved: no ROS 2 build, no Docker image, no layer.
+name: "VxWorks 26.03 unixextra tests"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  unixextra-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      # sdkenv.sh refuses to run with /bin/sh = dash
+      - name: Use bash as /bin/sh
+        run: |
+          sudo ln -sf bash /bin/sh
+          ls -l /bin/sh
+
+      - name: Download the SDK
+        uses: ./.github/actions/setup-wrsdk
+        with:
+          sdks_list: wrsdks.json
+          sdk: qemu
+          vxworks: "26.03"
+          directory: /tmp
+          sdkenv: true
+
+      # The sources are the ones pkg/unixextra builds for this release, read from
+      # its Makefile; the tests are the ones with a UNIXEXTRA verdict line (the
+      # non-interactive ones). Each test is linked against the static library
+      # built from those sources.
+      - name: Build the unixextra tests
+        run: |
+          set -e
+          SOURCES="$(sed -n 's/.*SOURCES="\([^"]*\)".*/\1/p' pkg/unixextra/Makefile)"
+          [ -n "$SOURCES" ] || { echo "no SOURCES in pkg/unixextra/Makefile"; exit 1; }
+          rm -rf /tmp/unixextra && cp -r pkg/unixextra/files /tmp/unixextra
+          cd /tmp/unixextra
+          TESTS="$(grep -l 'UNIXEXTRA ' tests/*.c | sed 's/\.c$//' | tr '\n' ' ')"
+          echo "SOURCES: $SOURCES"; echo "TESTS: $TESTS"
+          make CC=wr-cc AR=wr-ar SOURCES="$SOURCES" TESTS="$TESTS" all
+          # the USB dir, attached to QEMU as /bd0a
+          mkdir -p /tmp/usb
+          cp $TESTS /tmp/usb/
+          ls -l /tmp/usb
+
+      - name: Set up the QEMU test host
+        uses: ./.github/actions/setup-qemu
+
+      # The tests need no image content: an empty FAT disk, the tests on /bd0a
+      - name: Run the unixextra tests on QEMU
+        run: |
+          sudo apt-get install -y dosfstools
+          dd if=/dev/zero of=/tmp/empty.img bs=1M count=64
+          mkfs.vfat -F 32 /tmp/empty.img
+          VX_USB=/tmp/usb ./tests/main_script.exp /tmp/empty.img unixextra

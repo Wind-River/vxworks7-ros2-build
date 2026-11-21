@@ -7,6 +7,17 @@ include $(WIND_USR_MK)/defs.common.mk
 include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/defs.vxworks.mk
 include $(WIND_USR_MK)/defs.python.mk
+include $(WIND_USR_MK)/defs.fs.mk
+include $(WIND_USR_MK)/defs.image.mk
+include $(WIND_USR_MK)/defs.sdk_overlay.mk
+include $(WIND_USR_MK)/defs.toolkit.mk
+include $(WIND_USR_MK)/defs.info.mk
+include $(WIND_USR_MK)/defs.examples.mk
+
+# The included modules define file rules (e.g. $(ROS2_IMG) in defs.image.mk)
+# that make reads BEFORE `all` below; the first explicit rule would otherwise
+# become the default goal. Pin it so a bare `make` always builds everything.
+.DEFAULT_GOAL := all
 
 ifeq ($(ROS_DISTRO),)
 $(error Please export ROS_DISTRO)
@@ -22,10 +33,42 @@ DEFAULT_BUILD ?= sdk unixextra ros2
 endif
 endif
 
-.PHONY: examples
+.PHONY: examples image fs sdk-overlay toolkit info
 
 all: $(DOWNLOADS_DIR) $(STAMP_DIR) $(EXPORT_DIR)
 	for p in $(DEFAULT_BUILD); do $(MAKE) -C pkg/$$p $$p.install || exit 1; done;
+
+# fs - lay out export/deploy from the built packages and prepare it for the target
+# (defs.fs.mk::fs_deploy, fs_prepare_deploy).
+fs: all
+	$(call fs_deploy)
+	$(call fs_prepare_deploy)
+
+# sdk-overlay - make the SDK overlay: output/sdk-overlay-build/<name>/ + the
+# output/<name>.tar.zst archive (defs.sdk_overlay.mk::build_sdk_overlay).
+sdk-overlay: all
+	$(call build_sdk_overlay)
+
+# The SDK overlay as a file prerequisite (its installer in the staging dir): made
+# by `make sdk-overlay` when missing, used as is when present (e.g. the CI toolkit
+# job, which downloads it instead of building).
+$(SDK_OVERLAY_STAGE)/install-sdk-overlay.sh:
+	$(MAKE) sdk-overlay
+
+# image - pack the bootable FAT32 ros2.img (defs.image.mk::build_fs).
+image: fs $(ROS2_IMG)
+
+# toolkit - assemble the ROS 2 VxWorks SDK delivery kit (defs.toolkit.mk::build_toolkit).
+toolkit: $(SDK_OVERLAY_STAGE)/install-sdk-overlay.sh
+	$(call build_toolkit)
+
+# examples - build the example container images (defs.examples.mk::build_examples).
+examples: fs
+	$(call build_examples)
+
+# info - print the resolved build configuration (defs.info.mk::print_info).
+info:
+	$(call print_info)
 
 $(EXPORT_DIR):
 	@mkdir -p $(ROOT_DIR)
@@ -49,65 +92,4 @@ distclean: clean
 clean: clean_buildstamps
 	for p in $(DEFAULT_BUILD); do rm -rf $(BUILD_DIR)/$$p; done;
 
-fs: all
-	for p in $(DEFAULT_BUILD); do $(MAKE) -C pkg/$$p $$p.deploy || exit 1; done;
-
-image: fs
-	dd if=/dev/zero of=$(TOP_BUILDDIR)/ros2.img count=2048 bs=1M
-	mkfs.vfat -F 32 $(TOP_BUILDDIR)/ros2.img
-	mkdir -p $(TOP_BUILDDIR)/mount
-	fusefat -o rw+ $(TOP_BUILDDIR)/ros2.img $(TOP_BUILDDIR)/mount
-	# Prepare the deployed python for the target: pre-compile .pyc (unchecked-hash,
-	# so the target never recompiles on its slow FS) and rewrite the setuptools
-	# EASY-INSTALL console-script shims to importlib.metadata (the pkg_resources
-	# shims scan all *.dist-info at startup -- minutes on the target). Both steps
-	# are defined in mk/usr/defs.python.mk. Replaces the old 'rm __pycache__'.
-	$(call python_prepare_deploy,$(TOP_BUILDDIR)/export/deploy)
-	# Prune build/dev-only artifacts the TARGET never needs at runtime, to cut the
-	# fusefat copy's per-file cost (file count dominates the FUSE write time).
-	# KEEP *.dist-info / *.egg-info (ros2 run entry-point discovery reads them) and
-	# the CPython stdlib test dir ($(TOP_BUILDDIR)/export/deploy/lib/python3.9/test).
-	find $(TOP_BUILDDIR)/export/deploy \( -path '*/cmake/*' -o -name '*.cmake' \) -type f -delete
-	find $(TOP_BUILDDIR)/export/deploy/lib -type d \( -name test -o -name tests \) \
-	    -not -path '*/python3.*/test' -not -path '*/python3.*/test/*' -exec rm -rf {} +
-	find $(TOP_BUILDDIR)/export/deploy/lib -type d -name include -not -path '*/python3.*/*' -exec rm -rf {} +
-	find $(TOP_BUILDDIR)/export/deploy \( -name '*.a' -o -name '*.pc' \) -type f -delete
-	cp --no-preserve=ownership -r -L $(TOP_BUILDDIR)/export/deploy/* $(TOP_BUILDDIR)/mount/. 2>/dev/null
-	fusermount -u $(TOP_BUILDDIR)/mount
-
-examples: fs
-	@set -e; \
-	for f in examples/Dockerfile.*; do \
-		tag=$$(basename $$f | cut -d. -f2); \
-		echo "🚧 Building image for '$$tag'..."; \
-		buildah bud \
-			--arch amd64 \
-			--os vxworks \
-			-f $$f \
-			-t $$tag $(DEPLOY_DIR); \
-	done;
-	@echo "✅ All example images built successfully!"
-	$(TOUCH) $(STAMP_DIR)/$@.build
-
-info:
-	@$(ECHO) "DEFAULT_BUILD:      $(DEFAULT_BUILD)"
-	@$(ECHO) "WIND RELEASE:       $(WIND_RELEASE_ID)"
-	@$(ECHO) "ROS DISTRO:         $(ROS_DISTRO)"
-	@$(ECHO) "TARGET BSP:         $(TGT_BSP)"
-	@$(ECHO) "TARGET ARCH:        $(TGT_ARCH)"
-	@$(ECHO) "TARGET PYTHON:      Python3.$(TGT_PYTHON_MINOR)"
-	@$(ECHO) "TARGET SOABI:       $(Python_SOABI)"
-	@$(ECHO) "HOST PYTHON:        `which python3`"
-	@$(ECHO) "CMAKE:              `which cmake`"
-	@$(ECHO) "CURDIR:             $(CURDIR)"
-	@$(ECHO) "DOWNLOADS_DIR:      $(DOWNLOADS_DIR)"
-	@$(ECHO) "PACKAGE_DIR:        $(PACKAGE_DIR)"
-	@$(ECHO) "BUILD_DIR:          $(BUILD_DIR)"
-	@$(ECHO) "EXPORT_DIR:         $(EXPORT_DIR)"
-	@$(ECHO) "ROOT_DIR:           $(ROOT_DIR)"
-	@$(ECHO) "DEPLOY_DIR:         $(DEPLOY_DIR)"
-	@$(ECHO) "WIND_CC_SYSROOT:    $(WIND_CC_SYSROOT)"
-	@$(ECHO) "WIND_SDK_HOST_TOOLS:$(WIND_SDK_HOST_TOOLS)"
-	@$(ECHO) "3PP_DEPLOY_DIR:     $(3PP_DEPLOY_DIR)"
-	@$(ECHO) "3PP_DEVELOP_DIR:    $(3PP_DEVELOP_DIR)"
 

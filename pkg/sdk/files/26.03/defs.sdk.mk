@@ -33,6 +33,34 @@ define sdk_fix
 	else \
 		echo "'defs.autotools.mk' already exists, do not copy."; \
 	fi
+
+	# SDK 26.03 defects: libsqlite3.so* ship with NO DT_SONAME and libyaml.so with the
+	# unversioned SONAME "libyaml.so" (libyaml's CMake sets no SOVERSION). Neither can
+	# be fixed in place: patchelf appends a 3rd PT_LOAD and the VxWorks ldso accepts
+	# exactly 2 ("wrong number of segments (3 != 2)", ldso_7x/libdl/map_object.c).
+	# ROS 2 builds both from source instead (sqlite_vendor, libyaml_vendor; patches in
+	# vxworks7-layer-for-ros2), so move the SDK copies, plus libcyaml which links the
+	# SDK libyaml, out of both 3pp trees into 3pp/.removed/<tree>/, where
+	# find_package/pkg-config/-l cannot see them. Reversible; idempotent.
+	for T in develop deploy; do \
+		S=$(3PP_DIR)/$$T/usr; R=$(3PP_DIR)/.removed/$$T/usr; \
+		for p in lib/libsqlite3.* include/sqlite3.h include/sqlite3ext.h lib/pkgconfig/sqlite3.pc \
+		         lib/libyaml.* include/yaml.h cmake/yamlConfig.cmake cmake/yamlConfigVersion.cmake \
+		         cmake/yamlTargets.cmake cmake/yamlTargets-*.cmake \
+		         lib/libcyaml.* include/cyaml lib/pkgconfig/libcyaml.pc; do \
+			for f in $$S/$$p; do \
+				[ -e "$$f" ] || [ -L "$$f" ] || continue; \
+				d=$$R/$${f#$$S/}; mkdir -p "$$(dirname "$$d")"; rm -rf "$$d"; mv "$$f" "$$d"; \
+				echo "moved $$f -> $$d"; \
+			done; \
+		done; \
+	done
+
+	# SDK file edits, as patches (files/<rel>/sdk-patches/*.patch, paths relative to
+	# the SDK root), applied by the same script the SDK overlay's sdk_fix_install
+	# runs. 26.03: functional-bind-lvalue.patch (std::bind moved its bound arguments
+	# out on every call). Idempotent.
+	$(CURDIR)/files/apply-sdk-patches.sh $(CURDIR)/files/$(WIND_RELEASE_ID)/sdk-patches $(WIND_SDK_HOME)
 endef
 
 define vxworks_fix
@@ -64,6 +92,10 @@ define vxworks_fix
         fi
 endef
 
+# pip bootstrap used by python_fix (also read by mk/usr/make-sdk-overlay.sh via
+# `make -C pkg/sdk sdk.get-pip-url`, so the overlay installs pip the same way)
+GET_PIP_URL ?= https://bootstrap.pypa.io/pip/3.$(TGT_PYTHON_MINOR)/get-pip.py
+
 define python_fix
 	if [ ! -L $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 ]; then \
 		ln -f -r -s $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3.$(TGT_PYTHON_MINOR) $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3; \
@@ -80,7 +112,7 @@ define python_fix
 	fi
 
 	if [ ! -f $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip3 ]; then \
-		cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),https://bootstrap.pypa.io/pip/3.$(TGT_PYTHON_MINOR)/get-pip.py,get-pip.py) ; \
+		cd $(DOWNLOADS_DIR) && $(call fetch_web,$(PKG_NAME),$(GET_PIP_URL),get-pip.py) ; \
 		$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/python3 $(DOWNLOADS_DIR)/get-pip.py ; \
 		sed -i '1s|^#!.*|#!/usr/bin/env python3|' \
 			$(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/pip \
@@ -111,7 +143,9 @@ define sdk_install
         else \
                 echo "'crossenv' already exists."; \
         fi ; \
-        $(call sdk_rust_fixups)
+        install -D -m0755 files/optimize-python-startup.py $(WIND_SDK_HOST_TOOLS)/x86_64-linux/bin/optimize-python-startup ; \
+        echo "✔ optimize-python-startup installed" ; \
+        $(call rust_fix)
 endef
 
 # VxWorks Rust toolchain gap the SDK ships but does not fix: libloading has no
@@ -119,7 +153,7 @@ endef
 # (not ROS 2 specific), so it lives with the SDK: patch upstream 0.8.9 into
 # $(WIND_CC_SYSROOT)/usr/rust/vxworks-crates/libloading, which Rust consumers point
 # [patch.crates-io] at.
-define sdk_rust_fixups
+define rust_fix
         RP=$(CURDIR)/files/$(WIND_RELEASE_ID)/rust-patches ; \
         CRATES=$(WIND_CC_SYSROOT)/usr/rust/vxworks-crates ; \
         LL="$$CRATES/libloading/src/os/unix/consts.rs" ; \
@@ -148,14 +182,15 @@ define sdk_rust_fixups
         fi
 endef
 
+# Target runtime from the SDK 3pp DEPLOY tree (the set Wind River intends for the
+# target; develop adds only Boost, which nothing in the ROS 2 image links).
+# From deploy/usr/bin only the Python interpreter is needed on the target: the
+# other entries are host/dev tools or scripts VxWorks cannot exec by shebang.
 define sdk_deploy
 	cp $(WIND_CC_SYSROOT)/usr/lib/common/lib*.so.[0-9] $(DEPLOY_DIR)/lib/. ; \
-	cp $(3PP_DEVELOP_DIR)/usr/bin/* $(DEPLOY_DIR)/bin/. ; \
-	cp $(3PP_DEVELOP_DIR)/usr/lib/lib*.so* $(DEPLOY_DIR)/lib/. ; \
-	cp -r $(3PP_DEVELOP_DIR)/usr/lib/python3.* $(DEPLOY_DIR)/lib/. ; \
-	if [ -d $(3PP_DEPLOY_DIR)/usr/lib/python3.$(TGT_PYTHON_MINOR)/site-packages ]; then \
-		cp -r $(3PP_DEPLOY_DIR)/usr/lib/python3.$(TGT_PYTHON_MINOR)/site-packages $(3PP_DEVELOP_DIR)/usr/lib/python3.$(TGT_PYTHON_MINOR)/. ; \
-	fi
+	cp $(3PP_DEPLOY_DIR)/usr/bin/python3 $(3PP_DEPLOY_DIR)/usr/bin/python3.$(TGT_PYTHON_MINOR) $(DEPLOY_DIR)/bin/. ; \
+	cp $(3PP_DEPLOY_DIR)/usr/lib/lib*.so* $(DEPLOY_DIR)/lib/. ; \
+	cp -r $(3PP_DEPLOY_DIR)/usr/lib/python3.* $(DEPLOY_DIR)/lib/.
 endef
 
 endif

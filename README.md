@@ -241,6 +241,42 @@ In this case, rerun it without a certificate check as
 wruser@vxros2:/work WGET_OPT="--no-check-certificate -O" CURL="" make
 ```
 
+### Speed up rebuilds with `ccache` (optional)
+
+The ROS 2 C/C++ compile is the dominant build cost. `ccache` caches compiled
+objects so unchanged sources are not recompiled on a rebuild. It is **opt-in**:
+set `CCACHE_DIR` (with `ccache` installed) and build normally — the Makefile
+auto-enables ccache whenever `CCACHE_DIR` is set.
+
+```bash
+# ccache must be installed (apt-get install -y ccache)
+export CCACHE_DIR=$HOME/.ccache-vxros2       # setting this enables ccache
+export CCACHE_COMPILERCHECK=content          # hash wr-cc/wr-c++ by content
+export CCACHE_MAXSIZE=10G
+
+make fs                        # first build populates the cache (all misses)
+make distclean && make fs
+ccache -s                      # rebuild shows direct cache hits -> faster compile
+```
+
+When `CCACHE_DIR` is set, the build sets `CMAKE_<LANG>_COMPILER_LAUNCHER=ccache`
+for the colcon build so the host `ccache` fronts `wr-cc`/`wr-c++`. No wrapper
+script is used. The build also normalizes `LD_LIBRARY_PATH` before invoking
+colcon: `sdkenv.sh` appends the SDK host lib dirs starting from an unset
+variable, which leaves a trailing `:` — an empty path element that the dynamic
+loader treats as the current directory. During the build the compiler runs with
+its working directory inside each package's build dir; for `zstd_vendor` that
+dir contains a freshly-built VxWorks `libzstd.so.1`. Since the dynamically-linked
+host `ccache` depends on `libzstd.so.1`, the loader would otherwise resolve that
+dependency from `.` (the VxWorks lib), which needs `libc.so.1` and makes `ccache`
+crash (`libc.so.1: cannot open shared object file`). Stripping the empty element
+fixes it. `wr-cc`/`wr-c++` are statically linked and unaffected.
+
+Notes: accelerates **compiles only** (not vcs fetch / cmake configure / rosidl
+codegen); use a persistent `CCACHE_DIR` so the cache survives `make distclean`.
+Unset `CCACHE_DIR` for a plain build with no caching. CI sets `CCACHE_DIR` and
+caches it via `actions/cache` (see `.github/workflows/vxworks-ros2-build.yaml`).
+
 ## Run ROS 2 examples
 
 QEMU is used to boot VxWorks and run Python and C++ ROS 2 examples, for that `tap0` interface shall be configured.

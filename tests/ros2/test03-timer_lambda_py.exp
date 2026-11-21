@@ -1,0 +1,19 @@
+proc test03-timer_lambda_py {} {
+    test_header "TIMER LAMBDA PYTHON"
+    # 'python3 ros2 run' is slow to start on the target: the interpreter scans
+    # pkg_resources metadata off the image before the node runs. Give it room,
+    # and fail loudly instead of falling through to Ctrl-C a half-started python.
+    set timeout 600
+    vxworks::send_cmd $qemu::spawn_id "python3 ros2 run examples_rclcpp_minimal_timer timer_lambda"
+    for {set i 0} {$i < 5} {incr i} {
+        expect {
+            -exact {Hello, world!} { }
+            timeout {
+                send_ctrl_c
+                test_fail "timed out waiting for 'Hello, world!' (#[expr {$i + 1}])"
+            }
+        }
+    }
+    send_ctrl_c
+    vxworks::send_cmd $qemu::spawn_id "rtp delete /usr/lib/examples_rclcpp_minimal_timer/timer_lambda"
+}

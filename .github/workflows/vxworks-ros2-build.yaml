@@ -23,6 +23,10 @@ on:
         required: false
         type: boolean
         default: false
+      toolkit:
+        required: false
+        type: boolean
+        default: false
       debug:
         required: false
         type: boolean
@@ -43,7 +47,12 @@ on:
         required: true
         default: qemu
       test:
-        description: "Run tests"
+        description: "run tests"
+        required: false
+        default: false
+        type: boolean
+      toolkit:
+        description: "toolkit"
         required: false
         default: false
         type: boolean
@@ -54,13 +63,17 @@ on:
         type: boolean
 
 jobs:
+  # The build container, built once per run (docker-build.yaml) and uploaded as
+  # the artifact "Docker Image vxros2build <ros_distro>"; the jobs that run in it
+  # (build, toolkit-selftest) download and docker-load it.
+  docker:
+    uses: ./.github/workflows/docker-build.yaml
+    with:
+      ros_distro: ${{ inputs.ros_distro }}
+
   build:
     runs-on: ubuntu-24.04
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
+    needs: docker
     outputs:
       sdk: ${{ steps.set_outputs.outputs.sdk }}
       ros_distro: ${{ steps.set_outputs.outputs.ros_distro }}
@@ -92,21 +105,6 @@ jobs:
           sudo apt-get clean || true
           echo "Disk after cleanup:"; df -h /
 
-      - name: Resolve supported Ubuntu version
-        id: version
-        run: |
-          sudo apt-get update && sudo apt-get install -y jq
-
-          # Look up the ubuntu version for the selected distro in ros2.json
-          UBUNTU_VER=$(jq -r ".[\"${{ env.ros_distro }}\"].ubuntu" .github/workflows/ros2.json)
-
-          if [ "$UBUNTU_VER" == "null" ]; then
-            echo "Error: Distro ${{ env.ros_distro }} not found in ros2.json"
-            exit 1
-          fi
-
-          echo "ubuntu=$UBUNTU_VER" >> $GITHUB_OUTPUT
-
       - name: Use Download SDK action
         uses: ./.github/actions/setup-wrsdk
         with:
@@ -116,79 +114,43 @@ jobs:
           directory: /tmp
           sdkenv: false
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Download the vxros2build container
+        uses: actions/download-artifact@v4
         with:
-          driver-opts: network=host
+          name: Docker Image vxros2build ${{ env.ros_distro }}
+          path: /tmp/docker-image
 
-      - name: Build vxbuild docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: Docker/${{ steps.version.outputs.ubuntu }}/vxbuild/.
-          push: true
-          tags: localhost:5000/local/vxbuild:${{ steps.version.outputs.ubuntu }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-        env:
-          DOCKER_BUILD_SUMMARY: false
-          DOCKER_BUILD_RECORD_UPLOAD: false
-
-      - name: Inspect
+      - name: Load the vxros2build container
         run: |
-          docker buildx imagetools inspect localhost:5000/local/vxbuild:${{ steps.version.outputs.ubuntu }}
-
-      - name: Build vxros2build docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: Docker/${{ steps.version.outputs.ubuntu }}/vxros2build/.
-          push: false
-          load: true
-          build-args: |
-            ROS_DISTRO=${{ env.ros_distro }}
-            BASE_IMAGE=localhost:5000/local/vxbuild:${{ steps.version.outputs.ubuntu }}
-          tags: vxros2build:${{ env.ros_distro }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-        env:
-          DOCKER_BUILD_SUMMARY: false
-          DOCKER_BUILD_RECORD_UPLOAD: false
-
-      - name: Verify Docker vxros2build:${{ env.ros_distro }} image
-        run: |
+          docker load -i /tmp/docker-image/vxros2build.${{ env.ros_distro }}.tar.gz
+          rm -rf /tmp/docker-image
           docker images vxros2build:${{ env.ros_distro }}
+
+      - name: Restore ccache (ROS 2 C/C++ compile cache)
+        uses: actions/cache@v4
+        with:
+          path: /tmp/ccache
+          # key on SDK + distro; restore-keys warm-starts from the latest prior
+          # cache even when the exact key changes (ccache self-validates hits).
+          key: ccache-${{ env.sdk }}-${{ env.ros_distro }}-${{ env.vxworks }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ env.sdk }}-${{ env.ros_distro }}-${{ env.vxworks }}-
+            ccache-${{ env.sdk }}-${{ env.ros_distro }}-
 
       - name: Build ROS 2 ${{ env.ros_distro }} against VxWorks ${{ env.vxworks }} ${{ env.sdk }}
         run:  |
+          # chmod 777 so the in-container build user (wruser, remapped to the
+          # passed -e UID by the entrypoint) can write the bind-mounted cache dir.
+          mkdir -p /tmp/ccache
+          chmod 777 /tmp/ccache
           docker run --rm \
             -e UID=$(id -u) -e GID=$(id -g) \
+            -e CCACHE_DIR=/ccache -e CCACHE_COMPILERCHECK=content -e CCACHE_MAXSIZE=5G \
+            -v /tmp/ccache:/ccache \
             -v /tmp/wrsdk:/wrsdk \
             -v ${{ github.workspace }}:/work \
             vxros2build:${{ env.ros_distro }} \
-            /bin/bash -c 'set -- /wrsdk/sdkenv.sh; . /wrsdk/sdkenv.sh && make fs -C /work'
-
-      - name: Test ROS 2 SDK - build a Hello World app against it
-        if: ${{ inputs.test }}
-        run: |
-          # Part 1 of the ROS 2 SDK test: create + cross-build a hello_world
-          # rclcpp app against the produced SDK (output/export/root). Runs in the
-          # same Docker container (SDK sourced, export/root present). Stages the
-          # resulting VxWorks RTP into ros2-sdk-usb/ for the test job to attach.
-          docker run --rm \
-            -e UID=$(id -u) -e GID=$(id -g) \
-            -v /tmp/wrsdk:/wrsdk \
-            -v ${{ github.workspace }}:/work \
-            vxros2build:${{ env.ros_distro }} \
-            /bin/bash -c 'set -- /wrsdk/sdkenv.sh; . /wrsdk/sdkenv.sh && \
-              VX_WS=/work/ros2-sdk-ws VX_USB_DIR=/work/ros2-sdk-usb \
-              /work/tests/ros2-sdk/test-ros2-hello-world.sh'
-
-      - name: Upload the Hello World RTP artifact
-        if: ${{ inputs.test }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: hello_world ${{ env.sdk }} ${{ env.ros_distro }}
-          path: ${{ github.workspace }}/ros2-sdk-usb/hello_world_node
-          if-no-files-found: error
+            /bin/bash -c 'set -- /wrsdk/sdkenv.sh; . /wrsdk/sdkenv.sh && make fs sdk-overlay -C /work'
 
       - name: Create an SROS2 script
         run: |
@@ -217,29 +179,59 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y dosfstools
           cd ${{ github.workspace }}
-          dd if=/dev/zero of=ros2.img count=2048 bs=1M
-          mkfs.vfat -F 32 ./ros2.img
+          # Build the image at the Makefile's canonical location (output/ros2.img,
+          # = $(TOP_BUILDDIR)/ros2.img) so downstream consumers (make toolkit /
+          # make-toolkit.sh) find it where they expect.
+          dd if=/dev/zero of=output/ros2.img count=2048 bs=1M
+          mkfs.vfat -F 32 ./output/ros2.img
           mkdir -p /tmp/mount
-          sudo mount -o loop -t vfat ./ros2.img /tmp/mount
+          sudo mount -o loop -t vfat ./output/ros2.img /tmp/mount
           sudo cp -r -L ./output/export/deploy/* /tmp/mount/.
           df -h /tmp/mount/
           sudo umount /tmp/mount
 
       - name: Copy VxWorks image
         run: |
+          # Kernel image(s): x86 -> vxWorks; rpi4b -> uVxWorks (+ vxWorks).
           cp /tmp/wrsdk/vxsdk/bsps/*/*xWorks* ${{ github.workspace }}
+          # rpi4b also needs the device tree; QEMU boots it with -dtb and the
+          # test harness (find_dtb) looks for rpi-4b.dtb next to the kernel.
+          cp /tmp/wrsdk/vxsdk/bsps/*/*.dtb ${{ github.workspace }} 2>/dev/null || true
 
       - name: Upload VxWorks and the HDD image
         uses: actions/upload-artifact@v4
         with:
           name: HDD image ${{ env.sdk }} ${{ env.ros_distro }}
           path: |
-            ${{ github.workspace }}/ros2.img
+            ${{ github.workspace }}/output/ros2.img
             ${{ github.workspace }}/*xWorks*
+            ${{ github.workspace }}/*.dtb
 
-      - name: Setup tmate session
-        if: ${{ inputs.debug }}
-        uses: mxschmitt/action-tmate@v3
+      - name: Pack the ROS 2 SDK (export/root)
+        run: |
+          # tar, because upload-artifact does not keep symlinks (.so chains).
+          cd ${{ github.workspace }}/output
+          tar --zstd -cf ros2-sdk.tar.zst export/root
+          ls -l ros2-sdk.tar.zst
+
+      - name: Upload the ROS 2 SDK (export/root)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ROS 2 SDK ${{ env.sdk }} ${{ env.ros_distro }}
+          path: ${{ github.workspace }}/output/ros2-sdk.tar.zst
+
+      - name: Upload the SDK overlay
+        uses: actions/upload-artifact@v4
+        with:
+          name: SDK overlay ${{ env.sdk }} ${{ env.ros_distro }}
+          # make sdk-overlay's archive (files/ + sdk_overlay.json + install-sdk-overlay.sh)
+          path: ${{ github.workspace }}/output/sdk-overlay-*.tar.*
+
+      - name: Setup upterm session
+        if: ${{ always() && inputs.debug }}
+        uses: owenthereal/action-upterm@v2
+        with:
+          limit-access-to-actor: true
 
       - name: Set outputs for sdk and ros_distro
         id: set_outputs
@@ -247,8 +239,56 @@ jobs:
           echo "sdk=${{ env.sdk }}" >> $GITHUB_OUTPUT
           echo "ros_distro=${{ env.ros_distro }}" >> $GITHUB_OUTPUT
 
-  test:
+  toolkit:
     runs-on: ubuntu-24.04
+    needs: build
+    if: ${{ inputs.toolkit }}
+    env:
+      ROS_DISTRO: ${{ needs.build.outputs.ros_distro }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      # No SDK here: make toolkit reads no SDK files, and the SDK identity
+      # (release id, arch, SDK name) comes from the SDK overlay's sdk_overlay.json.
+      - name: Download the HDD image
+        uses: actions/download-artifact@v4
+        with:
+          name: HDD image ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+
+      - name: Download the ROS 2 SDK (export/root)
+        uses: actions/download-artifact@v4
+        with:
+          name: ROS 2 SDK ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          path: ${{ github.workspace }}/output
+
+      - name: Download the SDK overlay
+        uses: actions/download-artifact@v4
+        with:
+          name: SDK overlay ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          path: ${{ github.workspace }}/output
+
+      - name: Assemble the ROS 2 SDK toolkit
+        run: |
+          cd ${{ github.workspace }}/output
+          tar --zstd -xf ros2-sdk.tar.zst && rm ros2-sdk.tar.zst
+          mkdir -p sdk-overlay-build
+          # make-sdk-overlay.sh writes .tar.zst, or .tar.gz without zstd: let tar detect it
+          tar -C sdk-overlay-build -xf sdk-overlay-*.tar.*
+          ls -ld export/root sdk-overlay-build/sdk-overlay-* ros2.img
+          cd ${{ github.workspace }} && make toolkit
+
+      - name: Upload the ROS 2 SDK toolkit
+        uses: actions/upload-artifact@v4
+        with:
+          name: ros2-vxworks-toolkit ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          path: ${{ github.workspace }}/output/toolkit-*.tar.*
+
+  test:
+    # raspberrypi4b: boot the aarch64 target on an arm64 host; x86 SDKs on amd64
+    runs-on: ${{ needs.build.outputs.sdk == 'raspberrypi4b' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     needs: build
     if: ${{ inputs.test }}
     steps:
@@ -267,36 +307,142 @@ jobs:
         with:
           name: HDD image ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
 
-      - name: Download the Hello World RTP (ROS 2 SDK test)
-        uses: actions/download-artifact@v4
-        with:
-          name: hello_world ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
-          path: ${{ github.workspace }}/ros2-sdk-usb
-
-      - name: Install QEMU and expect
-        run: |
-          # Update apt and install dependencies
-          sudo apt-get update
-          sudo apt-get install -y qemu-system-x86 expect
-
-          # Add user to kvm group
-          sudo usermod -aG kvm $USER
-
-          # Setup tun
-          sudo apt-get install uml-utilities
-          sudo tunctl -u $USER -t tap0
-          sudo ifconfig tap0 192.168.200.254 up
+      - name: Set up the QEMU test host
+        uses: ./.github/actions/setup-qemu
 
       - name: Run Tests with QEMU and expect
+        env:
+          SDK: ${{ needs.build.outputs.sdk }}
         run: |
           # Change directory to GitHub workspace
           cd ${{ github.workspace }}
 
-          # Attach the Hello World RTP (from the build job) as a USB disk so the
-          # ROS 2 SDK on-target test (test09-ros2-sdk-hello) can run it as
-          # /bd0a/hello_world_node. The whole suite (test01..test09) runs.
-          chmod +x ros2-sdk-usb/hello_world_node || true
+          # Select the harness target from the built SDK: raspberrypi4b -> rpi4
+          # (aarch64; kernel uVxWorks + rpi-4b.dtb staged beside it), else x86.
+          [ "$SDK" = "raspberrypi4b" ] && export VX_TARGET=rpi4
 
-          # Run tests
+          # Run tests. The HDD-image artifact preserves its build-job path, so the
+          # downloaded image is at ./output/ros2.img (the Makefile canonical
+          # location); pass it explicitly to main_script.exp (default ./ros2.img).
           echo "Running tests..."
-          VX_USB_DIR=${{ github.workspace }}/ros2-sdk-usb ./tests/main_script.exp
+          ./tests/main_script.exp output/ros2.img ros2
+
+  # The toolkit self-test, split by host: the samples are built with the SDK's
+  # host tools (vxsdk/host/x86_64-linux), so on x86; they are run on QEMU on the
+  # runner that matches the target (aarch64 raspi4b on arm64, like the test job).
+  toolkit-selftest:
+    runs-on: ubuntu-24.04
+    needs: [build, toolkit]
+    if: ${{ inputs.test && inputs.toolkit }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Download the ROS 2 SDK toolkit
+        uses: actions/download-artifact@v4
+        with:
+          name: ros2-vxworks-toolkit ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          path: ${{ github.workspace }}/toolkit-dl
+
+      - name: Get a vanilla VxWorks SDK for the toolkit self-test
+        uses: ./.github/actions/setup-wrsdk
+        with:
+          sdks_list: wrsdks.json
+          sdk: ${{ needs.build.outputs.sdk }}
+          vxworks: ${{ inputs.vxworks }}
+          # Own directory: the action's "extracted SDK" cache is keyed by tarball
+          # name only, and the build job saves /tmp/wrsdk AFTER pkg/sdk patched it.
+          # A separate path gets a separate cache entry, i.e. a fresh extraction.
+          directory: /tmp/vanilla
+          sdkenv: false
+
+      - name: Download the vxros2build container
+        uses: actions/download-artifact@v4
+        with:
+          name: Docker Image vxros2build ${{ needs.build.outputs.ros_distro }}
+          path: /tmp/docker-image
+
+      - name: Load the vxros2build container
+        run: |
+          docker load -i /tmp/docker-image/vxros2build.${{ needs.build.outputs.ros_distro }}.tar.gz
+          rm -rf /tmp/docker-image
+          docker images vxros2build:${{ needs.build.outputs.ros_distro }}
+
+      - name: Toolkit self-test — build the C++/Rust/Python samples from the toolkit
+        run: |
+          # A vanilla SDK + the toolkit, built in the vxros2build container like the
+          # main build. The toolkit is unpacked here on the host (tar detects the
+          # compression) and passed as a directory; selftest-build.sh applies it to
+          # the SDK (ros2sdk-prepare.sh), builds one node per language and stages
+          # install/ on a USB dir (-> /bd0a on target). The workspace and the SDK
+          # are mounted at their host paths, so the absolute paths it writes to
+          # selftest.env are valid on the host for the next step.
+          cd ${{ github.workspace }}
+          TGZ="$(ls toolkit-dl/toolkit-*.tar.* | head -1)"
+          [ -f "$TGZ" ] || { echo "no toolkit tarball in toolkit-dl/"; exit 1; }
+          mkdir -p toolkit-dl/unpacked && tar -C toolkit-dl/unpacked -xf "$TGZ"
+          TK="$(find toolkit-dl/unpacked -mindepth 1 -maxdepth 1 -type d | head -1)"
+          [ -d "$TK" ] || { echo "no top-level dir in $TGZ"; exit 1; }
+          SDK=/tmp/vanilla/wrsdk
+          docker run --rm \
+            -e UID=$(id -u) -e GID=$(id -g) \
+            -v $SDK:$SDK \
+            -v ${{ github.workspace }}:${{ github.workspace }} \
+            vxros2build:${{ needs.build.outputs.ros_distro }} \
+            /bin/bash -c "set -- $SDK/sdkenv.sh; . $SDK/sdkenv.sh && cd ${{ github.workspace }} && ./toolkit/scripts/selftest-build.sh --toolkit $PWD/$TK --sdk $SDK --workdir ${{ github.workspace }}/selftest"
+          echo "--- selftest.env ---"; cat selftest/selftest.env
+
+      - name: Pack the USB stage and the toolkit image
+        run: |
+          # tar, because upload-artifact does not keep symlinks (.so chains)
+          cd ${{ github.workspace }}/selftest
+          . ./selftest.env
+          printf 'VX_TESTS="%s"\n' "$VX_TESTS" > tests.env
+          cp "$VX_IMG" ros2.img
+          tar --zstd -cf ../toolkit-selftest.tar.zst usb ros2.img tests.env
+          ls -l ../toolkit-selftest.tar.zst
+
+      - name: Upload the USB stage and the toolkit image
+        uses: actions/upload-artifact@v4
+        with:
+          name: toolkit-selftest ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          path: ${{ github.workspace }}/toolkit-selftest.tar.zst
+
+  toolkit-test:
+    # same host choice as the test job
+    runs-on: ${{ needs.build.outputs.sdk == 'raspberrypi4b' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    needs: [build, toolkit-selftest]
+    if: ${{ inputs.test && inputs.toolkit }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      # the VxWorks kernel the tests boot ships with the HDD image artifact
+      - name: Download HDD image and VxWorks artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: HDD image ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+
+      - name: Download the USB stage and the toolkit image
+        uses: actions/download-artifact@v4
+        with:
+          name: toolkit-selftest ${{ needs.build.outputs.sdk }} ${{ needs.build.outputs.ros_distro }}
+          path: ${{ github.workspace }}
+
+      - name: Set up the QEMU test host
+        uses: ./.github/actions/setup-qemu
+
+      - name: Toolkit self-test — run on QEMU (USB -> /bd0a; image untouched)
+        env:
+          SDK: ${{ needs.build.outputs.sdk }}
+        run: |
+          cd ${{ github.workspace }}
+          [ "$SDK" = "raspberrypi4b" ] && export VX_TARGET=rpi4
+          mkdir -p selftest && tar --zstd -C selftest -xf toolkit-selftest.tar.zst
+          . selftest/tests.env      # VX_TESTS: toolkit/test*-<lang>-*
+          echo "VX_USB=$PWD/selftest/usb  image=$PWD/selftest/ros2.img  TESTS=$VX_TESTS"
+          VX_USB="$PWD/selftest/usb" ./tests/main_script.exp "$PWD/selftest/ros2.img" $VX_TESTS

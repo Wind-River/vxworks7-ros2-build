@@ -1,6 +1,11 @@
 #!/usr/bin/expect
 
-# Runs ROS 2 tests on VxWorks under QEMU.
+# Runs on-target test suites on VxWorks under QEMU.
+#
+# One directory per suite, its tests numbered from 01 (test<NN>-<name>.exp):
+#   ros2/       ROS 2 nodes from the image                  (default suite)
+#   toolkit/    nodes the SDK toolkit built (selftest-build.sh), on USB /bd0a
+#   unixextra/  the unixextra C function tests (pkg/unixextra), on USB /bd0a
 #
 # Three Expect/Tcl libraries under lib/:
 #   vxworks.exp (::vxworks) - target shell semantics: prompts, 'cmd',
@@ -8,45 +13,106 @@
 #   qemu.exp    (::qemu)    - QEMU serial console transport: boot, Ctrl-C, quit
 #   telnet.exp  (::telnet)  - telnet console transport: second shell
 # vxworks.exp is sourced first because qemu/telnet reference ::vxworks.
-# This script only orchestrates: boot, run every test*.exp, quit.
+# This script only orchestrates: boot, run the selected suites/tests, quit.
 
 set test_directory [file dirname [info script]]
 source [file join $test_directory lib vxworks.exp]
 source [file join $test_directory lib qemu.exp]
 source [file join $test_directory lib telnet.exp]
 
-# Function to run all tests
+# Function to run all tests. Each test proc either returns normally (PASS),
+# raises an error (FAIL: test_fail, vxworks::run_node, or any Tcl error), or
+# calls test_skip (SKIP). The results are collected in ::test_results and
+# summarised (and turned into the exit status) by report_tests.
+set test_results {}
 proc run_tests {test_scripts} {
     foreach test_script $test_scripts {
+        set suite [file tail [file dirname $test_script]]
+        # the test procs this script defines, run in name order; removed again
+        # afterwards, so suites may reuse the same test names
+        set before [info procs test*]
         source $test_script
-    }
-    set all_procs [info procs]
-    set test_procs [lsort [lsearch -all -inline $all_procs test*]]
-    foreach test_function $test_procs {
-        if {[string match "test*" $test_function]} {
-            $test_function
+        set procs {}
+        foreach p [lsort [info procs test*]] {
+            if {[lsearch -exact $before $p] < 0 && ![string match "test_*" $p]} { lappend procs $p }
+        }
+        foreach test_function $procs {
+            set name $suite/$test_function
+            set code [catch {$test_function} err opts]
+            if {$code == 0 || $code == 2} {
+                puts "\nPASS $name"
+                lappend ::test_results PASS $name
+            } elseif {[dict get $opts -errorcode] eq {TEST SKIP}} {
+                puts "\nSKIP $name: $err"
+                lappend ::test_results SKIP $name
+            } else {
+                puts "\nFAIL $name: $err"
+                lappend ::test_results FAIL $name
+                # The test did not reach its own cleanup: stop whatever it left
+                # running in the foreground of the serial console.
+                qemu::send_ctrl_c
+            }
             # Back to the serial console: a test may have left the telnet spawn
             # as the implicit channel.
             set spawn_id $qemu::spawn_id
+            # Settle the console on a fresh command-shell prompt before the next
+            # test runs. Draining to a quiet window is handled by the library
+            # (vxworks::drain) so the settle logic lives in exactly one place.
+            vxworks::drain $qemu::spawn_id
             send "\r"
             expect -exact $vxworks::prompt_cmd
+            rename $test_function ""
         }
     }
 }
+
+# Print the per-test results and return the exit status: 1 if any test failed.
+proc report_tests {} {
+    set failed 0
+    puts "\nTest results:"
+    foreach {result name} $::test_results {
+        puts "  $result $name"
+        if {$result eq "FAIL"} { incr failed }
+    }
+    puts "[expr {[llength $::test_results] / 2}] run, $failed failed"
+    return [expr {$failed > 0}]
+}
+
+# Fail / skip the calling test with a reason (see run_tests). Both raise a Tcl
+# error so they also leave the test from inside an expect action; a skip is
+# told apart by its errorCode.
+proc test_fail {reason} { error $reason }
+proc test_skip {reason} { error $reason {} {TEST SKIP} }
 
 # Back-compat shims so existing test*.exp keep working unchanged.
 proc send_ctrl_c {} { qemu::send_ctrl_c }
 proc quit_qemu {}   { qemu::quit }
 
+# Print a test's banner, numbered from the calling test proc's name (test03-* ->
+# "TEST 03: ..."), so the number has one source: the test's file/proc name.
+proc test_header {title} {
+    set caller [lindex [info level -1] 0]
+    if {[regexp {^test(\d+)} $caller -> num]} {
+        puts "\nTEST $num: $title"
+    } else {
+        puts "\nTEST: $title"
+    }
+}
+
+# Suites whose tests run binaries from a USB dir attached as /bd0a (VX_USB).
+set usb_suites {toolkit unixextra}
+
 # Function to display usage information
 proc show_usage {} {
     puts "Usage:"
-    puts "  main_script \[<ros2.img>\] \[test ...\]"
-    puts "  ros2.img  - image path (default ./ros2.img)"
-    puts "  test ...  - one or more test names to run (default: all)."
-    puts "              name with or without the .exp suffix, e.g."
-    puts "                main_script ros2.img test06-rclrs"
-    puts "                main_script ros2.img test04-talker test06-rclrs"
+    puts "  main_script \[<ros2.img>\] \[<suite>|<suite>/<test> ...\]"
+    puts "  ros2.img - image path (default ./ros2.img)"
+    puts "  suite    - a directory under tests/: ros2 (default), toolkit, unixextra;"
+    puts "             toolkit and unixextra need VX_USB=<dir> (attached as /bd0a)"
+    puts "  test     - one test of a suite, with or without the .exp suffix, e.g."
+    puts "               main_script ros2.img ros2"
+    puts "               main_script ros2.img ros2/test04-talker ros2/test06-rclrs"
+    puts "               VX_USB=<dir> main_script ros2.img unixextra"
     exit 0
 }
 
@@ -56,39 +122,47 @@ foreach arg $argv {
     }
 }
 
-# Default path to ros2.img
-set default_img_path "./ros2.img"
-
-# Parse args: first non-test arg is the image path; the rest are test selectors.
-# A "test selector" is anything that starts with "test"; anything else is the
-# image. This lets both of these work:
-#   main_script ros2.img                     (image only, run all)
-#   main_script ros2.img test06-rclrs         (image + one test)
-#   main_script test06-rclrs                  (no image -> default, one test)
-set img_path $default_img_path
+# Parse args: a suite (a directory under tests/) or <suite>/<test> selects tests;
+# anything else is the image path (default ./ros2.img).
+set img_path "./ros2.img"
 set selectors {}
 foreach arg $argv {
-    if {[string match "test*" $arg]} {
+    set suite [lindex [split $arg /] 0]
+    if {[regexp {^[a-z0-9_]+(/test[^/]*)?$} $arg] && [file isdirectory [file join $test_directory $suite]]} {
         lappend selectors $arg
     } else {
         set img_path $arg
     }
 }
-
-# Build the list of test scripts to source. With no selectors, glob them all;
-# otherwise take exactly the named ones (accepting an optional .exp suffix).
 if {[llength $selectors] == 0} {
-    set test_scripts [lsort [glob -nocomplain -directory $test_directory test*.exp]]
-} else {
-    set test_scripts {}
-    foreach name $selectors {
-        set file [string map {.exp ""} $name].exp
-        set path [file join $test_directory $file]
+    set selectors {ros2}
+}
+
+# The test scripts to source, in order: a suite's test*.exp sorted, or the named test.
+set test_scripts {}
+foreach sel $selectors {
+    set suite [lindex [split $sel /] 0]
+    if {$sel eq $suite} {
+        set found [lsort [glob -nocomplain -directory [file join $test_directory $suite] test*.exp]]
+        if {[llength $found] == 0} {
+            puts "ERROR: suite $suite has no tests (tests/$suite/test*.exp)"
+            exit 1
+        }
+        lappend test_scripts {*}$found
+    } else {
+        set path [file join $test_directory [string map {.exp ""} $sel].exp]
         if {![file exists $path]} {
-            puts "ERROR: no such test: $file (in $test_directory)"
+            puts "ERROR: no such test: $sel (tests/[string map {.exp ""} $sel].exp)"
             exit 1
         }
         lappend test_scripts $path
+    }
+    # USB suites run binaries staged on a host dir attached as /bd0a: without
+    # VX_USB there is nothing to run, so refuse instead of booting into a missing /bd0a
+    if {[lsearch -exact $usb_suites $suite] >= 0 &&
+        (![info exists ::env(VX_USB)] || $::env(VX_USB) eq "" || ![file isdirectory $::env(VX_USB)])} {
+        puts "ERROR: suite $suite needs VX_USB=<dir> (its binaries, attached as /bd0a)"
+        exit 1
     }
 }
 puts "\nExecuting: $test_scripts"
@@ -110,7 +184,7 @@ puts "Target: [qemu::target]  (expect timeout ${timeout}s)"
 qemu::boot $img_path
 
 # Make the serial console the default channel for bare send/expect (tests that
-# don't pass an explicit -i, e.g. test01/02/03/05 and run_tests).
+# don't pass an explicit -i, e.g. ros2/test01/02/03/05 and run_tests).
 set spawn_id $qemu::spawn_id
 
 # Run the tests, then quit QEMU.
@@ -121,5 +195,5 @@ qemu::quit
 # Wait for QEMU to finish
 wait
 
-# Exit Expect script
-exit
+# Exit Expect script: non-zero if any test failed (see report_tests)
+exit [report_tests]
