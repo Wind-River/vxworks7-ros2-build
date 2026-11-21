@@ -42,7 +42,9 @@ MAJOR_VERSION := $(shell echo $(WIND_RELEASE_ID) | cut -d. -f1)
 ifeq ($(shell [ $(MAJOR_VERSION) -gt 23 ] && echo yes),yes)
 PKG_MAKE_OPT = SOURCES="flock.c socketpair.c vdprintf.c posix_fallocate.c" TESTS=
 endif
-PKG_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT) DESTDIR=$(WIND_CC_SYSROOT) PREFIX=/usr INCLUDE_PATH=h/published/UTILS_UNIX LIBRARY_PATH=lib/common
+# install root: the SDK sysroot; unixextra.stage passes a scratch dir instead
+UNIXEXTRA_DESTDIR ?= $(WIND_CC_SYSROOT)
+PKG_MAKE_INSTALL_OPT = $(TGT_MAKE_INSTALL_OPT) DESTDIR=$(UNIXEXTRA_DESTDIR) PREFIX=/usr INCLUDE_PATH=h/published/UTILS_UNIX LIBRARY_PATH=lib/common
 PKG_MAKE_BUILD_VAR = $(AUTOTOOLS_ENV)
 
 unixextra.download :
@@ -66,6 +68,16 @@ unixextra.install : unixextra.build
 	$(PKG_MAKE_INSTALL_VAR) $(MAKE) -C $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) -f $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/Makefile $(PKG_MAKE_INSTALL_OPT) $(PKG_MAKE_OPT)
 	sed -i 's/-lunix -lregex/-lunix -lunixextra -lregex/g' $(WIND_CC_SYSROOT)/cc-conf/default.conf
 	@$(MAKE_STAMP)
+
+# unixextra.stage UNIXEXTRA_DESTDIR=<dir> - the same install as unixextra.install
+# (same options, same SOURCES), into <dir> instead of the SDK; no stamp, no
+# default.conf edit. Used by mk/usr/make-sdk-overlay.sh.
+.PHONY: unixextra.stage
+unixextra.stage : unixextra.build
+	@[ "$(UNIXEXTRA_DESTDIR)" != "$(WIND_CC_SYSROOT)" ] || { echo "unixextra.stage: set UNIXEXTRA_DESTDIR"; exit 1; }
+	cd $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) && \
+	export MAKEFLAGS='$(FILTERED_MAKEFLAGS)' &&  \
+	$(PKG_MAKE_INSTALL_VAR) $(MAKE) -C $(BUILD_DIR)/$(PKG_NAME)/$(PKG_BUILD_DIR) -f $(BUILD_DIR)/$(PKG_NAME)/$(PKG_SRC_DIR)/Makefile $(PKG_MAKE_INSTALL_OPT) $(PKG_MAKE_OPT)
 
 unixextra.deploy : unixextra.install
 	@$(call echo_action,Deploying,$*)
