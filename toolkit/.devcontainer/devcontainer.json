@@ -1,0 +1,40 @@
+{
+  // VS Code Dev Container for ROS 2 VxWorks SDK development.
+  //
+  // Prerequisites:
+  //   - Docker + the "Dev Containers" VS Code extension.
+  //   - Your licensed vanilla Wind River VxWorks SDK unpacked somewhere, with
+  //     its path exported as WRSDK (e.g. in .devcontainer/.env):
+  //         WRSDK=/home/me/Downloads/wrsdk-vxworks7-qemu
+  //
+  // Then in VS Code: "Dev Containers: Reopen in Container".
+  // The two-stage image (vxbuild -> vxros2build) is built, your SDK is mounted
+  // at /wrsdk, the kit at /kit, and the ROS 2 build env is set up on attach.
+  "name": "ROS 2 VxWorks SDK (lyrical)",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/work",
+
+  // Apply the SDK delta once + set up the build env for every new shell, so
+  // `ros2 pkg create` / `colcon build --mixin vxworks` work out of the box.
+  "onCreateCommand": "bash -lc '/kit/scripts/ros2sdk-prepare.sh /wrsdk || true'",
+  "postStartCommand": "bash -lc 'grep -q ros2sdkenv.sh ~/.bashrc || echo \"source /kit/scripts/ros2sdkenv.sh\" >> ~/.bashrc'",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "ms-python.python",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "C_Cpp.default.cppStandard": "c++17",
+        "cmake.configureOnOpen": false
+      }
+    }
+  }
+}
